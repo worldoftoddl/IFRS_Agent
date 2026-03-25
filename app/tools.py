@@ -1,10 +1,48 @@
 """K-IFRS 검색 도구 — LangChain @tool 데코레이터."""
 
+import re
+import time
+
 import psycopg
 from langchain_core.tools import tool
 
 from app.db import get_connection
 from app.embedder import embed_query
+
+# standard_id 유효성 검증 패턴
+_STANDARD_ID_RE = re.compile(r"^K-IFRS\s+\d{4}$")
+
+# 임베딩+Step2 결과 캐시 (동일 Agent 턴 내 중복 호출 방지)
+_STEP2_CACHE: dict[tuple[str, str], tuple[list[float], list[tuple], list[str]]] = {}
+_STEP2_CACHE_TTL = 60  # 초
+_STEP2_CACHE_TS: dict[tuple[str, str], float] = {}
+
+
+def _get_step2_cached(
+    conn: psycopg.Connection, query: str, standard_id: str
+) -> tuple[list[float], list[tuple], list[str]]:
+    """임베딩 + Step 2 결과를 캐시하여 반환. 동일 Agent 턴 내 중복 API 호출 방지."""
+    key = (query, standard_id)
+    now = time.monotonic()
+
+    if key in _STEP2_CACHE and (now - _STEP2_CACHE_TS[key]) < _STEP2_CACHE_TTL:
+        return _STEP2_CACHE[key]
+
+    query_emb = embed_query(query)
+    main_chunks, para_nums = _step2_search_authoritative(conn, query_emb, standard_id)
+    result = (query_emb, main_chunks, para_nums)
+
+    _STEP2_CACHE[key] = result
+    _STEP2_CACHE_TS[key] = now
+    return result
+
+
+def _validate_standard_id(standard_id: str) -> str | None:
+    """standard_id 형식 검증. 유효하면 None, 아니면 에러 메시지 반환."""
+    if not _STANDARD_ID_RE.match(standard_id):
+        return f"'{standard_id}'는 유효한 기준서 ID 형식이 아닙니다. 예: 'K-IFRS 1115'"
+    return None
+
 
 # 컴포넌트 정렬 순서: 본문 → 정의 → 적용지침 → 경과규정
 _COMPONENT_ORDER = {"main": 0, "definitions": 1, "ag": 2, "transition": 3}
@@ -155,6 +193,7 @@ def _format_bc_results(bc_results: list[tuple]) -> list[str]:
         target = f"{ts}~{te}" if te else ts
         ctx.append(f"\n**{para or 'BC'}** ({section or '-'}) → 본문 문단 {target}")
         ctx.append(md[:_RELATED_CONTENT_MAX_CHARS])
+    ctx.append("")
     return ctx
 
 
@@ -178,6 +217,9 @@ def search_ifrs(query: str) -> str:
     """K-IFRS 기준서에서 Level 1(Authoritative) 문단을 검색합니다.
     일반적인 회계 관련 질문에 사용하세요.
     관련 기준서를 식별한 뒤, 기준서 본문·적용지침·정의 등 권위 있는 문단을 벡터 검색하여 반환합니다.
+    적용사례(IE)나 결론도출근거(BC)는 포함되지 않습니다.
+    구체적인 처리 사례가 필요하면 search_ifrs_examples를,
+    기준 제정 논거가 필요하면 search_ifrs_rationale를 추가로 호출하세요.
 
     Args:
         query: 검색할 회계 관련 질문 (예: "충당부채 인식 조건", "리스 식별 기준")
@@ -192,8 +234,8 @@ def search_ifrs(query: str) -> str:
 
         selected_id = standards[0][0]
 
-        # Step 2: Level 1 문단 검색
-        main_chunks, _ = _step2_search_authoritative(conn, query_emb, selected_id)
+        # Step 2: Level 1 문단 검색 (결과를 캐시에 저장)
+        _, main_chunks, _ = _get_step2_cached(conn, query, selected_id)
 
         # 컨텍스트 조합
         ctx = _format_identification_header(standards, selected_id)
@@ -213,11 +255,12 @@ def search_ifrs_examples(query: str, standard_id: str) -> str:
         query: 검색할 회계 관련 질문 (예: "수행의무 식별 사례")
         standard_id: 대상 기준서 ID (예: "K-IFRS 1115") — search_ifrs 결과에서 확인
     """
-    with get_connection() as conn:
-        query_emb = embed_query(query)
+    if err := _validate_standard_id(standard_id):
+        return err
 
-        # 관련 문단 번호 확보 (Step 2)
-        _, para_nums = _step2_search_authoritative(conn, query_emb, standard_id)
+    with get_connection() as conn:
+        # 캐시된 Step 2 결과 사용 (search_ifrs에서 이미 실행했으면 재사용)
+        _, _, para_nums = _get_step2_cached(conn, query, standard_id)
 
         # Step 3: IE 적용사례 조회
         ie_results = _step3_4_find_related(conn, standard_id, para_nums, "ie")
@@ -242,11 +285,12 @@ def search_ifrs_rationale(query: str, standard_id: str) -> str:
         query: 검색할 질문 (예: "충당부채 인식기준의 제정 배경")
         standard_id: 대상 기준서 ID (예: "K-IFRS 1037") — search_ifrs 결과에서 확인
     """
-    with get_connection() as conn:
-        query_emb = embed_query(query)
+    if err := _validate_standard_id(standard_id):
+        return err
 
-        # 관련 문단 번호 확보 (Step 2)
-        _, para_nums = _step2_search_authoritative(conn, query_emb, standard_id)
+    with get_connection() as conn:
+        # 캐시된 Step 2 결과 사용 (search_ifrs에서 이미 실행했으면 재사용)
+        _, _, para_nums = _get_step2_cached(conn, query, standard_id)
 
         # Step 4: BC 결론도출근거 조회
         bc_results = _step3_4_find_related(conn, standard_id, para_nums, "bc")
