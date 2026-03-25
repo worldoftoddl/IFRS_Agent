@@ -1,13 +1,13 @@
-"""K-IFRS 질의응답 Agent — DeepAgents + LangGraph."""
+"""K-IFRS 질의응답 Agent — DeepAgents + LangGraph.
 
-from dotenv import load_dotenv
+langgraph.json의 "env": ".env"가 환경변수를 로딩하므로,
+이 모듈에서 load_dotenv()를 호출하지 않는다.
+"""
 
-load_dotenv()
+from deepagents import create_deep_agent
 
-from deepagents import create_deep_agent  # noqa: E402
-
-from app.prompts import SYSTEM_PROMPT  # noqa: E402
-from app.tools import get_standard_info, search_ifrs  # noqa: E402
+from app.prompts import SYSTEM_PROMPT
+from app.tools import get_standard_info, search_ifrs
 
 agent = create_deep_agent(
     model="anthropic:claude-sonnet-4-6",
