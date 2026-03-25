@@ -10,7 +10,7 @@ LangGraph + DeepAgents 프레임워크 기반으로, 사용자 질문에 대해 
 - **백엔드**: `deepagents` (`create_deep_agent`) + LangGraph 서버 (`langgraph dev`)
 - **프론트엔드**: `deep-agents-ui` (Next.js 16) — `ui/` 디렉토리
 - **DB**: PostgreSQL+pgvector (`kifrs` DB) — `_IFRS_parsing` 프로젝트에서 구축
-- **LLM**: Claude Sonnet 4.6 (`claude-sonnet-4-6`)
+- **LLM**: Claude Sonnet 4.6 (`anthropic:claude-sonnet-4-6`)
 - **임베딩**: Upstage Solar (`embedding-query`, 4096차원)
 
 ## 저장소 구조
@@ -22,9 +22,10 @@ LangGraph + DeepAgents 프레임워크 기반으로, 사용자 질문에 대해 
 ├── app/
 │   ├── __init__.py
 │   ├── agent.py                ← create_deep_agent() 메인 진입점
-│   ├── tools.py                ← @tool: search_ifrs, get_standard_info
-│   ├── db.py                   ← psycopg ConnectionPool + pgvector 등록
-│   ├── embedder.py             ← Upstage embedding-query 래퍼
+│   ├── tools.py                ← 4개 도구: search_ifrs, search_ifrs_examples,
+│   │                              search_ifrs_rationale, get_standard_info
+│   ├── db.py                   ← psycopg ConnectionPool + pgvector (thread-safe 싱글턴)
+│   ├── embedder.py             ← Upstage embedding-query 래퍼 (thread-safe 싱글턴)
 │   └── prompts.py              ← K-IFRS 전문가 시스템 프롬프트
 ├── ui/                         ← deep-agents-ui (git clone, .gitignore)
 └── CLAUDE.md
@@ -38,11 +39,8 @@ python3 -m venv .venv && source .venv/bin/activate
 pip install -e .              # 프로덕션 의존성
 pip install -e ".[dev]"       # + ruff, pytest, langgraph-cli
 
-# --- DB 기동 (kifrs DB, _IFRS_parsing 프로젝트의 docker-compose 사용) ---
-cd /home/shin/Project/_IFRS_parsing && docker compose up -d
-
 # --- LangGraph 서버 시작 ---
-langgraph dev                 # http://127.0.0.1:2024 에서 서빙
+langgraph dev --no-browser    # http://127.0.0.1:2024 에서 서빙
 
 # --- 프론트엔드 (deep-agents-ui) ---
 cd ui && yarn install && yarn dev   # http://localhost:3000
@@ -51,7 +49,7 @@ cd ui && yarn install && yarn dev   # http://localhost:3000
 # --- 환경변수 (.env) ---
 # ANTHROPIC_API_KEY=...       ← Claude API
 # UPSTAGE_API_KEY=...         ← Upstage Solar Embedding
-# DATABASE_URL=dbname=kifrs        ← 로컬 peer/trust 인증
+# DATABASE_URL=dbname=kifrs   ← 로컬 peer/trust 인증
 # LANGCHAIN_API_KEY=...       ← LangSmith (선택)
 ```
 
@@ -64,7 +62,7 @@ from deepagents import create_deep_agent
 
 agent = create_deep_agent(
     model="anthropic:claude-sonnet-4-6",
-    tools=[search_ifrs, get_standard_info],
+    tools=[search_ifrs, search_ifrs_examples, search_ifrs_rationale, get_standard_info],
     system_prompt=SYSTEM_PROMPT,
     name="kifrs-agent",
 )
@@ -73,10 +71,20 @@ agent = create_deep_agent(
 - `create_deep_agent()`는 `CompiledStateGraph`를 반환
 - `langgraph.json`의 `"ifrs-agent": "./app/agent.py:agent"`로 서빙
 - Checkpointer: `langgraph dev`가 in-memory checkpointer 자동 주입 (thread별 세션 유지)
+- `app/agent.py`에서 `load_dotenv()` 호출하지 않음 — `langgraph.json`의 `"env": ".env"`가 처리
 
-### 4-Step 검색 파이프라인 (`app/tools.py`)
+### 검색 도구 (`app/tools.py`) — 단계적 검색 전략
 
-노트북 `_IFRS_parsing/search_test.ipynb`에서 이식한 파이프라인:
+질문 성격에 따라 Agent가 적절한 도구를 선택:
+
+| 도구 | 용도 | 호출 시점 |
+|------|------|----------|
+| `search_ifrs` | Level 1 기준서 본문/적용지침 검색 | 항상 (기본, 첫 번째로 호출) |
+| `search_ifrs_examples` | IE 적용사례 검색 | 실무 처리 방법이 본문만으론 부족할 때 |
+| `search_ifrs_rationale` | BC 결론도출근거 검색 | 기준 제정 배경·논거를 묻는 질문 |
+| `get_standard_info` | 기준서 메타데이터 조회 | 기준서 기본 정보 확인 |
+
+**내부 파이프라인:**
 
 | Step | 기능 | 테이블 |
 |------|------|--------|
@@ -85,15 +93,32 @@ agent = create_deep_agent(
 | 3 | IE 적용사례 링크 조회 | `paragraph_links` (source_component='ie') → `chunks` |
 | 4 | BC 결론도출근거 링크 조회 | `paragraph_links` (source_component='bc') → `chunks` |
 
+**캐시**: Step 2 결과(임베딩 + 문단 번호)를 `_step2_cache`에 TTL 60초, max 50개로 캐시.
+`search_ifrs` 실행 후 `search_ifrs_examples`/`search_ifrs_rationale` 호출 시 임베딩 API 재호출 없이 캐시 히트.
+
+### DB 연결 (`app/db.py`)
+
+- `psycopg_pool.ConnectionPool` 싱글턴 (thread-safe, double-checked locking)
+- `get_connection()`: 컨텍스트 매니저 — `with get_connection() as conn:` 패턴으로 자동 반환
+- pgvector 벡터 타입 자동 등록
+- `DATABASE_URL` 미설정 시 `RuntimeError` (fail-fast)
+
+### 임베딩 (`app/embedder.py`)
+
+- Upstage Solar `embedding-query` 모델, 4096차원
+- OpenAI 호환 API (`https://api.upstage.ai/v1`)
+- retryable 에러만 catch (`APIConnectionError`, `APITimeoutError`, `RateLimitError`)
+- thread-safe 싱글턴 클라이언트
+
 ### DB 스키마 (kifrs)
 
 | 테이블 | 용도 |
 |--------|------|
 | `standards` | 기준서 메타데이터 (63개) |
-| `chunks` | 검색 대상 청크 (embedding vector(4096)) |
-| `standard_summaries` | 기준서 식별용 요약 (embedding vector(4096)) |
+| `chunks` | 검색 대상 청크 (embedding vector(4096)), 14,762개 |
+| `standard_summaries` | 기준서 식별용 요약 (embedding vector(4096)), 63개 |
 | `footnotes` | 각주 |
-| `paragraph_links` | BC/IE → 본문 문단 참조 링크 |
+| `paragraph_links` | BC/IE → 본문 문단 참조 링크, 7,952개 |
 
 ## 핵심 기술 스택 (2026.03 기준)
 
@@ -105,6 +130,15 @@ agent = create_deep_agent(
 | `langchain-anthropic` | 1.4.0 | Claude 모델 통합 |
 | `psycopg` | 3.3.3 | PostgreSQL 드라이버 |
 | `pgvector` | 0.4.2 | 벡터 타입 지원 |
+| `deep-agents-ui` | Next.js 16 | 프론트엔드 (Turbopack) |
+
+## 코드 품질
+
+- `ruff check app/` — 전체 통과
+- `[tool.ruff.lint]`: `E`, `F`, `I`, `N`, `UP`, `B`, `C4` 규칙 적용
+- `app/prompts.py`는 E501 per-file-ignore (프롬프트 문자열 줄 길이 제외)
+- 모든 SQL은 `%s` 파라미터화 또는 `ANY(%s)` 배열 바인딩 사용
+- `standard_id` 입력값은 정규식 `^K-IFRS\s+\d{4}$`로 검증
 
 ## K-IFRS 도메인 지식
 
@@ -120,6 +154,7 @@ agent = create_deep_agent(
 
 Agent 답변 시 Level 1 문단을 우선 인용하고, Level 4는 보조 참고로만 사용해야 한다.
 BC/IE는 기준서의 일부를 구성하지 않으므로 본문과 충돌 시 본문이 우선한다.
+현재 DB에는 Level 1, 4만 포함. Level 2(IFRIC 안건결정), Level 3(개념체계)는 미포함.
 
 ### K-IFRS 번호 체계
 
