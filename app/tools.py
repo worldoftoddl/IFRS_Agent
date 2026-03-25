@@ -116,21 +116,38 @@ def _step1_identify_standard(
     ).fetchall()
 
 
+def _get_base_authority(conn: psycopg.Connection, standard_id: str) -> int:
+    """기준서의 base_authority를 조회. 없으면 1(일반 기준서) 반환."""
+    row = conn.execute(
+        "SELECT base_authority FROM standards WHERE standard_id = %s",
+        (standard_id,),
+    ).fetchone()
+    return row[0] if row else 1
+
+
 def _step2_search_authoritative(
     conn: psycopg.Connection, query_emb: list[float], standard_id: str, top_k: int = 10
 ) -> tuple[list[tuple], list[str]]:
-    """Step 2: 기준서 내 Level 1 문단 벡터 검색."""
+    """Step 2: 기준서 내 권위 문단 벡터 검색.
+
+    authority 필터를 기준서의 base_authority에 따라 동적 적용:
+    - 일반 기준서(base_authority=1): authority <= 1 (본문, AG만)
+    - 개념체계(base_authority=3): authority <= 3 (개념체계 본문 포함)
+    - 실무서(base_authority=4): authority <= 4 (실무서 본문 포함)
+    """
+    base_auth = _get_base_authority(conn, standard_id)
+
     rows = conn.execute(
         """
         SELECT chunk_id, para_number, component, section_title,
                content_markdown,
                1 - (embedding <=> %s::vector) AS similarity
         FROM chunks
-        WHERE standard_id = %s AND authority = 1
+        WHERE standard_id = %s AND authority <= %s
         ORDER BY embedding <=> %s::vector
         LIMIT %s
         """,
-        (query_emb, standard_id, query_emb, top_k),
+        (query_emb, standard_id, base_auth, query_emb, top_k),
     ).fetchall()
 
     rows_sorted = sorted(
