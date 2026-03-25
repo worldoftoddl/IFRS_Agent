@@ -248,33 +248,39 @@ def _format_identification_header(standards: list[tuple], selected_id: str) -> l
 
 
 @tool
-def search_ifrs(query: str) -> str:
+def search_ifrs(query: str, standard_id: str = "") -> str:
     """K-IFRS 기준서에서 Level 1(Authoritative) 문단을 검색합니다.
     일반적인 회계 관련 질문에 사용하세요.
-    관련 기준서를 식별한 뒤, 기준서 본문·적용지침·정의 등 권위 있는 문단을 벡터 검색하여 반환합니다.
+    standard_id를 생략하면 자동으로 가장 관련 있는 기준서를 식별합니다.
+    standard_id를 지정하면 해당 기준서 내에서만 검색합니다 (예: 개념체계, 특정 기준서).
     적용사례(IE)나 결론도출근거(BC)는 포함되지 않습니다.
     구체적인 처리 사례가 필요하면 search_ifrs_examples를,
     기준 제정 논거가 필요하면 search_ifrs_rationale를 추가로 호출하세요.
 
     Args:
         query: 검색할 회계 관련 질문 (예: "충당부채 인식 조건", "리스 식별 기준")
+        standard_id: 검색 대상 기준서 ID (선택, 예: "K-IFRS 1037", "재무보고 개념체계").
+                     생략하면 자동 식별합니다.
     """
     query_emb = embed_query(query)
 
     with get_connection() as conn:
-        # Step 1: 기준서 식별
-        standards = _step1_identify_standard(conn, query_emb)
-        if not standards:
-            return "관련 기준서를 찾을 수 없습니다."
-
-        # selected_id는 DB 결과이므로 _validate_standard_id 불필요
-        selected_id = standards[0][0]
+        if standard_id:
+            # 기준서 직접 지정 — Step 1 건너뜀
+            selected_id = standard_id
+            ctx: list[str] = [f"## 검색 대상: {selected_id}", ""]
+        else:
+            # Step 1: 기준서 자동 식별
+            standards = _step1_identify_standard(conn, query_emb)
+            if not standards:
+                return "관련 기준서를 찾을 수 없습니다."
+            selected_id = standards[0][0]
+            ctx = _format_identification_header(standards, selected_id)
 
         # Step 2: Level 1 문단 검색 (결과를 캐시에 저장하여 후속 IE/BC 검색에서 재사용)
         main_chunks, _ = _get_step2_cached(query_emb, query, selected_id)
 
         # 컨텍스트 조합
-        ctx = _format_identification_header(standards, selected_id)
         ctx.extend(_format_standard_header(conn, selected_id, query))
         ctx.extend(_format_main_chunks(main_chunks))
 
