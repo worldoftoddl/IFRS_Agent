@@ -22,6 +22,11 @@ _RELATED_CONTENT_MAX_CHARS = 500
 _SCOPE_MAX_CHARS = 1000
 
 
+# ---------------------------------------------------------------------------
+# 내부 검색 함수
+# ---------------------------------------------------------------------------
+
+
 def _step1_identify_standard(
     conn: psycopg.Connection, query_emb: list[float], top_k: int = 3
 ) -> list[tuple]:
@@ -89,15 +94,15 @@ def _step3_4_find_related(
     ).fetchall()
 
 
-def _build_context(
-    conn: psycopg.Connection,
-    standard_id: str,
-    query: str,
-    main_chunks: list[tuple],
-    ie_results: list[tuple] | None = None,
-    bc_results: list[tuple] | None = None,
-) -> str:
-    """4단계 결과를 LLM 컨텍스트로 포맷팅."""
+# ---------------------------------------------------------------------------
+# 컨텍스트 포맷팅
+# ---------------------------------------------------------------------------
+
+
+def _format_standard_header(
+    conn: psycopg.Connection, standard_id: str, query: str
+) -> list[str]:
+    """기준서 제목 + 용어 정의 헤더를 포맷팅."""
     row = conn.execute(
         "SELECT title, definitions_text FROM standard_summaries WHERE standard_id = %s",
         (standard_id,),
@@ -109,49 +114,70 @@ def _build_context(
     ctx.append(f"# {standard_id} {title}")
     ctx.append(f"사용자 질문: {query}\n")
 
-    # 정의
     if definitions:
         ctx.append("## 용어 정의 [참조]")
         ctx.append(definitions[:_DEFINITIONS_MAX_CHARS])
         ctx.append("")
 
-    # Step 2: 본문 + AG
-    ctx.append("## 적용 문단 [Authoritative, Level 1]")
+    return ctx
+
+
+def _format_main_chunks(main_chunks: list[tuple]) -> list[str]:
+    """Level 1 문단 검색 결과를 포맷팅."""
+    ctx: list[str] = ["## 적용 문단 [Authoritative, Level 1]"]
     for _, para, comp, section, md, sim in main_chunks:
         label = _COMPONENT_LABEL.get(comp, comp)
         ctx.append(f"\n**문단 {para or 'N/A'}** ({label}, {section or '-'}, 유사도: {sim:.3f})")
         ctx.append(md[:_CHUNK_CONTENT_MAX_CHARS])
     ctx.append("")
+    return ctx
 
-    # Step 3: IE
-    if ie_results:
-        ctx.append("## 적용사례 [Non-authoritative, Level 4]")
-        for _, para, section, md, ts, te, _lt in ie_results:
-            target = f"{ts}~{te}" if te else ts
-            ctx.append(f"\n**{para or 'IE'}** ({section or '-'}) → 본문 문단 {target}")
-            ctx.append(md[:_RELATED_CONTENT_MAX_CHARS])
-        ctx.append("")
 
-    # Step 4: BC
-    if bc_results:
-        ctx.append("## 결론도출근거 [Non-authoritative, Level 4]")
-        ctx.append(
-            "*주의: 결론도출근거는 기준서의 일부를 구성하지 않습니다. "
-            "본문과 충돌 시 본문이 우선합니다.*\n"
-        )
-        for _, para, section, md, ts, te, _lt in bc_results:
-            target = f"{ts}~{te}" if te else ts
-            ctx.append(f"\n**{para or 'BC'}** ({section or '-'}) → 본문 문단 {target}")
-            ctx.append(md[:_RELATED_CONTENT_MAX_CHARS])
+def _format_ie_results(ie_results: list[tuple]) -> list[str]:
+    """IE 적용사례 결과를 포맷팅."""
+    ctx: list[str] = ["## 적용사례 [Non-authoritative, Level 4]"]
+    for _, para, section, md, ts, te, _lt in ie_results:
+        target = f"{ts}~{te}" if te else ts
+        ctx.append(f"\n**{para or 'IE'}** ({section or '-'}) → 본문 문단 {target}")
+        ctx.append(md[:_RELATED_CONTENT_MAX_CHARS])
+    ctx.append("")
+    return ctx
 
-    return "\n".join(ctx)
+
+def _format_bc_results(bc_results: list[tuple]) -> list[str]:
+    """BC 결론도출근거 결과를 포맷팅."""
+    ctx: list[str] = [
+        "## 결론도출근거 [Non-authoritative, Level 4]",
+        "*주의: 결론도출근거는 기준서의 일부를 구성하지 않습니다. "
+        "본문과 충돌 시 본문이 우선합니다.*\n",
+    ]
+    for _, para, section, md, ts, te, _lt in bc_results:
+        target = f"{ts}~{te}" if te else ts
+        ctx.append(f"\n**{para or 'BC'}** ({section or '-'}) → 본문 문단 {target}")
+        ctx.append(md[:_RELATED_CONTENT_MAX_CHARS])
+    return ctx
+
+
+def _format_identification_header(standards: list[tuple], selected_id: str) -> list[str]:
+    """기준서 식별 결과 헤더를 포맷팅."""
+    lines = ["## 기준서 식별 결과"]
+    for sid, stitle, ssim in standards:
+        marker = " ← 선택됨" if sid == selected_id else ""
+        lines.append(f"- {sid} {stitle} (유사도: {ssim:.3f}){marker}")
+    lines.append("")
+    return lines
+
+
+# ---------------------------------------------------------------------------
+# 공개 도구 (LangChain @tool)
+# ---------------------------------------------------------------------------
 
 
 @tool
 def search_ifrs(query: str) -> str:
-    """K-IFRS 기준서를 검색합니다. 사용자의 회계 관련 질문에 대해
-    관련 기준서를 식별하고, 적용 문단(본문/적용지침)을 벡터 검색한 뒤,
-    관련 적용사례(IE)와 결론도출근거(BC)까지 포함한 종합 컨텍스트를 반환합니다.
+    """K-IFRS 기준서에서 Level 1(Authoritative) 문단을 검색합니다.
+    일반적인 회계 관련 질문에 사용하세요.
+    관련 기준서를 식별한 뒤, 기준서 본문·적용지침·정의 등 권위 있는 문단을 벡터 검색하여 반환합니다.
 
     Args:
         query: 검색할 회계 관련 질문 (예: "충당부채 인식 조건", "리스 식별 기준")
@@ -166,30 +192,72 @@ def search_ifrs(query: str) -> str:
 
         selected_id = standards[0][0]
 
-        # 기준서 식별 결과 헤더
-        header_lines = ["## 기준서 식별 결과"]
-        for sid, stitle, ssim in standards:
-            marker = " ← 선택됨" if sid == selected_id else ""
-            header_lines.append(f"- {sid} {stitle} (유사도: {ssim:.3f}){marker}")
-        header_lines.append("")
-
         # Step 2: Level 1 문단 검색
-        main_chunks, para_nums = _step2_search_authoritative(
-            conn, query_emb, selected_id
-        )
-
-        # Step 3: IE 적용사례
-        ie_results = _step3_4_find_related(conn, selected_id, para_nums, "ie")
-
-        # Step 4: BC 결론도출근거
-        bc_results = _step3_4_find_related(conn, selected_id, para_nums, "bc")
+        main_chunks, _ = _step2_search_authoritative(conn, query_emb, selected_id)
 
         # 컨텍스트 조합
-        context = _build_context(
-            conn, selected_id, query, main_chunks, ie_results, bc_results
-        )
+        ctx = _format_identification_header(standards, selected_id)
+        ctx.extend(_format_standard_header(conn, selected_id, query))
+        ctx.extend(_format_main_chunks(main_chunks))
 
-        return "\n".join(header_lines) + "\n" + context
+        return "\n".join(ctx)
+
+
+@tool
+def search_ifrs_examples(query: str, standard_id: str) -> str:
+    """특정 기준서의 적용사례(IE, Illustrative Examples)를 검색합니다.
+    회계처리 방법이나 실무 적용이 필요한데 기준서 본문만으로는 부족할 때 사용하세요.
+    먼저 search_ifrs로 관련 기준서를 확인한 후, 해당 기준서의 IE를 조회합니다.
+
+    Args:
+        query: 검색할 회계 관련 질문 (예: "수행의무 식별 사례")
+        standard_id: 대상 기준서 ID (예: "K-IFRS 1115") — search_ifrs 결과에서 확인
+    """
+    with get_connection() as conn:
+        query_emb = embed_query(query)
+
+        # 관련 문단 번호 확보 (Step 2)
+        _, para_nums = _step2_search_authoritative(conn, query_emb, standard_id)
+
+        # Step 3: IE 적용사례 조회
+        ie_results = _step3_4_find_related(conn, standard_id, para_nums, "ie")
+
+        if not ie_results:
+            return f"{standard_id}에서 '{query}'와 관련된 적용사례(IE)를 찾을 수 없습니다."
+
+        ctx = _format_standard_header(conn, standard_id, query)
+        ctx.extend(_format_ie_results(ie_results))
+
+        return "\n".join(ctx)
+
+
+@tool
+def search_ifrs_rationale(query: str, standard_id: str) -> str:
+    """특정 기준서의 결론도출근거(BC, Basis for Conclusions)를 검색합니다.
+    회계기준이 왜 그렇게 정해졌는지, 기준 제정 과정의 논거를 알고 싶을 때 사용하세요.
+    먼저 search_ifrs로 관련 기준서를 확인한 후, 해당 기준서의 BC를 조회합니다.
+    주의: BC는 기준서의 일부를 구성하지 않으며, 본문과 충돌 시 본문이 우선합니다.
+
+    Args:
+        query: 검색할 질문 (예: "충당부채 인식기준의 제정 배경")
+        standard_id: 대상 기준서 ID (예: "K-IFRS 1037") — search_ifrs 결과에서 확인
+    """
+    with get_connection() as conn:
+        query_emb = embed_query(query)
+
+        # 관련 문단 번호 확보 (Step 2)
+        _, para_nums = _step2_search_authoritative(conn, query_emb, standard_id)
+
+        # Step 4: BC 결론도출근거 조회
+        bc_results = _step3_4_find_related(conn, standard_id, para_nums, "bc")
+
+        if not bc_results:
+            return f"{standard_id}에서 '{query}'와 관련된 결론도출근거(BC)를 찾을 수 없습니다."
+
+        ctx = _format_standard_header(conn, standard_id, query)
+        ctx.extend(_format_bc_results(bc_results))
+
+        return "\n".join(ctx)
 
 
 @tool
@@ -225,7 +293,6 @@ def get_standard_info(standard_id: str) -> str:
             + (f" ({kr_count}개 문단)" if has_kr else ""),
         ]
 
-        # 요약 정보 추가
         summary = conn.execute(
             "SELECT scope_text FROM standard_summaries WHERE standard_id = %s",
             (standard_id,),
