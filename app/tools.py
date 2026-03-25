@@ -225,6 +225,96 @@ def _step2_search_multi(
     return rows_sorted, para_numbers
 
 
+def _step2_search_hybrid(
+    conn: psycopg.Connection,
+    query_emb: list[float],
+    query_text: str,
+    standard_ids: list[str],
+    top_k: int = 10,
+    rrf_k: int = 60,
+) -> tuple[list[tuple], list[str]]:
+    """Step 2 BM25 + Dense 순수 RRF 하이브리드 검색.
+
+    Dense(벡터 유사도)와 BM25(키워드 매칭) 결과를
+    순수 RRF(Reciprocal Rank Fusion)로 결합.
+    rrf_score = 1/(k + rank_dense) + 1/(k + rank_bm25)
+    가중치 없음 — 스코어 스케일 차이를 무시하고 순위만 사용.
+
+    반환 튜플 형식: (chunk_id, para_number, component, section_title,
+                    content_markdown, rrf_score, standard_id)
+    """
+    if not standard_ids:
+        return [], []
+
+    rows_auth = conn.execute(
+        "SELECT standard_id, base_authority FROM standards WHERE standard_id = ANY(%s)",
+        (list(standard_ids),),
+    ).fetchall()
+    auth_pairs = [(r[0], r[1]) for r in rows_auth]
+
+    if not auth_pairs:
+        return [], []
+
+    sids = [p[0] for p in auth_pairs]
+    auths = [p[1] for p in auth_pairs]
+
+    # 단일 CTE 쿼리: dense + bm25 → FULL OUTER JOIN → 순수 RRF
+    all_rows = conn.execute(
+        """
+        WITH dense AS (
+            SELECT c.chunk_id, c.para_number, c.component, c.section_title,
+                   c.content_markdown, c.standard_id,
+                   ROW_NUMBER() OVER (ORDER BY c.embedding <=> %(emb)s::vector) AS rank_dense
+            FROM chunks c
+            JOIN UNNEST(%(sids)s::text[], %(auths)s::int[]) AS auth(sid, max_auth)
+              ON c.standard_id = auth.sid AND c.authority <= auth.max_auth
+            ORDER BY c.embedding <=> %(emb)s::vector
+            LIMIT %(pool)s
+        ),
+        bm25 AS (
+            SELECT c.chunk_id, c.para_number, c.component, c.section_title,
+                   c.content_markdown, c.standard_id,
+                   ROW_NUMBER() OVER (ORDER BY ts_rank(c.content_tsv, q) DESC) AS rank_bm25
+            FROM chunks c
+            JOIN UNNEST(%(sids)s::text[], %(auths)s::int[]) AS auth(sid, max_auth)
+              ON c.standard_id = auth.sid AND c.authority <= auth.max_auth,
+            plainto_tsquery('simple', %(query)s) q
+            WHERE c.content_tsv @@ q
+            ORDER BY ts_rank(c.content_tsv, q) DESC
+            LIMIT %(pool)s
+        )
+        SELECT COALESCE(d.chunk_id, b.chunk_id) AS chunk_id,
+               COALESCE(d.para_number, b.para_number) AS para_number,
+               COALESCE(d.component, b.component) AS component,
+               COALESCE(d.section_title, b.section_title) AS section_title,
+               COALESCE(d.content_markdown, b.content_markdown) AS content_markdown,
+               1.0/(%(rrf_k)s + COALESCE(d.rank_dense, 1000))
+                 + 1.0/(%(rrf_k)s + COALESCE(b.rank_bm25, 1000)) AS rrf_score,
+               COALESCE(d.standard_id, b.standard_id) AS standard_id
+        FROM dense d
+        FULL OUTER JOIN bm25 b ON d.chunk_id = b.chunk_id
+        ORDER BY rrf_score DESC
+        LIMIT %(top_k)s
+        """,
+        {
+            "emb": query_emb,
+            "sids": sids,
+            "auths": auths,
+            "query": query_text,
+            "pool": top_k * 3,
+            "rrf_k": rrf_k,
+            "top_k": top_k,
+        },
+    ).fetchall()
+
+    # component 순서로 재정렬
+    rows_sorted = sorted(
+        all_rows, key=lambda r: (_COMPONENT_ORDER.get(r[2], 99), -r[5])
+    )
+    para_numbers = [r[1] for r in all_rows if r[1]]
+    return rows_sorted, para_numbers
+
+
 def _step3_4_find_related(
     conn: psycopg.Connection,
     standard_id: str,
@@ -373,8 +463,8 @@ def search_ifrs(query: str) -> str:
         # 임계값 이상인 기준서만 통합 검색 대상에 포함
         standard_ids = [s[0] for s in standards if s[2] >= _SIMILARITY_THRESHOLD]
 
-        # Step 2: 임계값 통과 기준서에서 통합 벡터 검색
-        main_chunks, _ = _step2_search_multi(conn, query_emb, standard_ids)
+        # Step 2: 임계값 통과 기준서에서 BM25+Dense 하이브리드 검색 (순수 RRF)
+        main_chunks, _ = _step2_search_hybrid(conn, query_emb, query, standard_ids)
 
         # 결과에서 가장 많이 등장한 기준서를 주 기준서로 판정
         if main_chunks:
