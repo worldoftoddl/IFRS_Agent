@@ -1,23 +1,34 @@
 """Upstage Solar Embedding 쿼리 래퍼."""
 
+import logging
 import os
+import threading
 import time
 
-from openai import OpenAI
+from openai import APIConnectionError, APITimeoutError, OpenAI, RateLimitError
+
+logger = logging.getLogger(__name__)
 
 # Upstage embedding-query 최대 4000토큰, 한국어 ~1.3 chars/token → 5000자 절단
 _MAX_CHARS = 5000
 
 _client: OpenAI | None = None
+_client_lock = threading.Lock()
 
 
 def _get_client() -> OpenAI:
+    """싱글턴 OpenAI 클라이언트 반환 (thread-safe)."""
     global _client
     if _client is None:
-        _client = OpenAI(
-            api_key=os.environ.get("UPSTAGE_API_KEY", ""),
-            base_url="https://api.upstage.ai/v1",
-        )
+        with _client_lock:
+            if _client is None:
+                api_key = os.environ.get("UPSTAGE_API_KEY")
+                if not api_key:
+                    raise RuntimeError("UPSTAGE_API_KEY 환경변수가 설정되지 않았습니다.")
+                _client = OpenAI(
+                    api_key=api_key,
+                    base_url="https://api.upstage.ai/v1",
+                )
     return _client
 
 
@@ -32,9 +43,10 @@ def embed_query(text: str, max_retries: int = 3) -> list[float]:
         try:
             response = client.embeddings.create(input=clean, model="embedding-query")
             return response.data[0].embedding
-        except Exception as e:
+        except (APIConnectionError, APITimeoutError, RateLimitError) as e:
             if attempt == max_retries - 1:
                 raise
             wait = 2**attempt
+            logger.warning("Embedding 시도 %d 실패: %s — %d초 후 재시도", attempt + 1, e, wait)
             time.sleep(wait)
-    return []
+    raise RuntimeError("embed_query: 모든 재시도 실패")

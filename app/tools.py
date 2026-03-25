@@ -1,8 +1,9 @@
 """K-IFRS 검색 도구 — LangChain @tool 데코레이터."""
 
+import psycopg
 from langchain_core.tools import tool
 
-from app.db import get_connection, release_connection
+from app.db import get_connection
 from app.embedder import embed_query
 
 # 컴포넌트 정렬 순서: 본문 → 정의 → 적용지침 → 경과규정
@@ -14,9 +15,15 @@ _COMPONENT_LABEL = {
     "transition": "경과규정",
 }
 
+# 컨텍스트 포맷팅 시 최대 글자수
+_DEFINITIONS_MAX_CHARS = 3000
+_CHUNK_CONTENT_MAX_CHARS = 800
+_RELATED_CONTENT_MAX_CHARS = 500
+_SCOPE_MAX_CHARS = 1000
+
 
 def _step1_identify_standard(
-    conn, query_emb: list[float], top_k: int = 3
+    conn: psycopg.Connection, query_emb: list[float], top_k: int = 3
 ) -> list[tuple]:
     """Step 1: 쿼리에 가장 적합한 기준서 식별."""
     return conn.execute(
@@ -32,7 +39,7 @@ def _step1_identify_standard(
 
 
 def _step2_search_authoritative(
-    conn, query_emb: list[float], standard_id: str, top_k: int = 10
+    conn: psycopg.Connection, query_emb: list[float], standard_id: str, top_k: int = 10
 ) -> tuple[list[tuple], list[str]]:
     """Step 2: 기준서 내 Level 1 문단 벡터 검색."""
     rows = conn.execute(
@@ -56,15 +63,18 @@ def _step2_search_authoritative(
 
 
 def _step3_4_find_related(
-    conn, standard_id: str, para_numbers: list[str], component: str, top_k: int = 5
+    conn: psycopg.Connection,
+    standard_id: str,
+    para_numbers: list[str],
+    component: str,
+    top_k: int = 5,
 ) -> list[tuple]:
     """Step 3/4: paragraph_links를 통해 관련 IE/BC 청크 조회."""
     if not para_numbers:
         return []
 
-    placeholders = ",".join(["%s"] * len(para_numbers))
     return conn.execute(
-        f"""
+        """
         SELECT DISTINCT c.chunk_id, c.para_number, c.section_title,
                c.content_markdown,
                pl.target_para_start, pl.target_para_end, pl.link_type
@@ -72,15 +82,15 @@ def _step3_4_find_related(
         JOIN chunks c ON c.chunk_id = pl.source_chunk_id
         WHERE pl.standard_id = %s
           AND pl.source_component = %s
-          AND pl.target_para_start IN ({placeholders})
+          AND pl.target_para_start = ANY(%s)
         LIMIT %s
         """,
-        (standard_id, component, *para_numbers, top_k),
+        (standard_id, component, list(para_numbers), top_k),
     ).fetchall()
 
 
 def _build_context(
-    conn,
+    conn: psycopg.Connection,
     standard_id: str,
     query: str,
     main_chunks: list[tuple],
@@ -102,24 +112,24 @@ def _build_context(
     # 정의
     if definitions:
         ctx.append("## 용어 정의 [참조]")
-        ctx.append(definitions[:3000])
+        ctx.append(definitions[:_DEFINITIONS_MAX_CHARS])
         ctx.append("")
 
     # Step 2: 본문 + AG
     ctx.append("## 적용 문단 [Authoritative, Level 1]")
-    for chunk_id, para, comp, section, md, sim in main_chunks:
+    for _, para, comp, section, md, sim in main_chunks:
         label = _COMPONENT_LABEL.get(comp, comp)
         ctx.append(f"\n**문단 {para or 'N/A'}** ({label}, {section or '-'}, 유사도: {sim:.3f})")
-        ctx.append(md[:800])
+        ctx.append(md[:_CHUNK_CONTENT_MAX_CHARS])
     ctx.append("")
 
     # Step 3: IE
     if ie_results:
         ctx.append("## 적용사례 [Non-authoritative, Level 4]")
-        for chunk_id, para, section, md, ts, te, lt in ie_results:
+        for _, para, section, md, ts, te, _lt in ie_results:
             target = f"{ts}~{te}" if te else ts
             ctx.append(f"\n**{para or 'IE'}** ({section or '-'}) → 본문 문단 {target}")
-            ctx.append(md[:500])
+            ctx.append(md[:_RELATED_CONTENT_MAX_CHARS])
         ctx.append("")
 
     # Step 4: BC
@@ -129,10 +139,10 @@ def _build_context(
             "*주의: 결론도출근거는 기준서의 일부를 구성하지 않습니다. "
             "본문과 충돌 시 본문이 우선합니다.*\n"
         )
-        for chunk_id, para, section, md, ts, te, lt in bc_results:
+        for _, para, section, md, ts, te, _lt in bc_results:
             target = f"{ts}~{te}" if te else ts
             ctx.append(f"\n**{para or 'BC'}** ({section or '-'}) → 본문 문단 {target}")
-            ctx.append(md[:500])
+            ctx.append(md[:_RELATED_CONTENT_MAX_CHARS])
 
     return "\n".join(ctx)
 
@@ -146,8 +156,7 @@ def search_ifrs(query: str) -> str:
     Args:
         query: 검색할 회계 관련 질문 (예: "충당부채 인식 조건", "리스 식별 기준")
     """
-    conn = get_connection()
-    try:
+    with get_connection() as conn:
         query_emb = embed_query(query)
 
         # Step 1: 기준서 식별
@@ -156,8 +165,6 @@ def search_ifrs(query: str) -> str:
             return "관련 기준서를 찾을 수 없습니다."
 
         selected_id = standards[0][0]
-        selected_title = standards[0][1]
-        selected_sim = standards[0][2]
 
         # 기준서 식별 결과 헤더
         header_lines = ["## 기준서 식별 결과"]
@@ -184,9 +191,6 @@ def search_ifrs(query: str) -> str:
 
         return "\n".join(header_lines) + "\n" + context
 
-    finally:
-        release_connection(conn)
-
 
 @tool
 def get_standard_info(standard_id: str) -> str:
@@ -196,8 +200,7 @@ def get_standard_info(standard_id: str) -> str:
     Args:
         standard_id: 기준서 ID (예: "K-IFRS 1115", "K-IFRS 1037")
     """
-    conn = get_connection()
-    try:
+    with get_connection() as conn:
         row = conn.execute(
             """
             SELECT standard_id, title, standard_type, standard_family,
@@ -228,9 +231,6 @@ def get_standard_info(standard_id: str) -> str:
             (standard_id,),
         ).fetchone()
         if summary and summary[0]:
-            lines.append(f"\n## 적용범위\n{summary[0][:1000]}")
+            lines.append(f"\n## 적용범위\n{summary[0][:_SCOPE_MAX_CHARS]}")
 
         return "\n".join(lines)
-
-    finally:
-        release_connection(conn)
