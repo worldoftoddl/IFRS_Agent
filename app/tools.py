@@ -88,6 +88,9 @@ _COMPONENT_LABEL = {
     "transition": "경과규정",
 }
 
+# Step 1 유사도 임계값 — 이 값 미만이면 "관련 기준서 없음" 반환
+_SIMILARITY_THRESHOLD = 0.2
+
 # 컨텍스트 포맷팅 시 최대 글자수
 _DEFINITIONS_MAX_CHARS = 3000
 _CHUNK_CONTENT_MAX_CHARS = 800
@@ -353,7 +356,12 @@ def search_ifrs(query: str) -> str:
         if not standards:
             return "관련 기준서를 찾을 수 없습니다."
 
-        standard_ids = [s[0] for s in standards]
+        # 유사도 임계값 필터 — top-1이 임계값 미만이면 관련 기준서 없음
+        if standards[0][2] < _SIMILARITY_THRESHOLD:
+            return "관련 기준서를 찾을 수 없습니다. 회계 관련 질문을 입력해 주세요."
+
+        # 임계값 이상인 기준서만 통합 검색 대상에 포함
+        standard_ids = [s[0] for s in standards if s[2] >= _SIMILARITY_THRESHOLD]
 
         # Step 2: top-3 기준서에서 통합 벡터 검색
         main_chunks, _ = _step2_search_multi(conn, query_emb, standard_ids)
