@@ -51,7 +51,7 @@ cd ui && yarn install && yarn dev   # http://localhost:3000
 # --- 환경변수 (.env) ---
 # ANTHROPIC_API_KEY=...       ← Claude API
 # UPSTAGE_API_KEY=...         ← Upstage Solar Embedding
-# DATABASE_URL=postgresql://kifrs:kifrs@localhost:5432/kifrs
+# DATABASE_URL=dbname=kifrs        ← 로컬 peer/trust 인증
 # LANGCHAIN_API_KEY=...       ← LangSmith (선택)
 ```
 
@@ -63,16 +63,16 @@ cd ui && yarn install && yarn dev   # http://localhost:3000
 from deepagents import create_deep_agent
 
 agent = create_deep_agent(
-    model="claude-sonnet-4-6",
+    model="anthropic:claude-sonnet-4-6",
     tools=[search_ifrs, get_standard_info],
-    checkpointer=AsyncPostgresSaver,    # 세션 메모리 (thread별)
-    system_prompt=IFRS_EXPERT_PROMPT,
+    system_prompt=SYSTEM_PROMPT,
+    name="kifrs-agent",
 )
 ```
 
 - `create_deep_agent()`는 `CompiledStateGraph`를 반환
 - `langgraph.json`의 `"ifrs-agent": "./app/agent.py:agent"`로 서빙
-- Checkpointer: `AsyncPostgresSaver` — kifrs DB에 세션 상태 저장 (멀티턴 대화)
+- Checkpointer: `langgraph dev`가 in-memory checkpointer 자동 주입 (thread별 세션 유지)
 
 ### 4-Step 검색 파이프라인 (`app/tools.py`)
 
