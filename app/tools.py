@@ -4,6 +4,7 @@ import logging
 import re
 import threading
 import time
+from collections import Counter
 from dataclasses import dataclass
 
 import psycopg
@@ -55,6 +56,11 @@ def _get_step2_cached(
         main_chunks, para_nums = _step2_search_authoritative(conn, query_emb, standard_id)
 
     with _step2_cache_lock:
+        # re-check: 다른 스레드가 동시에 같은 키를 계산했을 수 있음
+        entry = _step2_cache.get(key)
+        if entry and (now - entry.created_at) < _STEP2_CACHE_TTL:
+            return entry.main_chunks, entry.para_nums
+
         _step2_cache[key] = _Step2CacheEntry(
             query_emb=query_emb,
             main_chunks=main_chunks,
@@ -177,42 +183,46 @@ def _step2_search_multi(
     if not standard_ids:
         return [], []
 
-    # 각 기준서의 base_authority 조회
+    # 각 기준서의 base_authority 조회 → (standard_id, max_authority) 쌍 구성
     rows_auth = conn.execute(
         "SELECT standard_id, base_authority FROM standards WHERE standard_id = ANY(%s)",
         (list(standard_ids),),
     ).fetchall()
-    auth_map = {r[0]: r[1] for r in rows_auth}
+    auth_pairs = [(r[0], r[1]) for r in rows_auth]
 
-    # 기준서별로 검색 후 통합 (base_authority가 다를 수 있으므로 개별 쿼리)
-    all_rows: list[tuple] = []
-    for sid in standard_ids:
-        base_auth = auth_map.get(sid, 1)
-        rows = conn.execute(
-            """
-            SELECT chunk_id, para_number, component, section_title,
-                   content_markdown,
-                   1 - (embedding <=> %s::vector) AS similarity,
-                   standard_id
-            FROM chunks
-            WHERE standard_id = %s AND authority <= %s
-            ORDER BY embedding <=> %s::vector
-            LIMIT %s
-            """,
-            (query_emb, sid, base_auth, query_emb, top_k),
-        ).fetchall()
-        all_rows.extend(rows)
+    if not auth_pairs:
+        return [], []
 
-    # 전체를 유사도 순으로 정렬 후 top_k
-    all_rows.sort(key=lambda r: -r[5])
-    top_rows = all_rows[:top_k]
+    # 단일 쿼리로 복수 기준서 통합 검색 — N+1 방지
+    # UNNEST로 (standard_id, max_authority) 쌍을 전달하여 기준서별 authority 동적 필터링
+    all_rows = conn.execute(
+        """
+        SELECT c.chunk_id, c.para_number, c.component, c.section_title,
+               c.content_markdown,
+               1 - (c.embedding <=> %s::vector) AS similarity,
+               c.standard_id
+        FROM chunks c
+        JOIN UNNEST(%s::text[], %s::int[]) AS auth(sid, max_auth)
+          ON c.standard_id = auth.sid AND c.authority <= auth.max_auth
+        ORDER BY c.embedding <=> %s::vector
+        LIMIT %s
+        """,
+        (
+            query_emb,
+            [p[0] for p in auth_pairs],
+            [p[1] for p in auth_pairs],
+            query_emb,
+            top_k,
+        ),
+    ).fetchall()
 
+    # DB에서 이미 유사도 순 + LIMIT 적용됨
     # component 순서로 재정렬 (본문 → 정의 → AG → 경과규정)
-    top_rows_sorted = sorted(
-        top_rows, key=lambda r: (_COMPONENT_ORDER.get(r[2], 99), -r[5])
+    rows_sorted = sorted(
+        all_rows, key=lambda r: (_COMPONENT_ORDER.get(r[2], 99), -r[5])
     )
-    para_numbers = [r[1] for r in top_rows if r[1]]
-    return top_rows_sorted, para_numbers
+    para_numbers = [r[1] for r in all_rows if r[1]]
+    return rows_sorted, para_numbers
 
 
 def _step3_4_find_related(
@@ -363,13 +373,11 @@ def search_ifrs(query: str) -> str:
         # 임계값 이상인 기준서만 통합 검색 대상에 포함
         standard_ids = [s[0] for s in standards if s[2] >= _SIMILARITY_THRESHOLD]
 
-        # Step 2: top-3 기준서에서 통합 벡터 검색
+        # Step 2: 임계값 통과 기준서에서 통합 벡터 검색
         main_chunks, _ = _step2_search_multi(conn, query_emb, standard_ids)
 
         # 결과에서 가장 많이 등장한 기준서를 주 기준서로 판정
         if main_chunks:
-            from collections import Counter
-
             std_counts = Counter(r[6] for r in main_chunks)
             primary_id = std_counts.most_common(1)[0][0]
         else:

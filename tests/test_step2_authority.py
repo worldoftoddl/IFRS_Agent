@@ -37,8 +37,7 @@ class TestStep2AuthorityFilter:
         rows, _ = _step2_search_authoritative(conn, query_emb, "K-IFRS 1037")
 
         assert len(rows) > 0, "K-IFRS 1037에서 검색 결과가 없음"
-        authorities = {r[5] for r in rows}  # authority는 인덱스에 없으므로 DB에서 확인
-        # 반환된 모든 청크의 component가 main/ag/definitions/transition이어야 함
+        # 반환된 모든 청크의 component가 main/ag/definitions/transition이어야 함 (bc/ie 제외 검증)
         components = {r[2] for r in rows}
         assert components <= {"main", "ag", "definitions", "transition"}, (
             f"authority=1 기준서에서 bc/ie 컴포넌트가 반환됨: {components}"
