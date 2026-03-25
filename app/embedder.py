@@ -49,4 +49,4 @@ def embed_query(text: str, max_retries: int = 3) -> list[float]:
             wait = 2**attempt
             logger.warning("Embedding 시도 %d 실패: %s — %d초 후 재시도", attempt + 1, e, wait)
             time.sleep(wait)
-    raise RuntimeError("embed_query: 모든 재시도 실패")
+    raise RuntimeError("embed_query: 모든 재시도 실패")  # max_retries <= 0인 경우 도달

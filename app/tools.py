@@ -1,7 +1,10 @@
 """K-IFRS 검색 도구 — LangChain @tool 데코레이터."""
 
+import logging
 import re
+import threading
 import time
+from dataclasses import dataclass
 
 import psycopg
 from langchain_core.tools import tool
@@ -9,32 +12,64 @@ from langchain_core.tools import tool
 from app.db import get_connection
 from app.embedder import embed_query
 
+logger = logging.getLogger(__name__)
+
 # standard_id 유효성 검증 패턴
 _STANDARD_ID_RE = re.compile(r"^K-IFRS\s+\d{4}$")
 
-# 임베딩+Step2 결과 캐시 (동일 Agent 턴 내 중복 호출 방지)
-_STEP2_CACHE: dict[tuple[str, str], tuple[list[float], list[tuple], list[str]]] = {}
+# ---------------------------------------------------------------------------
+# Step 2 결과 캐시 (동일 Agent 턴 내 중복 임베딩 API 호출 방지)
+# ---------------------------------------------------------------------------
+
 _STEP2_CACHE_TTL = 60  # 초
-_STEP2_CACHE_TS: dict[tuple[str, str], float] = {}
+_STEP2_CACHE_MAX_SIZE = 50
+
+
+@dataclass
+class _Step2CacheEntry:
+    query_emb: list[float]
+    main_chunks: list[tuple]
+    para_nums: list[str]
+    created_at: float
+
+
+_step2_cache: dict[tuple[str, str], _Step2CacheEntry] = {}
+_step2_cache_lock = threading.Lock()
 
 
 def _get_step2_cached(
-    conn: psycopg.Connection, query: str, standard_id: str
-) -> tuple[list[float], list[tuple], list[str]]:
-    """임베딩 + Step 2 결과를 캐시하여 반환. 동일 Agent 턴 내 중복 API 호출 방지."""
+    query_emb: list[float], query: str, standard_id: str
+) -> tuple[list[tuple], list[str]]:
+    """Step 2 결과를 캐시하여 반환. query_emb는 호출자가 미리 계산하여 전달."""
     key = (query, standard_id)
     now = time.monotonic()
 
-    if key in _STEP2_CACHE and (now - _STEP2_CACHE_TS[key]) < _STEP2_CACHE_TTL:
-        return _STEP2_CACHE[key]
+    with _step2_cache_lock:
+        entry = _step2_cache.get(key)
+        if entry and (now - entry.created_at) < _STEP2_CACHE_TTL:
+            logger.debug("Step2 캐시 히트: %s", key)
+            return entry.main_chunks, entry.para_nums
 
-    query_emb = embed_query(query)
-    main_chunks, para_nums = _step2_search_authoritative(conn, query_emb, standard_id)
-    result = (query_emb, main_chunks, para_nums)
+    # 캐시 미스 — DB 쿼리 (lock 밖에서 실행하여 blocking 최소화)
+    with get_connection() as conn:
+        main_chunks, para_nums = _step2_search_authoritative(conn, query_emb, standard_id)
 
-    _STEP2_CACHE[key] = result
-    _STEP2_CACHE_TS[key] = now
-    return result
+    with _step2_cache_lock:
+        _step2_cache[key] = _Step2CacheEntry(
+            query_emb=query_emb,
+            main_chunks=main_chunks,
+            para_nums=para_nums,
+            created_at=now,
+        )
+        # 만료 항목 정리 + max size 제한
+        expired = [k for k, v in _step2_cache.items() if (now - v.created_at) >= _STEP2_CACHE_TTL]
+        for k in expired:
+            del _step2_cache[k]
+        while len(_step2_cache) > _STEP2_CACHE_MAX_SIZE:
+            oldest_key = min(_step2_cache, key=lambda k: _step2_cache[k].created_at)
+            del _step2_cache[oldest_key]
+
+    return main_chunks, para_nums
 
 
 def _validate_standard_id(standard_id: str) -> str | None:
@@ -224,18 +259,19 @@ def search_ifrs(query: str) -> str:
     Args:
         query: 검색할 회계 관련 질문 (예: "충당부채 인식 조건", "리스 식별 기준")
     """
-    with get_connection() as conn:
-        query_emb = embed_query(query)
+    query_emb = embed_query(query)
 
+    with get_connection() as conn:
         # Step 1: 기준서 식별
         standards = _step1_identify_standard(conn, query_emb)
         if not standards:
             return "관련 기준서를 찾을 수 없습니다."
 
+        # selected_id는 DB 결과이므로 _validate_standard_id 불필요
         selected_id = standards[0][0]
 
-        # Step 2: Level 1 문단 검색 (결과를 캐시에 저장)
-        _, main_chunks, _ = _get_step2_cached(conn, query, selected_id)
+        # Step 2: Level 1 문단 검색 (결과를 캐시에 저장하여 후속 IE/BC 검색에서 재사용)
+        main_chunks, _ = _get_step2_cached(query_emb, query, selected_id)
 
         # 컨텍스트 조합
         ctx = _format_identification_header(standards, selected_id)
@@ -258,14 +294,14 @@ def search_ifrs_examples(query: str, standard_id: str) -> str:
     if err := _validate_standard_id(standard_id):
         return err
 
-    with get_connection() as conn:
-        # 캐시된 Step 2 결과 사용 (search_ifrs에서 이미 실행했으면 재사용)
-        _, _, para_nums = _get_step2_cached(conn, query, standard_id)
+    query_emb = embed_query(query)
+    _, para_nums = _get_step2_cached(query_emb, query, standard_id)
 
-        # Step 3: IE 적용사례 조회
+    with get_connection() as conn:
         ie_results = _step3_4_find_related(conn, standard_id, para_nums, "ie")
 
         if not ie_results:
+            logger.warning("IE 없음: %s, query=%s", standard_id, query)
             return f"{standard_id}에서 '{query}'와 관련된 적용사례(IE)를 찾을 수 없습니다."
 
         ctx = _format_standard_header(conn, standard_id, query)
@@ -288,14 +324,14 @@ def search_ifrs_rationale(query: str, standard_id: str) -> str:
     if err := _validate_standard_id(standard_id):
         return err
 
-    with get_connection() as conn:
-        # 캐시된 Step 2 결과 사용 (search_ifrs에서 이미 실행했으면 재사용)
-        _, _, para_nums = _get_step2_cached(conn, query, standard_id)
+    query_emb = embed_query(query)
+    _, para_nums = _get_step2_cached(query_emb, query, standard_id)
 
-        # Step 4: BC 결론도출근거 조회
+    with get_connection() as conn:
         bc_results = _step3_4_find_related(conn, standard_id, para_nums, "bc")
 
         if not bc_results:
+            logger.warning("BC 없음: %s, query=%s", standard_id, query)
             return f"{standard_id}에서 '{query}'와 관련된 결론도출근거(BC)를 찾을 수 없습니다."
 
         ctx = _format_standard_header(conn, standard_id, query)
@@ -312,6 +348,9 @@ def get_standard_info(standard_id: str) -> str:
     Args:
         standard_id: 기준서 ID (예: "K-IFRS 1115", "K-IFRS 1037")
     """
+    if err := _validate_standard_id(standard_id):
+        return err
+
     with get_connection() as conn:
         row = conn.execute(
             """
