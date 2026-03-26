@@ -73,12 +73,6 @@ class TestGoldenDataset:
         standards = {item["expected_standard"] for item in data}
         assert len(standards) >= 14, f"기준서 {len(standards)}개: {standards}"
 
-    def test_golden_has_cross_reference_query(self):
-        """교차참조형 쿼리가 최소 1건 있어야 한다."""
-        data = json.loads(GOLDEN_PATH.read_text())
-        has_cross_ref = any(item.get("query_type") == "cross_reference" for item in data)
-        assert has_cross_ref, "교차참조형 쿼리 없음"
-
     def test_golden_has_korean_specific(self):
         """한국 고유 요소('한' prefix) 테스트가 최소 1건 있어야 한다."""
         data = json.loads(GOLDEN_PATH.read_text())

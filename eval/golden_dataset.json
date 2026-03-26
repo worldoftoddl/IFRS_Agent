@@ -3,324 +3,409 @@
     "id": "q001",
     "query": "충당부채 인식 조건은?",
     "expected_standard": "K-IFRS 1037",
-    "expected_paragraphs": ["14", "15", "16"],
+    "expected_paragraphs": [
+      "14",
+      "15",
+      "16"
+    ],
     "category": "인식",
-    "difficulty": "easy",
-    "query_type": "simple_lookup"
+    "difficulty": "easy"
   },
   {
     "id": "q002",
     "query": "충당부채의 측정 방법",
     "expected_standard": "K-IFRS 1037",
-    "expected_paragraphs": ["36", "37", "38"],
+    "expected_paragraphs": [
+      "36",
+      "37",
+      "38"
+    ],
     "category": "측정",
-    "difficulty": "easy",
-    "query_type": "simple_lookup"
+    "difficulty": "easy"
   },
   {
     "id": "q003",
     "query": "수행의무를 어떻게 식별하는가",
     "expected_standard": "K-IFRS 1115",
-    "expected_paragraphs": ["22", "27", "29"],
+    "expected_paragraphs": [
+      "22",
+      "27",
+      "29"
+    ],
     "category": "인식",
-    "difficulty": "easy",
-    "query_type": "simple_lookup"
+    "difficulty": "easy"
   },
   {
     "id": "q004",
     "query": "수익 인식 시점은 언제인가",
     "expected_standard": "K-IFRS 1115",
-    "expected_paragraphs": ["31", "35", "38"],
+    "expected_paragraphs": [
+      "31",
+      "35",
+      "38"
+    ],
     "category": "인식",
-    "difficulty": "medium",
-    "query_type": "simple_lookup"
+    "difficulty": "medium"
   },
   {
     "id": "q005",
     "query": "고객과의 계약 식별 요건",
     "expected_standard": "K-IFRS 1115",
-    "expected_paragraphs": ["9", "10", "11"],
+    "expected_paragraphs": [
+      "9",
+      "10",
+      "11"
+    ],
     "category": "인식",
-    "difficulty": "easy",
-    "query_type": "simple_lookup"
+    "difficulty": "easy"
   },
   {
     "id": "q006",
     "query": "리스를 어떻게 식별하는가",
     "expected_standard": "K-IFRS 1116",
-    "expected_paragraphs": ["9", "B9", "B10"],
+    "expected_paragraphs": [
+      "9",
+      "B9",
+      "B10"
+    ],
     "category": "인식",
-    "difficulty": "easy",
-    "query_type": "simple_lookup"
+    "difficulty": "easy"
   },
   {
     "id": "q007",
     "query": "리스이용자의 사용권자산과 리스부채의 최초 측정",
     "expected_standard": "K-IFRS 1116",
-    "expected_paragraphs": ["22", "23", "24", "26", "27"],
+    "expected_paragraphs": [
+      "22",
+      "23",
+      "24",
+      "26",
+      "27"
+    ],
     "category": "측정",
-    "difficulty": "medium",
-    "query_type": "simple_lookup"
+    "difficulty": "medium"
   },
   {
     "id": "q008",
     "query": "외화 화폐성 항목의 환산 방법",
     "expected_standard": "K-IFRS 1021",
-    "expected_paragraphs": ["23", "28"],
+    "expected_paragraphs": [
+      "23",
+      "28"
+    ],
     "category": "측정",
-    "difficulty": "easy",
-    "query_type": "simple_lookup"
+    "difficulty": "easy"
   },
   {
     "id": "q009",
     "query": "기능통화를 표시통화로 환산하는 방법",
     "expected_standard": "K-IFRS 1021",
-    "expected_paragraphs": ["38", "39", "41"],
+    "expected_paragraphs": [
+      "38",
+      "39",
+      "41"
+    ],
     "category": "표시",
-    "difficulty": "medium",
-    "query_type": "simple_lookup"
+    "difficulty": "medium"
   },
   {
     "id": "q010",
     "query": "금융자산의 분류 기준",
     "expected_standard": "K-IFRS 1109",
-    "expected_paragraphs": ["4.1.1", "4.1.2", "4.1.4"],
+    "expected_paragraphs": [
+      "4.1.1",
+      "4.1.2",
+      "4.1.4"
+    ],
     "category": "분류",
-    "difficulty": "medium",
-    "query_type": "simple_lookup"
+    "difficulty": "medium"
   },
   {
     "id": "q011",
     "query": "금융자산 손상 기대신용손실",
     "expected_standard": "K-IFRS 1109",
-    "expected_paragraphs": ["5.5.1", "5.5.3", "5.5.5"],
+    "expected_paragraphs": [
+      "5.5.1",
+      "5.5.3",
+      "5.5.5"
+    ],
     "category": "측정",
-    "difficulty": "medium",
-    "query_type": "simple_lookup"
+    "difficulty": "medium"
   },
   {
     "id": "q012",
     "query": "재무상태표에 표시해야 하는 항목",
     "expected_standard": "K-IFRS 1001",
-    "expected_paragraphs": ["54", "55"],
+    "expected_paragraphs": [
+      "54",
+      "55"
+    ],
     "category": "표시",
-    "difficulty": "easy",
-    "query_type": "simple_lookup"
+    "difficulty": "easy"
   },
   {
     "id": "q013",
     "query": "유동자산과 비유동자산의 분류 기준",
     "expected_standard": "K-IFRS 1001",
-    "expected_paragraphs": ["60", "66", "69"],
+    "expected_paragraphs": [
+      "60",
+      "66",
+      "69"
+    ],
     "category": "분류",
-    "difficulty": "medium",
-    "query_type": "simple_lookup"
+    "difficulty": "medium"
   },
   {
     "id": "q014",
     "query": "포괄손익계산서에 표시할 항목",
     "expected_standard": "K-IFRS 1001",
-    "expected_paragraphs": ["82", "82A", "85"],
+    "expected_paragraphs": [
+      "82",
+      "82A",
+      "85"
+    ],
     "category": "표시",
-    "difficulty": "medium",
-    "query_type": "simple_lookup"
+    "difficulty": "medium"
   },
   {
     "id": "q015",
     "query": "개념체계에서 역사적 원가란",
     "expected_standard": "재무보고 개념체계",
-    "expected_paragraphs": ["6.4", "6.5"],
+    "expected_paragraphs": [
+      "6.4",
+      "6.5"
+    ],
     "category": "측정",
-    "difficulty": "medium",
-    "query_type": "simple_lookup"
+    "difficulty": "medium"
   },
   {
     "id": "q016",
     "query": "개념체계에서 이행가치란",
     "expected_standard": "재무보고 개념체계",
-    "expected_paragraphs": ["6.17", "6.18"],
+    "expected_paragraphs": [
+      "6.17",
+      "6.18"
+    ],
     "category": "측정",
-    "difficulty": "medium",
-    "query_type": "simple_lookup"
+    "difficulty": "medium"
   },
   {
     "id": "q017",
     "query": "무형자산의 인식 조건",
     "expected_standard": "K-IFRS 1038",
-    "expected_paragraphs": ["18", "21"],
+    "expected_paragraphs": [
+      "18",
+      "21"
+    ],
     "category": "인식",
-    "difficulty": "easy",
-    "query_type": "simple_lookup"
+    "difficulty": "easy"
   },
   {
     "id": "q017b",
     "query": "개발비 자본화 조건",
     "expected_standard": "K-IFRS 1038",
-    "expected_paragraphs": ["57"],
+    "expected_paragraphs": [
+      "57"
+    ],
     "category": "인식",
-    "difficulty": "easy",
-    "query_type": "simple_lookup"
+    "difficulty": "easy"
   },
   {
     "id": "q018",
     "query": "회계정책 변경의 소급 적용",
     "expected_standard": "K-IFRS 1008",
-    "expected_paragraphs": ["19", "22"],
+    "expected_paragraphs": [
+      "19",
+      "22"
+    ],
     "category": "회계정책",
-    "difficulty": "medium",
-    "query_type": "simple_lookup"
+    "difficulty": "medium"
   },
   {
     "id": "q019",
     "query": "유형자산의 감가상각 방법",
     "expected_standard": "K-IFRS 1016",
-    "expected_paragraphs": ["60", "62"],
+    "expected_paragraphs": [
+      "60",
+      "62"
+    ],
     "category": "측정",
-    "difficulty": "easy",
-    "query_type": "simple_lookup"
+    "difficulty": "easy"
   },
   {
     "id": "q020",
     "query": "재고자산의 저가법 평가",
     "expected_standard": "K-IFRS 1002",
-    "expected_paragraphs": ["28", "29"],
+    "expected_paragraphs": [
+      "28",
+      "29"
+    ],
     "category": "측정",
-    "difficulty": "easy",
-    "query_type": "simple_lookup"
+    "difficulty": "easy"
   },
   {
     "id": "q021",
     "query": "자산손상 징후가 있을 때 어떻게 하는가",
     "expected_standard": "K-IFRS 1036",
-    "expected_paragraphs": ["8", "9", "10"],
+    "expected_paragraphs": [
+      "8",
+      "9",
+      "10"
+    ],
     "category": "인식",
-    "difficulty": "easy",
-    "query_type": "simple_lookup"
+    "difficulty": "easy"
   },
   {
     "id": "q022",
     "query": "손상차손의 인식과 측정",
     "expected_standard": "K-IFRS 1036",
-    "expected_paragraphs": ["18", "59", "60"],
+    "expected_paragraphs": [
+      "18",
+      "59",
+      "60"
+    ],
     "category": "측정",
-    "difficulty": "medium",
-    "query_type": "simple_lookup"
+    "difficulty": "medium"
   },
   {
     "id": "q023",
     "query": "지배력의 판단 기준",
     "expected_standard": "K-IFRS 1110",
-    "expected_paragraphs": ["5", "6", "7"],
+    "expected_paragraphs": [
+      "5",
+      "6",
+      "7"
+    ],
     "category": "연결",
-    "difficulty": "medium",
-    "query_type": "simple_lookup"
+    "difficulty": "medium"
   },
   {
     "id": "q024",
     "query": "이연법인세자산의 인식 요건",
     "expected_standard": "K-IFRS 1012",
-    "expected_paragraphs": ["24", "25"],
+    "expected_paragraphs": [
+      "24",
+      "25"
+    ],
     "category": "인식",
-    "difficulty": "medium",
-    "query_type": "simple_lookup"
+    "difficulty": "medium"
   },
   {
     "id": "q025",
     "query": "관계기업에 대한 지분법 적용 절차",
     "expected_standard": "K-IFRS 1028",
-    "expected_paragraphs": ["10", "16"],
+    "expected_paragraphs": [
+      "10",
+      "16"
+    ],
     "category": "측정",
-    "difficulty": "medium",
-    "query_type": "simple_lookup"
+    "difficulty": "medium"
   },
   {
     "id": "q026",
     "query": "확정급여채무의 측정 절차",
     "expected_standard": "K-IFRS 1019",
-    "expected_paragraphs": ["57", "67"],
+    "expected_paragraphs": [
+      "57",
+      "67"
+    ],
     "category": "측정",
-    "difficulty": "medium",
-    "query_type": "simple_lookup"
+    "difficulty": "medium"
   },
   {
     "id": "q027",
     "query": "공정가치의 정의와 측정 원칙",
     "expected_standard": "K-IFRS 1113",
-    "expected_paragraphs": ["9", "11", "15"],
+    "expected_paragraphs": [
+      "9",
+      "11",
+      "15"
+    ],
     "category": "측정",
-    "difficulty": "easy",
-    "query_type": "simple_lookup"
+    "difficulty": "easy"
   },
   {
     "id": "q028",
     "query": "금융상품에서 생기는 위험의 공시",
     "expected_standard": "K-IFRS 1107",
-    "expected_paragraphs": ["7", "31"],
+    "expected_paragraphs": [
+      "7",
+      "31"
+    ],
     "category": "공시",
-    "difficulty": "medium",
-    "query_type": "simple_lookup"
+    "difficulty": "medium"
   },
   {
     "id": "q029",
     "query": "금융부채와 지분상품의 분류",
     "expected_standard": "K-IFRS 1032",
-    "expected_paragraphs": ["15", "16"],
+    "expected_paragraphs": [
+      "15",
+      "16"
+    ],
     "category": "분류",
-    "difficulty": "medium",
-    "query_type": "simple_lookup"
+    "difficulty": "medium"
   },
   {
     "id": "q030",
     "query": "리스부채의 이자비용은 어떤 기준서를 따르는가",
     "expected_standard": "K-IFRS 1116",
-    "expected_paragraphs": ["36", "37"],
+    "expected_paragraphs": [
+      "36",
+      "37"
+    ],
     "category": "측정",
-    "difficulty": "hard",
-    "query_type": "cross_reference"
+    "difficulty": "hard"
   },
   {
     "id": "q031",
     "query": "고객에게 환불할 의무가 있는 경우 충당부채인가 환불부채인가",
     "expected_standard": "K-IFRS 1115",
-    "expected_paragraphs": ["55"],
+    "expected_paragraphs": [
+      "55"
+    ],
     "category": "인식",
-    "difficulty": "hard",
-    "query_type": "cross_reference"
+    "difficulty": "hard"
   },
   {
     "id": "q032",
     "query": "영업권의 손상검사 절차",
     "expected_standard": "K-IFRS 1036",
-    "expected_paragraphs": ["10", "134"],
+    "expected_paragraphs": [
+      "10",
+      "134"
+    ],
     "category": "측정",
-    "difficulty": "hard",
-    "query_type": "cross_reference"
+    "difficulty": "hard"
   },
   {
     "id": "q033",
     "query": "K-IFRS 1115 문단 35의 기간에 걸쳐 이행하는 수행의무의 세 가지 조건은",
     "expected_standard": "K-IFRS 1115",
-    "expected_paragraphs": ["35"],
+    "expected_paragraphs": [
+      "35"
+    ],
     "category": "인식",
-    "difficulty": "easy",
-    "query_type": "citation_lookup"
+    "difficulty": "easy"
   },
   {
     "id": "q034",
     "query": "K-IFRS 1116에서 한국 고유 추가 적용범위 규정",
     "expected_standard": "K-IFRS 1116",
-    "expected_paragraphs": ["한2.1"],
+    "expected_paragraphs": [
+      "한2.1"
+    ],
     "category": "적용범위",
-    "difficulty": "hard",
-    "query_type": "korean_specific"
+    "difficulty": "hard"
   },
   {
     "id": "q035",
     "query": "손실부담계약 관련 한국 고유 추가 규정",
     "expected_standard": "K-IFRS 1037",
-    "expected_paragraphs": ["한92.1"],
+    "expected_paragraphs": [
+      "한92.1"
+    ],
     "category": "인식",
-    "difficulty": "hard",
-    "query_type": "korean_specific"
+    "difficulty": "hard"
   }
 ]
