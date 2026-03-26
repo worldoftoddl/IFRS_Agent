@@ -43,9 +43,9 @@
   },
   {
     "id": "q007",
-    "query": "리스이용자의 최초 측정",
+    "query": "리스이용자의 사용권자산과 리스부채의 최초 측정",
     "expected_standard": "K-IFRS 1116",
-    "expected_paragraphs": ["22", "23", "24"],
+    "expected_paragraphs": ["22", "23", "24", "26", "27"],
     "category": "측정"
   },
   {
@@ -59,7 +59,7 @@
     "id": "q009",
     "query": "기능통화를 표시통화로 환산하는 방법",
     "expected_standard": "K-IFRS 1021",
-    "expected_paragraphs": ["39", "41"],
+    "expected_paragraphs": ["38", "39", "41"],
     "category": "표시"
   },
   {
@@ -94,7 +94,7 @@
     "id": "q014",
     "query": "포괄손익계산서에 표시할 항목",
     "expected_standard": "K-IFRS 1001",
-    "expected_paragraphs": ["82", "85"],
+    "expected_paragraphs": ["82", "82A", "85"],
     "category": "표시"
   },
   {
@@ -115,7 +115,14 @@
     "id": "q017",
     "query": "무형자산의 인식 조건",
     "expected_standard": "K-IFRS 1038",
-    "expected_paragraphs": ["18", "21", "57"],
+    "expected_paragraphs": ["18", "21"],
+    "category": "인식"
+  },
+  {
+    "id": "q017b",
+    "query": "개발비 자본화 조건",
+    "expected_standard": "K-IFRS 1038",
+    "expected_paragraphs": ["57"],
     "category": "인식"
   },
   {
