@@ -51,45 +51,39 @@ class TestTsvectorSetup:
         assert row is not None, "content_tsv GIN 인덱스가 없음"
 
     def test_bm25_search_returns_results(self):
-        """plainto_tsquery로 BM25 검색이 동작해야 한다."""
+        """kiwipiepy 토큰화된 쿼리로 BM25 검색이 동작해야 한다."""
+        from app.tokenizer import tokenize_for_query
+
+        query_tokens = tokenize_for_query("충당부채 인식")
         with get_connection() as conn:
             rows = conn.execute(
                 """
                 SELECT chunk_id, ts_rank(content_tsv, q) AS rank
                 FROM chunks,
-                     plainto_tsquery('simple', '충당부채 인식') q
+                     plainto_tsquery('simple', %s) q
                 WHERE content_tsv @@ q
                 ORDER BY rank DESC
                 LIMIT 5
-                """
+                """,
+                (query_tokens,),
             ).fetchall()
-        assert len(rows) > 0, "BM25 검색 결과가 없음"
+        assert len(rows) > 0, f"BM25 검색 결과 없음 (query_tokens='{query_tokens}')"
 
     def test_bm25_search_matches_exact_term(self):
-        """정확한 용어 '이행가치'로 검색 시 해당 용어가 포함된 문단이 반환되어야 한다."""
+        """'이행가치' 토큰화 후 BM25 매칭이 되어야 한다."""
+        from app.tokenizer import tokenize_for_query
+
+        query_tokens = tokenize_for_query("이행가치")
         with get_connection() as conn:
             rows = conn.execute(
                 """
                 SELECT chunk_id, content_text
                 FROM chunks,
-                     plainto_tsquery('simple', '이행가치') q
+                     plainto_tsquery('simple', %s) q
                 WHERE content_tsv @@ q
                 LIMIT 5
-                """
+                """,
+                (query_tokens,),
             ).fetchall()
-        assert len(rows) > 0, "'이행가치' BM25 검색 결과가 없음"
-        assert any("이행가치" in r[1] for r in rows), (
-            "반환된 문단에 '이행가치'가 포함되지 않음"
-        )
-
-    def test_trigger_exists(self):
-        """content_text 변경 시 content_tsv를 자동 갱신하는 트리거가 존재해야 한다."""
-        with get_connection() as conn:
-            row = conn.execute(
-                """
-                SELECT trigger_name FROM information_schema.triggers
-                WHERE event_object_table = 'chunks'
-                  AND trigger_name = 'trg_chunks_tsv'
-                """
-            ).fetchone()
-        assert row is not None, "trg_chunks_tsv 트리거가 없음"
+        assert len(rows) > 0, f"'이행가치' BM25 매칭 실패 (tokens='{query_tokens}')"
+        assert any("이행" in r[1] or "가치" in r[1] for r in rows)

@@ -12,6 +12,7 @@ from langchain_core.tools import tool
 
 from app.db import get_connection
 from app.embedder import embed_query
+from app.tokenizer import tokenize_for_query
 
 logger = logging.getLogger(__name__)
 
@@ -301,7 +302,7 @@ def _step2_search_hybrid(
             "emb": query_emb,
             "sids": sids,
             "auths": auths,
-            "query": query_text,
+            "query": tokenize_for_query(query_text),
             "pool": pool_size if pool_size > 0 else top_k * 3,
             "rrf_k": rrf_k,
             "top_k": top_k,

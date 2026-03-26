@@ -16,6 +16,7 @@ load_dotenv()
 
 from app.db import get_connection  # noqa: E402
 from app.embedder import embed_query  # noqa: E402
+from app.tokenizer import tokenize_for_query  # noqa: E402
 from app.tools import (  # noqa: E402
     _COMPONENT_ORDER,
     _SIMILARITY_THRESHOLD,
@@ -73,7 +74,7 @@ def _search_bm25_only(
         LIMIT %(top_k)s
         """,
         {
-            "query": query_text,
+            "query": tokenize_for_query(query_text),
             "sids": [p[0] for p in auth_pairs],
             "auths": [p[1] for p in auth_pairs],
             "top_k": top_k,
