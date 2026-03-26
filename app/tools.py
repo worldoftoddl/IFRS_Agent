@@ -317,6 +317,52 @@ def _step2_search_hybrid(
     return rows_sorted, para_numbers
 
 
+def _step2_search_multi_query(
+    conn: psycopg.Connection,
+    query_text: str,
+    standard_ids: list[str],
+    top_k: int = 10,
+) -> tuple[list[tuple], list[str]]:
+    """Step 2 Multi-Query Retrieval.
+
+    LLM으로 쿼리를 3개 변형 생성 → 각각 dense 검색 → 결과 합산(중복 제거).
+    각 변형이 임베딩 공간에서 다른 영역을 탐색하여 후보 풀 다양성 확보.
+
+    반환 튜플 형식: (chunk_id, para_number, component, section_title,
+                    content_markdown, similarity, standard_id)
+    """
+    from app.multi_query import generate_query_variants
+
+    if not standard_ids:
+        return [], []
+
+    # 쿼리 변형 생성 (Haiku)
+    variants = generate_query_variants(query_text)
+
+    # 각 변형에 대해 dense 검색
+    seen_chunk_ids: set[str] = set()
+    all_rows: list[tuple] = []
+
+    for variant in variants:
+        variant_emb = embed_query(variant)
+        rows, _ = _step2_search_multi(conn, variant_emb, standard_ids, top_k=top_k)
+        for row in rows:
+            if row[0] not in seen_chunk_ids:  # chunk_id 중복 제거
+                seen_chunk_ids.add(row[0])
+                all_rows.append(row)
+
+    # 유사도 순 정렬 후 top_k
+    all_rows.sort(key=lambda r: -r[5])
+    top_rows = all_rows[:top_k]
+
+    # component 순서로 재정렬
+    rows_sorted = sorted(
+        top_rows, key=lambda r: (_COMPONENT_ORDER.get(r[2], 99), -r[5])
+    )
+    para_numbers = [r[1] for r in top_rows if r[1]]
+    return rows_sorted, para_numbers
+
+
 def _step3_4_find_related(
     conn: psycopg.Connection,
     standard_id: str,

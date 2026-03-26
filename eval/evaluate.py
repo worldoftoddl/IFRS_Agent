@@ -23,6 +23,7 @@ from app.tools import (  # noqa: E402
     _step1_identify_standard,
     _step2_search_hybrid,
     _step2_search_multi,
+    _step2_search_multi_query,
 )
 
 GOLDEN_PATH = Path(__file__).parent / "golden_dataset.json"
@@ -40,6 +41,8 @@ SEARCH_CONFIGS: dict[str, dict] = {
     "bm25_only": {"rrf_k": 60, "pool_size": 30, "mode": "bm25_only", "rerank": False},
     "reranker": {"rrf_k": 60, "pool_size": 30, "mode": "hybrid", "rerank": True},
     "dense_reranker": {"rrf_k": 60, "pool_size": 30, "mode": "dense_only", "rerank": True},
+    "multi_query": {"rrf_k": 60, "pool_size": 30, "mode": "multi_query", "rerank": False},
+    "multi_query_reranker": {"rrf_k": 60, "pool_size": 30, "mode": "multi_query", "rerank": True},
 }
 
 
@@ -122,6 +125,10 @@ def run_evaluation(item: dict, config: dict | None = None, top_k: int = 10) -> d
         elif mode == "dense_only":
             rows, _ = _step2_search_multi(
                 conn, query_emb, standard_ids, top_k=search_top_k
+            )
+        elif mode == "multi_query":
+            rows, _ = _step2_search_multi_query(
+                conn, query, standard_ids, top_k=search_top_k
             )
         elif mode == "bm25_only":
             rows = _search_bm25_only(conn, query, standard_ids, top_k=search_top_k)

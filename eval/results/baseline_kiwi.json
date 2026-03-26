@@ -8,10 +8,10 @@
   },
   "n_queries": 36,
   "avg_recall": 0.52,
-  "avg_mrr": 0.523,
+  "avg_mrr": 0.522,
   "std_accuracy": 0.861,
-  "avg_latency_sec": 0.69,
-  "total_time_sec": 24.9,
+  "avg_latency_sec": 0.68,
+  "total_time_sec": 24.5,
   "results": [
     {
       "id": "q001",
@@ -104,7 +104,7 @@
         "mrr": 1.0,
         "std_accuracy": 1
       },
-      "latency_sec": 3.37
+      "latency_sec": 3.59
     },
     {
       "id": "q002",
@@ -196,7 +196,7 @@
         "mrr": 0.2,
         "std_accuracy": 1
       },
-      "latency_sec": 0.67
+      "latency_sec": 0.8
     },
     {
       "id": "q003",
@@ -290,7 +290,7 @@
         "mrr": 0.5,
         "std_accuracy": 1
       },
-      "latency_sec": 0.93
+      "latency_sec": 0.39
     },
     {
       "id": "q004",
@@ -383,7 +383,7 @@
         "mrr": 1.0,
         "std_accuracy": 1
       },
-      "latency_sec": 0.99
+      "latency_sec": 0.5
     },
     {
       "id": "q005",
@@ -474,7 +474,7 @@
         "mrr": 1.0,
         "std_accuracy": 1
       },
-      "latency_sec": 0.48
+      "latency_sec": 0.34
     },
     {
       "id": "q006",
@@ -566,7 +566,7 @@
         "mrr": 1.0,
         "std_accuracy": 1
       },
-      "latency_sec": 0.74
+      "latency_sec": 0.68
     },
     {
       "id": "q007",
@@ -661,7 +661,7 @@
         "mrr": 1.0,
         "std_accuracy": 1
       },
-      "latency_sec": 0.76
+      "latency_sec": 0.45
     },
     {
       "id": "q008",
@@ -754,7 +754,7 @@
         "mrr": 1.0,
         "std_accuracy": 1
       },
-      "latency_sec": 0.34
+      "latency_sec": 0.55
     },
     {
       "id": "q009",
@@ -846,7 +846,7 @@
         "mrr": 0.5,
         "std_accuracy": 1
       },
-      "latency_sec": 0.68
+      "latency_sec": 0.55
     },
     {
       "id": "q010",
@@ -939,7 +939,7 @@
         "mrr": 0.0,
         "std_accuracy": 0
       },
-      "latency_sec": 0.5
+      "latency_sec": 0.7
     },
     {
       "id": "q011",
@@ -1032,7 +1032,7 @@
         "mrr": 0.0,
         "std_accuracy": 0
       },
-      "latency_sec": 0.7
+      "latency_sec": 0.46
     },
     {
       "id": "q012",
@@ -1122,7 +1122,7 @@
         "mrr": 0.3333333333333333,
         "std_accuracy": 1
       },
-      "latency_sec": 0.66
+      "latency_sec": 1.81
     },
     {
       "id": "q013",
@@ -1215,7 +1215,7 @@
         "mrr": 0.0,
         "std_accuracy": 0
       },
-      "latency_sec": 0.37
+      "latency_sec": 0.61
     },
     {
       "id": "q014",
@@ -1308,7 +1308,7 @@
         "mrr": 0.0,
         "std_accuracy": 1
       },
-      "latency_sec": 0.41
+      "latency_sec": 0.62
     },
     {
       "id": "q015",
@@ -1400,7 +1400,7 @@
         "mrr": 1.0,
         "std_accuracy": 1
       },
-      "latency_sec": 0.33
+      "latency_sec": 0.41
     },
     {
       "id": "q016",
@@ -1492,7 +1492,7 @@
         "mrr": 0.3333333333333333,
         "std_accuracy": 1
       },
-      "latency_sec": 0.5
+      "latency_sec": 0.51
     },
     {
       "id": "q017",
@@ -1583,7 +1583,7 @@
         "mrr": 1.0,
         "std_accuracy": 1
       },
-      "latency_sec": 0.53
+      "latency_sec": 0.54
     },
     {
       "id": "q017b",
@@ -1674,7 +1674,7 @@
         "mrr": 0.2,
         "std_accuracy": 0
       },
-      "latency_sec": 0.47
+      "latency_sec": 0.5
     },
     {
       "id": "q018",
@@ -1767,7 +1767,7 @@
         "mrr": 1.0,
         "std_accuracy": 1
       },
-      "latency_sec": 0.55
+      "latency_sec": 0.47
     },
     {
       "id": "q019",
@@ -1859,7 +1859,7 @@
         "mrr": 1.0,
         "std_accuracy": 1
       },
-      "latency_sec": 0.73
+      "latency_sec": 0.63
     },
     {
       "id": "q020",
@@ -1951,7 +1951,7 @@
         "mrr": 1.0,
         "std_accuracy": 1
       },
-      "latency_sec": 0.48
+      "latency_sec": 0.43
     },
     {
       "id": "q021",
@@ -2043,7 +2043,7 @@
         "mrr": 1.0,
         "std_accuracy": 1
       },
-      "latency_sec": 0.82
+      "latency_sec": 0.7
     },
     {
       "id": "q022",
@@ -2091,7 +2091,7 @@
           "chunk_id": "KIFRS1036-main-7",
           "para": "7",
           "standard_id": "K-IFRS 1036",
-          "score": 0.028612012987012988
+          "score": 0.028782894736842105
         },
         {
           "chunk_id": "KIFRS1105-main-19",
@@ -2100,16 +2100,16 @@
           "score": 0.02819138376017471
         },
         {
-          "chunk_id": "KIFRS1036-main-nonum",
-          "para": null,
-          "standard_id": "K-IFRS 1036",
-          "score": 0.02786377708978328
-        },
-        {
           "chunk_id": "KIFRS1036-main-BC165",
           "para": "BC165",
           "standard_id": "K-IFRS 1036",
           "score": 0.02774588595484118
+        },
+        {
+          "chunk_id": "KIFRS1036-main-nonum",
+          "para": null,
+          "standard_id": "K-IFRS 1036",
+          "score": 0.027692895339954164
         },
         {
           "chunk_id": "KIFRS1036-main-nonum-4",
@@ -2135,7 +2135,7 @@
         "mrr": 0.0,
         "std_accuracy": 1
       },
-      "latency_sec": 0.51
+      "latency_sec": 0.41
     },
     {
       "id": "q023",
@@ -2227,7 +2227,7 @@
         "mrr": 0.25,
         "std_accuracy": 1
       },
-      "latency_sec": 0.73
+      "latency_sec": 0.41
     },
     {
       "id": "q024",
@@ -2409,7 +2409,7 @@
         "mrr": 1.0,
         "std_accuracy": 1
       },
-      "latency_sec": 0.5
+      "latency_sec": 0.62
     },
     {
       "id": "q026",
@@ -2502,7 +2502,7 @@
         "mrr": 1.0,
         "std_accuracy": 1
       },
-      "latency_sec": 0.56
+      "latency_sec": 0.73
     },
     {
       "id": "q027",
@@ -2593,7 +2593,7 @@
         "mrr": 0.3333333333333333,
         "std_accuracy": 1
       },
-      "latency_sec": 0.38
+      "latency_sec": 0.49
     },
     {
       "id": "q028",
@@ -2612,11 +2612,11 @@
         "B8",
         "24I",
         "1",
-        "31",
-        "32A"
+        "32A",
+        "31"
       ],
       "primary_standard": "K-IFRS 1107",
-      "first_correct_rank": 7,
+      "first_correct_rank": 8,
       "all_results": [
         {
           "chunk_id": "KIFRS1107-main-nonum-2",
@@ -2652,7 +2652,7 @@
           "chunk_id": "KIFRS1107-main-B8",
           "para": "B8",
           "standard_id": "K-IFRS 1107",
-          "score": 0.03015873015873016
+          "score": 0.029957522915269395
         },
         {
           "chunk_id": "KIFRS1107-main-24I",
@@ -2667,24 +2667,24 @@
           "score": 0.029138513513513514
         },
         {
+          "chunk_id": "KIFRS1107-main-32A",
+          "para": "32A",
+          "standard_id": "K-IFRS 1107",
+          "score": 0.02857142857142857
+        },
+        {
           "chunk_id": "KIFRS1107-main-31",
           "para": "31",
           "standard_id": "K-IFRS 1107",
           "score": 0.028484848484848484
-        },
-        {
-          "chunk_id": "KIFRS1107-main-32A",
-          "para": "32A",
-          "standard_id": "K-IFRS 1107",
-          "score": 0.028370221327967807
         }
       ],
       "metrics": {
         "recall": 0.5,
-        "mrr": 0.14285714285714285,
+        "mrr": 0.125,
         "std_accuracy": 1
       },
-      "latency_sec": 0.42
+      "latency_sec": 0.72
     },
     {
       "id": "q029",
@@ -2756,7 +2756,7 @@
           "chunk_id": "KIFRS1032-main-BC8",
           "para": "BC8",
           "standard_id": "K-IFRS 1032",
-          "score": 0.02439384979302188
+          "score": 0.024269005847953218
         },
         {
           "chunk_id": "KIFRS1032-main-2",
@@ -2776,7 +2776,7 @@
         "mrr": 0.0,
         "std_accuracy": 1
       },
-      "latency_sec": 0.45
+      "latency_sec": 0.48
     },
     {
       "id": "q030",
@@ -2868,7 +2868,7 @@
         "mrr": 0.0,
         "std_accuracy": 1
       },
-      "latency_sec": 0.86
+      "latency_sec": 0.5
     },
     {
       "id": "q031",
@@ -2960,7 +2960,7 @@
         "mrr": 1.0,
         "std_accuracy": 1
       },
-      "latency_sec": 0.3
+      "latency_sec": 0.62
     },
     {
       "id": "q032",
@@ -3052,7 +3052,7 @@
         "mrr": 0.0,
         "std_accuracy": 1
       },
-      "latency_sec": 0.35
+      "latency_sec": 0.45
     },
     {
       "id": "q033",
@@ -3144,7 +3144,7 @@
         "mrr": 0.2,
         "std_accuracy": 1
       },
-      "latency_sec": 0.53
+      "latency_sec": 1.03
     },
     {
       "id": "q034",
@@ -3231,7 +3231,7 @@
         "mrr": 0.0,
         "std_accuracy": 0
       },
-      "latency_sec": 0.83
+      "latency_sec": 0.41
     },
     {
       "id": "q035",
@@ -3322,7 +3322,7 @@
         "mrr": 0.3333333333333333,
         "std_accuracy": 1
       },
-      "latency_sec": 1.87
+      "latency_sec": 0.76
     }
   ]
 }
