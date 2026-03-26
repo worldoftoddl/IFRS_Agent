@@ -39,6 +39,7 @@ select = ["E", "F", "I", "N", "UP", "B", "C4"]
 "app/prompts.py" = ["E501"]  # 프롬프트 문자열 내부 줄 길이 제외
 "eval/evaluate.py" = ["E402"]  # __main__ 스크립트: load_dotenv() 후 import
 "app/migrations/*.py" = ["E402"]  # 마이그레이션 스크립트: sys.path 조정 후 import
+"app/extract_terms.py" = ["E402"]  # __main__ 스크립트: load_dotenv() 후 import
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

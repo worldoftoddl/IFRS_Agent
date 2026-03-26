@@ -1,0 +1,1732 @@
+{
+  "config": "bm25_only",
+  "config_params": {
+    "rrf_k": 60,
+    "pool_size": 30,
+    "mode": "bm25_only",
+    "rerank": false
+  },
+  "n_queries": 36,
+  "avg_recall": 0.131,
+  "avg_mrr": 0.228,
+  "std_accuracy": 0.722,
+  "avg_latency_sec": 0.72,
+  "total_time_sec": 25.9,
+  "results": [
+    {
+      "id": "q001",
+      "query": "충당부채 인식 조건은?",
+      "expected_standard": "K-IFRS 1037",
+      "expected_paragraphs": [
+        "14",
+        "15",
+        "16"
+      ],
+      "category": "인식",
+      "difficulty": "easy",
+      "found_paragraphs": [],
+      "primary_standard": "K-IFRS 1037",
+      "first_correct_rank": null,
+      "all_results": [],
+      "metrics": {
+        "recall": 0.0,
+        "mrr": 0.0,
+        "std_accuracy": 1
+      },
+      "latency_sec": 3.48
+    },
+    {
+      "id": "q002",
+      "query": "충당부채의 측정 방법",
+      "expected_standard": "K-IFRS 1037",
+      "expected_paragraphs": [
+        "36",
+        "37",
+        "38"
+      ],
+      "category": "측정",
+      "difficulty": "easy",
+      "found_paragraphs": [
+        "1",
+        "3",
+        "39"
+      ],
+      "primary_standard": "K-IFRS 2101",
+      "first_correct_rank": null,
+      "all_results": [
+        {
+          "chunk_id": "KIFRS2101-main-1",
+          "para": "1",
+          "standard_id": "K-IFRS 2101",
+          "score": 0.6165136
+        },
+        {
+          "chunk_id": "KIFRS2101-main-3",
+          "para": "3",
+          "standard_id": "K-IFRS 2101",
+          "score": 0.27215984
+        },
+        {
+          "chunk_id": "KIFRS1037-main-39",
+          "para": "39",
+          "standard_id": "K-IFRS 1037",
+          "score": 0.26860374
+        },
+        {
+          "chunk_id": "KIFRS2101-transition-nonum-1",
+          "para": null,
+          "standard_id": "K-IFRS 2101",
+          "score": 0.78842217
+        }
+      ],
+      "metrics": {
+        "recall": 0.0,
+        "mrr": 0.0,
+        "std_accuracy": 0
+      },
+      "latency_sec": 1.21
+    },
+    {
+      "id": "q003",
+      "query": "수행의무를 어떻게 식별하는가",
+      "expected_standard": "K-IFRS 1115",
+      "expected_paragraphs": [
+        "22",
+        "27",
+        "29"
+      ],
+      "category": "인식",
+      "difficulty": "easy",
+      "found_paragraphs": [],
+      "primary_standard": "K-IFRS 1115",
+      "first_correct_rank": null,
+      "all_results": [],
+      "metrics": {
+        "recall": 0.0,
+        "mrr": 0.0,
+        "std_accuracy": 1
+      },
+      "latency_sec": 0.32
+    },
+    {
+      "id": "q004",
+      "query": "수익 인식 시점은 언제인가",
+      "expected_standard": "K-IFRS 1115",
+      "expected_paragraphs": [
+        "31",
+        "35",
+        "38"
+      ],
+      "category": "인식",
+      "difficulty": "medium",
+      "found_paragraphs": [],
+      "primary_standard": "K-IFRS 1115",
+      "first_correct_rank": null,
+      "all_results": [],
+      "metrics": {
+        "recall": 0.0,
+        "mrr": 0.0,
+        "std_accuracy": 1
+      },
+      "latency_sec": 1.55
+    },
+    {
+      "id": "q005",
+      "query": "고객과의 계약 식별 요건",
+      "expected_standard": "K-IFRS 1115",
+      "expected_paragraphs": [
+        "9",
+        "10",
+        "11"
+      ],
+      "category": "인식",
+      "difficulty": "easy",
+      "found_paragraphs": [],
+      "primary_standard": "K-IFRS 1115",
+      "first_correct_rank": null,
+      "all_results": [],
+      "metrics": {
+        "recall": 0.0,
+        "mrr": 0.0,
+        "std_accuracy": 1
+      },
+      "latency_sec": 1.29
+    },
+    {
+      "id": "q006",
+      "query": "리스를 어떻게 식별하는가",
+      "expected_standard": "K-IFRS 1116",
+      "expected_paragraphs": [
+        "9",
+        "B9",
+        "B10"
+      ],
+      "category": "인식",
+      "difficulty": "easy",
+      "found_paragraphs": [],
+      "primary_standard": "K-IFRS 1116",
+      "first_correct_rank": null,
+      "all_results": [],
+      "metrics": {
+        "recall": 0.0,
+        "mrr": 0.0,
+        "std_accuracy": 1
+      },
+      "latency_sec": 0.53
+    },
+    {
+      "id": "q007",
+      "query": "리스이용자의 사용권자산과 리스부채의 최초 측정",
+      "expected_standard": "K-IFRS 1116",
+      "expected_paragraphs": [
+        "22",
+        "23",
+        "24",
+        "26",
+        "27"
+      ],
+      "category": "측정",
+      "difficulty": "medium",
+      "found_paragraphs": [
+        "BC287",
+        "C9",
+        "C8",
+        "BC288",
+        "22",
+        "C11",
+        "BC302"
+      ],
+      "primary_standard": "K-IFRS 1116",
+      "first_correct_rank": 5,
+      "all_results": [
+        {
+          "chunk_id": "KIFRS1116-main-nonum-5",
+          "para": null,
+          "standard_id": "K-IFRS 1116",
+          "score": 0.99998486
+        },
+        {
+          "chunk_id": "KIFRS1116-main-BC287",
+          "para": "BC287",
+          "standard_id": "K-IFRS 1116",
+          "score": 0.9999485
+        },
+        {
+          "chunk_id": "KIFRS1116-main-C9",
+          "para": "C9",
+          "standard_id": "K-IFRS 1116",
+          "score": 0.9973081
+        },
+        {
+          "chunk_id": "KIFRS1116-main-C8",
+          "para": "C8",
+          "standard_id": "K-IFRS 1116",
+          "score": 0.99550176
+        },
+        {
+          "chunk_id": "KIFRS1116-main-BC288",
+          "para": "BC288",
+          "standard_id": "K-IFRS 1116",
+          "score": 0.9893591
+        },
+        {
+          "chunk_id": "KIFRS1116-main-22",
+          "para": "22",
+          "standard_id": "K-IFRS 1116",
+          "score": 0.98795146
+        },
+        {
+          "chunk_id": "KIFRS1116-main-C11",
+          "para": "C11",
+          "standard_id": "K-IFRS 1116",
+          "score": 0.94475317
+        },
+        {
+          "chunk_id": "KIFRS1116-main-BC302",
+          "para": "BC302",
+          "standard_id": "K-IFRS 1116",
+          "score": 0.8923211
+        }
+      ],
+      "metrics": {
+        "recall": 0.2,
+        "mrr": 0.2,
+        "std_accuracy": 1
+      },
+      "latency_sec": 0.51
+    },
+    {
+      "id": "q008",
+      "query": "외화 화폐성 항목의 환산 방법",
+      "expected_standard": "K-IFRS 1021",
+      "expected_paragraphs": [
+        "23",
+        "28"
+      ],
+      "category": "측정",
+      "difficulty": "easy",
+      "found_paragraphs": [
+        "23"
+      ],
+      "primary_standard": "K-IFRS 1021",
+      "first_correct_rank": 1,
+      "all_results": [
+        {
+          "chunk_id": "KIFRS1021-main-23",
+          "para": "23",
+          "standard_id": "K-IFRS 1021",
+          "score": 0.9947147
+        }
+      ],
+      "metrics": {
+        "recall": 0.5,
+        "mrr": 1.0,
+        "std_accuracy": 1
+      },
+      "latency_sec": 0.5
+    },
+    {
+      "id": "q009",
+      "query": "기능통화를 표시통화로 환산하는 방법",
+      "expected_standard": "K-IFRS 1021",
+      "expected_paragraphs": [
+        "38",
+        "39",
+        "41"
+      ],
+      "category": "표시",
+      "difficulty": "medium",
+      "found_paragraphs": [
+        "39",
+        "42",
+        "57",
+        "43"
+      ],
+      "primary_standard": "K-IFRS 1021",
+      "first_correct_rank": 1,
+      "all_results": [
+        {
+          "chunk_id": "KIFRS1021-main-39",
+          "para": "39",
+          "standard_id": "K-IFRS 1021",
+          "score": 0.9952991
+        },
+        {
+          "chunk_id": "KIFRS1021-main-42",
+          "para": "42",
+          "standard_id": "K-IFRS 1021",
+          "score": 0.98559153
+        },
+        {
+          "chunk_id": "KIFRS1021-main-57",
+          "para": "57",
+          "standard_id": "K-IFRS 1021",
+          "score": 0.9774917
+        },
+        {
+          "chunk_id": "KIFRS1021-main-43",
+          "para": "43",
+          "standard_id": "K-IFRS 1021",
+          "score": 0.95383984
+        },
+        {
+          "chunk_id": "KIFRS1021-transition-nonum",
+          "para": null,
+          "standard_id": "K-IFRS 1021",
+          "score": 0.9999997
+        }
+      ],
+      "metrics": {
+        "recall": 0.3333333333333333,
+        "mrr": 1.0,
+        "std_accuracy": 1
+      },
+      "latency_sec": 0.42
+    },
+    {
+      "id": "q010",
+      "query": "금융자산의 분류 기준",
+      "expected_standard": "K-IFRS 1109",
+      "expected_paragraphs": [
+        "4.1.1",
+        "4.1.2",
+        "4.1.4"
+      ],
+      "category": "분류",
+      "difficulty": "medium",
+      "found_paragraphs": [
+        "44Z",
+        "42L",
+        "42M",
+        "42J",
+        "42N",
+        "BC49",
+        "BC244",
+        "93",
+        "42K"
+      ],
+      "primary_standard": "K-IFRS 1107",
+      "first_correct_rank": null,
+      "all_results": [
+        {
+          "chunk_id": "KIFRS1107-main-44Z",
+          "para": "44Z",
+          "standard_id": "K-IFRS 1107",
+          "score": 0.90236634
+        },
+        {
+          "chunk_id": "KIFRS1107-main-42L",
+          "para": "42L",
+          "standard_id": "K-IFRS 1107",
+          "score": 0.8746948
+        },
+        {
+          "chunk_id": "KIFRS1107-main-42M",
+          "para": "42M",
+          "standard_id": "K-IFRS 1107",
+          "score": 0.79274744
+        },
+        {
+          "chunk_id": "KIFRS1107-main-42J",
+          "para": "42J",
+          "standard_id": "K-IFRS 1107",
+          "score": 0.68724513
+        },
+        {
+          "chunk_id": "KIFRS1107-main-42N",
+          "para": "42N",
+          "standard_id": "K-IFRS 1107",
+          "score": 0.68510956
+        },
+        {
+          "chunk_id": "KIFRS1032-main-BC49",
+          "para": "BC49",
+          "standard_id": "K-IFRS 1032",
+          "score": 0.66873085
+        },
+        {
+          "chunk_id": "KIFRS1113-main-BC244",
+          "para": "BC244",
+          "standard_id": "K-IFRS 1113",
+          "score": 0.6458333
+        },
+        {
+          "chunk_id": "KIFRS1113-main-93",
+          "para": "93",
+          "standard_id": "K-IFRS 1113",
+          "score": 0.5774825
+        },
+        {
+          "chunk_id": "KIFRS1107-main-42K",
+          "para": "42K",
+          "standard_id": "K-IFRS 1107",
+          "score": 0.5462002
+        },
+        {
+          "chunk_id": "KIFRS1032-ag-nonum-1",
+          "para": null,
+          "standard_id": "K-IFRS 1032",
+          "score": 0.9258158
+        }
+      ],
+      "metrics": {
+        "recall": 0.0,
+        "mrr": 0.0,
+        "std_accuracy": 0
+      },
+      "latency_sec": 0.32
+    },
+    {
+      "id": "q011",
+      "query": "금융자산 손상 기대신용손실",
+      "expected_standard": "K-IFRS 1109",
+      "expected_paragraphs": [
+        "5.5.1",
+        "5.5.3",
+        "5.5.5"
+      ],
+      "category": "측정",
+      "difficulty": "medium",
+      "found_paragraphs": [
+        "35H",
+        "35M",
+        "35F",
+        "45",
+        "35G",
+        "35K"
+      ],
+      "primary_standard": "K-IFRS 1107",
+      "first_correct_rank": null,
+      "all_results": [
+        {
+          "chunk_id": "KIFRS1107-main-35H",
+          "para": "35H",
+          "standard_id": "K-IFRS 1107",
+          "score": 0.9698041
+        },
+        {
+          "chunk_id": "KIFRS1107-main-35M",
+          "para": "35M",
+          "standard_id": "K-IFRS 1107",
+          "score": 0.95189655
+        },
+        {
+          "chunk_id": "KIFRS1107-main-35F",
+          "para": "35F",
+          "standard_id": "K-IFRS 1107",
+          "score": 0.91807204
+        },
+        {
+          "chunk_id": "KIFRS1107-main-45",
+          "para": "45",
+          "standard_id": "K-IFRS 1107",
+          "score": 0.90733284
+        },
+        {
+          "chunk_id": "KIFRS1107-main-35G",
+          "para": "35G",
+          "standard_id": "K-IFRS 1107",
+          "score": 0.8492469
+        },
+        {
+          "chunk_id": "KIFRS1107-main-35K",
+          "para": "35K",
+          "standard_id": "K-IFRS 1107",
+          "score": 0.49811172
+        }
+      ],
+      "metrics": {
+        "recall": 0.0,
+        "mrr": 0.0,
+        "std_accuracy": 0
+      },
+      "latency_sec": 0.5
+    },
+    {
+      "id": "q012",
+      "query": "재무상태표에 표시해야 하는 항목",
+      "expected_standard": "K-IFRS 1001",
+      "expected_paragraphs": [
+        "54",
+        "55"
+      ],
+      "category": "표시",
+      "difficulty": "easy",
+      "found_paragraphs": [
+        "89",
+        "B46",
+        "6",
+        "57",
+        "11",
+        "BC106",
+        "10"
+      ],
+      "primary_standard": "K-IFRS 1107",
+      "first_correct_rank": null,
+      "all_results": [
+        {
+          "chunk_id": "실무서2중요성-main-89",
+          "para": "89",
+          "standard_id": "실무서 2 중요성",
+          "score": 0.9999997
+        },
+        {
+          "chunk_id": "KIFRS1107-main-nonum-3",
+          "para": null,
+          "standard_id": "K-IFRS 1107",
+          "score": 0.99999076
+        },
+        {
+          "chunk_id": "KIFRS1107-main-B46",
+          "para": "B46",
+          "standard_id": "K-IFRS 1107",
+          "score": 0.9995347
+        },
+        {
+          "chunk_id": "KIFRS1107-main-6",
+          "para": "6",
+          "standard_id": "K-IFRS 1107",
+          "score": 0.99654293
+        },
+        {
+          "chunk_id": "KIFRS1001-main-57",
+          "para": "57",
+          "standard_id": "K-IFRS 1001",
+          "score": 0.99638057
+        },
+        {
+          "chunk_id": "KIFRS1107-main-11",
+          "para": "11",
+          "standard_id": "K-IFRS 1107",
+          "score": 0.9958226
+        },
+        {
+          "chunk_id": "KIFRS1001-transition-nonum-5",
+          "para": null,
+          "standard_id": "K-IFRS 1001",
+          "score": 0.9999997
+        },
+        {
+          "chunk_id": "KIFRS1001-transition-BC106",
+          "para": "BC106",
+          "standard_id": "K-IFRS 1001",
+          "score": 0.9999997
+        },
+        {
+          "chunk_id": "KIFRS1001-transition-nonum-1",
+          "para": null,
+          "standard_id": "K-IFRS 1001",
+          "score": 0.9999997
+        },
+        {
+          "chunk_id": "실무서2중요성-ie-10",
+          "para": "10",
+          "standard_id": "실무서 2 중요성",
+          "score": 0.99973506
+        }
+      ],
+      "metrics": {
+        "recall": 0.0,
+        "mrr": 0.0,
+        "std_accuracy": 0
+      },
+      "latency_sec": 0.62
+    },
+    {
+      "id": "q013",
+      "query": "유동자산과 비유동자산의 분류 기준",
+      "expected_standard": "K-IFRS 1001",
+      "expected_paragraphs": [
+        "60",
+        "66",
+        "69"
+      ],
+      "category": "분류",
+      "difficulty": "medium",
+      "found_paragraphs": [
+        "45",
+        "5B",
+        "B1",
+        "2",
+        "29",
+        "26A",
+        "2",
+        "41",
+        "3"
+      ],
+      "primary_standard": "K-IFRS 1105",
+      "first_correct_rank": null,
+      "all_results": [
+        {
+          "chunk_id": "KIFRS1105-main-45",
+          "para": "45",
+          "standard_id": "K-IFRS 1105",
+          "score": 0.997611
+        },
+        {
+          "chunk_id": "KIFRS1105-main-5B",
+          "para": "5B",
+          "standard_id": "K-IFRS 1105",
+          "score": 0.9931137
+        },
+        {
+          "chunk_id": "KIFRS1105-main-nonum",
+          "para": null,
+          "standard_id": "K-IFRS 1105",
+          "score": 0.9919348
+        },
+        {
+          "chunk_id": "KIFRS1105-main-B1",
+          "para": "B1",
+          "standard_id": "K-IFRS 1105",
+          "score": 0.98898095
+        },
+        {
+          "chunk_id": "KIFRS1036-main-2",
+          "para": "2",
+          "standard_id": "K-IFRS 1036",
+          "score": 0.9836102
+        },
+        {
+          "chunk_id": "KIFRS1105-main-29",
+          "para": "29",
+          "standard_id": "K-IFRS 1105",
+          "score": 0.98152614
+        },
+        {
+          "chunk_id": "KIFRS1105-main-26A",
+          "para": "26A",
+          "standard_id": "K-IFRS 1105",
+          "score": 0.979743
+        },
+        {
+          "chunk_id": "KIFRS1105-main-2",
+          "para": "2",
+          "standard_id": "K-IFRS 1105",
+          "score": 0.94072825
+        },
+        {
+          "chunk_id": "KIFRS1105-main-41",
+          "para": "41",
+          "standard_id": "K-IFRS 1105",
+          "score": 0.93160677
+        },
+        {
+          "chunk_id": "KIFRS1016-main-3",
+          "para": "3",
+          "standard_id": "K-IFRS 1016",
+          "score": 0.92801905
+        }
+      ],
+      "metrics": {
+        "recall": 0.0,
+        "mrr": 0.0,
+        "std_accuracy": 0
+      },
+      "latency_sec": 0.81
+    },
+    {
+      "id": "q014",
+      "query": "포괄손익계산서에 표시할 항목",
+      "expected_standard": "K-IFRS 1001",
+      "expected_paragraphs": [
+        "82",
+        "82A",
+        "85"
+      ],
+      "category": "표시",
+      "difficulty": "medium",
+      "found_paragraphs": [
+        "89",
+        "78",
+        "94",
+        "20",
+        "114",
+        "24C",
+        "85A",
+        "BC106"
+      ],
+      "primary_standard": "K-IFRS 1001",
+      "first_correct_rank": null,
+      "all_results": [
+        {
+          "chunk_id": "실무서2중요성-main-89",
+          "para": "89",
+          "standard_id": "실무서 2 중요성",
+          "score": 0.9999997
+        },
+        {
+          "chunk_id": "KIFRS1012-main-78",
+          "para": "78",
+          "standard_id": "K-IFRS 1012",
+          "score": 0.96669996
+        },
+        {
+          "chunk_id": "KIFRS1001-main-94",
+          "para": "94",
+          "standard_id": "K-IFRS 1001",
+          "score": 0.95931226
+        },
+        {
+          "chunk_id": "KIFRS1107-main-20",
+          "para": "20",
+          "standard_id": "K-IFRS 1107",
+          "score": 0.9579317
+        },
+        {
+          "chunk_id": "KIFRS1001-main-114",
+          "para": "114",
+          "standard_id": "K-IFRS 1001",
+          "score": 0.95494044
+        },
+        {
+          "chunk_id": "KIFRS1107-main-24C",
+          "para": "24C",
+          "standard_id": "K-IFRS 1107",
+          "score": 0.93318045
+        },
+        {
+          "chunk_id": "KIFRS1001-main-85A",
+          "para": "85A",
+          "standard_id": "K-IFRS 1001",
+          "score": 0.9278975
+        },
+        {
+          "chunk_id": "KIFRS1001-transition-nonum-5",
+          "para": null,
+          "standard_id": "K-IFRS 1001",
+          "score": 0.9999997
+        },
+        {
+          "chunk_id": "KIFRS1012-transition-nonum-1",
+          "para": null,
+          "standard_id": "K-IFRS 1012",
+          "score": 0.9999997
+        },
+        {
+          "chunk_id": "KIFRS1001-transition-BC106",
+          "para": "BC106",
+          "standard_id": "K-IFRS 1001",
+          "score": 0.9999942
+        }
+      ],
+      "metrics": {
+        "recall": 0.0,
+        "mrr": 0.0,
+        "std_accuracy": 1
+      },
+      "latency_sec": 1.86
+    },
+    {
+      "id": "q015",
+      "query": "개념체계에서 역사적 원가란",
+      "expected_standard": "재무보고 개념체계",
+      "expected_paragraphs": [
+        "6.4",
+        "6.5"
+      ],
+      "category": "측정",
+      "difficulty": "medium",
+      "found_paragraphs": [],
+      "primary_standard": "재무보고 개념체계",
+      "first_correct_rank": null,
+      "all_results": [],
+      "metrics": {
+        "recall": 0.0,
+        "mrr": 0.0,
+        "std_accuracy": 1
+      },
+      "latency_sec": 0.62
+    },
+    {
+      "id": "q016",
+      "query": "개념체계에서 이행가치란",
+      "expected_standard": "재무보고 개념체계",
+      "expected_paragraphs": [
+        "6.17",
+        "6.18"
+      ],
+      "category": "측정",
+      "difficulty": "medium",
+      "found_paragraphs": [],
+      "primary_standard": "재무보고 개념체계",
+      "first_correct_rank": null,
+      "all_results": [],
+      "metrics": {
+        "recall": 0.0,
+        "mrr": 0.0,
+        "std_accuracy": 1
+      },
+      "latency_sec": 0.33
+    },
+    {
+      "id": "q017",
+      "query": "무형자산의 인식 조건",
+      "expected_standard": "K-IFRS 1038",
+      "expected_paragraphs": [
+        "18",
+        "21"
+      ],
+      "category": "인식",
+      "difficulty": "easy",
+      "found_paragraphs": [
+        "18",
+        "47",
+        "34",
+        "14",
+        "1",
+        "21",
+        "B64",
+        "68"
+      ],
+      "primary_standard": "K-IFRS 1038",
+      "first_correct_rank": 1,
+      "all_results": [
+        {
+          "chunk_id": "KIFRS1038-main-18",
+          "para": "18",
+          "standard_id": "K-IFRS 1038",
+          "score": 0.8218197
+        },
+        {
+          "chunk_id": "KIFRS1038-main-47",
+          "para": "47",
+          "standard_id": "K-IFRS 1038",
+          "score": 0.6262764
+        },
+        {
+          "chunk_id": "KIFRS1038-main-34",
+          "para": "34",
+          "standard_id": "K-IFRS 1038",
+          "score": 0.6200465
+        },
+        {
+          "chunk_id": "KIFRS1103-main-14",
+          "para": "14",
+          "standard_id": "K-IFRS 1103",
+          "score": 0.5653895
+        },
+        {
+          "chunk_id": "KIFRS1038-main-1",
+          "para": "1",
+          "standard_id": "K-IFRS 1038",
+          "score": 0.5244957
+        },
+        {
+          "chunk_id": "KIFRS1038-main-21",
+          "para": "21",
+          "standard_id": "K-IFRS 1038",
+          "score": 0.29846883
+        },
+        {
+          "chunk_id": "KIFRS1038-transition-nonum-3",
+          "para": null,
+          "standard_id": "K-IFRS 1038",
+          "score": 0.9904737
+        },
+        {
+          "chunk_id": "KIFRS1103-transition-B64",
+          "para": "B64",
+          "standard_id": "K-IFRS 1103",
+          "score": 0.89673233
+        },
+        {
+          "chunk_id": "KIFRS1038-transition-nonum-2",
+          "para": null,
+          "standard_id": "K-IFRS 1038",
+          "score": 0.72271633
+        },
+        {
+          "chunk_id": "KIFRS1103-transition-68",
+          "para": "68",
+          "standard_id": "K-IFRS 1103",
+          "score": 0.09315028
+        }
+      ],
+      "metrics": {
+        "recall": 1.0,
+        "mrr": 1.0,
+        "std_accuracy": 1
+      },
+      "latency_sec": 0.48
+    },
+    {
+      "id": "q017b",
+      "query": "개발비 자본화 조건",
+      "expected_standard": "K-IFRS 1038",
+      "expected_paragraphs": [
+        "57"
+      ],
+      "category": "인식",
+      "difficulty": "easy",
+      "found_paragraphs": [],
+      "primary_standard": "K-IFRS 1023",
+      "first_correct_rank": null,
+      "all_results": [],
+      "metrics": {
+        "recall": 0.0,
+        "mrr": 0.0,
+        "std_accuracy": 0
+      },
+      "latency_sec": 0.66
+    },
+    {
+      "id": "q018",
+      "query": "회계정책 변경의 소급 적용",
+      "expected_standard": "K-IFRS 1008",
+      "expected_paragraphs": [
+        "19",
+        "22"
+      ],
+      "category": "회계정책",
+      "difficulty": "medium",
+      "found_paragraphs": [
+        "BC74",
+        "4A",
+        "54F"
+      ],
+      "primary_standard": "K-IFRS 1032",
+      "first_correct_rank": null,
+      "all_results": [
+        {
+          "chunk_id": "KIFRS1032-main-BC74",
+          "para": "BC74",
+          "standard_id": "K-IFRS 1032",
+          "score": 0.762635
+        },
+        {
+          "chunk_id": "KIFRS1101-main-4A",
+          "para": "4A",
+          "standard_id": "K-IFRS 1101",
+          "score": 0.3265365
+        },
+        {
+          "chunk_id": "KIFRS1008-transition-54F",
+          "para": "54F",
+          "standard_id": "K-IFRS 1008",
+          "score": 0.7778471
+        }
+      ],
+      "metrics": {
+        "recall": 0.0,
+        "mrr": 0.0,
+        "std_accuracy": 0
+      },
+      "latency_sec": 0.57
+    },
+    {
+      "id": "q019",
+      "query": "유형자산의 감가상각 방법",
+      "expected_standard": "K-IFRS 1016",
+      "expected_paragraphs": [
+        "60",
+        "62"
+      ],
+      "category": "측정",
+      "difficulty": "easy",
+      "found_paragraphs": [
+        "62",
+        "1",
+        "60",
+        "61",
+        "73",
+        "76",
+        "46",
+        "BC117",
+        "BC37"
+      ],
+      "primary_standard": "K-IFRS 1016",
+      "first_correct_rank": 1,
+      "all_results": [
+        {
+          "chunk_id": "KIFRS1016-main-62",
+          "para": "62",
+          "standard_id": "K-IFRS 1016",
+          "score": 0.76333296
+        },
+        {
+          "chunk_id": "KIFRS1016-main-1",
+          "para": "1",
+          "standard_id": "K-IFRS 1016",
+          "score": 0.636468
+        },
+        {
+          "chunk_id": "KIFRS1016-main-60",
+          "para": "60",
+          "standard_id": "K-IFRS 1016",
+          "score": 0.5993194
+        },
+        {
+          "chunk_id": "KIFRS1016-main-61",
+          "para": "61",
+          "standard_id": "K-IFRS 1016",
+          "score": 0.519282
+        },
+        {
+          "chunk_id": "KIFRS1016-main-73",
+          "para": "73",
+          "standard_id": "K-IFRS 1016",
+          "score": 0.4117831
+        },
+        {
+          "chunk_id": "KIFRS1016-main-76",
+          "para": "76",
+          "standard_id": "K-IFRS 1016",
+          "score": 0.34440184
+        },
+        {
+          "chunk_id": "KIFRS1016-main-46",
+          "para": "46",
+          "standard_id": "K-IFRS 1016",
+          "score": 0.31604862
+        },
+        {
+          "chunk_id": "KIFRS1016-transition-nonum-2",
+          "para": null,
+          "standard_id": "K-IFRS 1016",
+          "score": 0.9343227
+        },
+        {
+          "chunk_id": "KIFRS1016-transition-BC117",
+          "para": "BC117",
+          "standard_id": "K-IFRS 1016",
+          "score": 0.65828824
+        },
+        {
+          "chunk_id": "KIFRS1016-transition-BC37",
+          "para": "BC37",
+          "standard_id": "K-IFRS 1016",
+          "score": 0.4300173
+        }
+      ],
+      "metrics": {
+        "recall": 1.0,
+        "mrr": 1.0,
+        "std_accuracy": 1
+      },
+      "latency_sec": 0.32
+    },
+    {
+      "id": "q020",
+      "query": "재고자산의 저가법 평가",
+      "expected_standard": "K-IFRS 1002",
+      "expected_paragraphs": [
+        "28",
+        "29"
+      ],
+      "category": "측정",
+      "difficulty": "easy",
+      "found_paragraphs": [
+        "29"
+      ],
+      "primary_standard": "K-IFRS 1002",
+      "first_correct_rank": 1,
+      "all_results": [
+        {
+          "chunk_id": "KIFRS1002-main-29",
+          "para": "29",
+          "standard_id": "K-IFRS 1002",
+          "score": 0.361113
+        }
+      ],
+      "metrics": {
+        "recall": 0.5,
+        "mrr": 1.0,
+        "std_accuracy": 1
+      },
+      "latency_sec": 0.91
+    },
+    {
+      "id": "q021",
+      "query": "자산손상 징후가 있을 때 어떻게 하는가",
+      "expected_standard": "K-IFRS 1036",
+      "expected_paragraphs": [
+        "8",
+        "9",
+        "10"
+      ],
+      "category": "인식",
+      "difficulty": "easy",
+      "found_paragraphs": [],
+      "primary_standard": "K-IFRS 1036",
+      "first_correct_rank": null,
+      "all_results": [],
+      "metrics": {
+        "recall": 0.0,
+        "mrr": 0.0,
+        "std_accuracy": 1
+      },
+      "latency_sec": 1.33
+    },
+    {
+      "id": "q022",
+      "query": "손상차손의 인식과 측정",
+      "expected_standard": "K-IFRS 1036",
+      "expected_paragraphs": [
+        "6",
+        "18",
+        "59",
+        "60"
+      ],
+      "category": "측정",
+      "difficulty": "medium",
+      "found_paragraphs": [
+        "BC177",
+        "7",
+        "130",
+        "BC229",
+        "BC165",
+        "BC107"
+      ],
+      "primary_standard": "K-IFRS 1036",
+      "first_correct_rank": null,
+      "all_results": [
+        {
+          "chunk_id": "KIFRS1036-main-nonum-2",
+          "para": null,
+          "standard_id": "K-IFRS 1036",
+          "score": 0.99998397
+        },
+        {
+          "chunk_id": "KIFRS1036-main-BC177",
+          "para": "BC177",
+          "standard_id": "K-IFRS 1036",
+          "score": 0.9980158
+        },
+        {
+          "chunk_id": "KIFRS1036-main-7",
+          "para": "7",
+          "standard_id": "K-IFRS 1036",
+          "score": 0.98119235
+        },
+        {
+          "chunk_id": "KIFRS1036-main-130",
+          "para": "130",
+          "standard_id": "K-IFRS 1036",
+          "score": 0.96154034
+        },
+        {
+          "chunk_id": "KIFRS1036-main-nonum-4",
+          "para": null,
+          "standard_id": "K-IFRS 1036",
+          "score": 0.95774674
+        },
+        {
+          "chunk_id": "KIFRS1036-main-nonum",
+          "para": null,
+          "standard_id": "K-IFRS 1036",
+          "score": 0.92422414
+        },
+        {
+          "chunk_id": "KIFRS1036-main-BC229",
+          "para": "BC229",
+          "standard_id": "K-IFRS 1036",
+          "score": 0.9117613
+        },
+        {
+          "chunk_id": "KIFRS1036-main-BC165",
+          "para": "BC165",
+          "standard_id": "K-IFRS 1036",
+          "score": 0.9065408
+        },
+        {
+          "chunk_id": "KIFRS1016-transition-nonum-2",
+          "para": null,
+          "standard_id": "K-IFRS 1016",
+          "score": 0.99041253
+        },
+        {
+          "chunk_id": "KIFRS1016-transition-BC107",
+          "para": "BC107",
+          "standard_id": "K-IFRS 1016",
+          "score": 0.8274493
+        }
+      ],
+      "metrics": {
+        "recall": 0.0,
+        "mrr": 0.0,
+        "std_accuracy": 1
+      },
+      "latency_sec": 0.93
+    },
+    {
+      "id": "q023",
+      "query": "지배력의 판단 기준",
+      "expected_standard": "K-IFRS 1110",
+      "expected_paragraphs": [
+        "5",
+        "6",
+        "7"
+      ],
+      "category": "연결",
+      "difficulty": "medium",
+      "found_paragraphs": [
+        "7",
+        "BC120"
+      ],
+      "primary_standard": "K-IFRS 1112",
+      "first_correct_rank": 1,
+      "all_results": [
+        {
+          "chunk_id": "KIFRS1112-main-7",
+          "para": "7",
+          "standard_id": "K-IFRS 1112",
+          "score": 0.1215367
+        },
+        {
+          "chunk_id": "KIFRS1112-transition-nonum-3",
+          "para": null,
+          "standard_id": "K-IFRS 1112",
+          "score": 0.71557224
+        },
+        {
+          "chunk_id": "KIFRS1112-transition-BC120",
+          "para": "BC120",
+          "standard_id": "K-IFRS 1112",
+          "score": 0.20795572
+        }
+      ],
+      "metrics": {
+        "recall": 0.3333333333333333,
+        "mrr": 1.0,
+        "std_accuracy": 0
+      },
+      "latency_sec": 0.3
+    },
+    {
+      "id": "q024",
+      "query": "이연법인세자산의 인식 요건",
+      "expected_standard": "K-IFRS 1012",
+      "expected_paragraphs": [
+        "24",
+        "25"
+      ],
+      "category": "인식",
+      "difficulty": "medium",
+      "found_paragraphs": [
+        "BC85",
+        "BC83",
+        "BC82"
+      ],
+      "primary_standard": "K-IFRS 1012",
+      "first_correct_rank": null,
+      "all_results": [
+        {
+          "chunk_id": "KIFRS1036-main-nonum-5",
+          "para": null,
+          "standard_id": "K-IFRS 1036",
+          "score": 0.2690378
+        },
+        {
+          "chunk_id": "KIFRS1012-transition-BC85",
+          "para": "BC85",
+          "standard_id": "K-IFRS 1012",
+          "score": 0.5967978
+        },
+        {
+          "chunk_id": "KIFRS1012-transition-BC83",
+          "para": "BC83",
+          "standard_id": "K-IFRS 1012",
+          "score": 0.2962824
+        },
+        {
+          "chunk_id": "KIFRS1012-transition-BC82",
+          "para": "BC82",
+          "standard_id": "K-IFRS 1012",
+          "score": 0.21967253
+        }
+      ],
+      "metrics": {
+        "recall": 0.0,
+        "mrr": 0.0,
+        "std_accuracy": 1
+      },
+      "latency_sec": 0.42
+    },
+    {
+      "id": "q025",
+      "query": "관계기업에 대한 지분법 회계처리 절차",
+      "expected_standard": "K-IFRS 1028",
+      "expected_paragraphs": [
+        "26",
+        "27",
+        "28"
+      ],
+      "category": "측정",
+      "difficulty": "medium",
+      "found_paragraphs": [
+        "26"
+      ],
+      "primary_standard": "K-IFRS 1028",
+      "first_correct_rank": 1,
+      "all_results": [
+        {
+          "chunk_id": "KIFRS1028-main-26",
+          "para": "26",
+          "standard_id": "K-IFRS 1028",
+          "score": 0.974811
+        }
+      ],
+      "metrics": {
+        "recall": 0.3333333333333333,
+        "mrr": 1.0,
+        "std_accuracy": 1
+      },
+      "latency_sec": 0.47
+    },
+    {
+      "id": "q026",
+      "query": "확정급여채무의 측정 절차",
+      "expected_standard": "K-IFRS 1019",
+      "expected_paragraphs": [
+        "57",
+        "67"
+      ],
+      "category": "측정",
+      "difficulty": "medium",
+      "found_paragraphs": [
+        "57"
+      ],
+      "primary_standard": "K-IFRS 1019",
+      "first_correct_rank": 1,
+      "all_results": [
+        {
+          "chunk_id": "KIFRS1019-main-57",
+          "para": "57",
+          "standard_id": "K-IFRS 1019",
+          "score": 0.4439409
+        }
+      ],
+      "metrics": {
+        "recall": 0.5,
+        "mrr": 1.0,
+        "std_accuracy": 1
+      },
+      "latency_sec": 0.31
+    },
+    {
+      "id": "q027",
+      "query": "공정가치의 정의와 측정 원칙",
+      "expected_standard": "K-IFRS 1113",
+      "expected_paragraphs": [
+        "9",
+        "11",
+        "15"
+      ],
+      "category": "측정",
+      "difficulty": "easy",
+      "found_paragraphs": [],
+      "primary_standard": "K-IFRS 1113",
+      "first_correct_rank": null,
+      "all_results": [],
+      "metrics": {
+        "recall": 0.0,
+        "mrr": 0.0,
+        "std_accuracy": 1
+      },
+      "latency_sec": 0.55
+    },
+    {
+      "id": "q028",
+      "query": "금융상품에서 생기는 위험의 공시",
+      "expected_standard": "K-IFRS 1107",
+      "expected_paragraphs": [
+        "7",
+        "31"
+      ],
+      "category": "공시",
+      "difficulty": "medium",
+      "found_paragraphs": [
+        "BC71",
+        "B8",
+        "33",
+        "32",
+        "1",
+        "24I",
+        "34",
+        "32A"
+      ],
+      "primary_standard": "K-IFRS 1107",
+      "first_correct_rank": null,
+      "all_results": [
+        {
+          "chunk_id": "KIFRS1107-main-nonum-3",
+          "para": null,
+          "standard_id": "K-IFRS 1107",
+          "score": 0.9998079
+        },
+        {
+          "chunk_id": "KIFRS1107-main-BC71",
+          "para": "BC71",
+          "standard_id": "K-IFRS 1107",
+          "score": 0.98471713
+        },
+        {
+          "chunk_id": "KIFRS1107-main-B8",
+          "para": "B8",
+          "standard_id": "K-IFRS 1107",
+          "score": 0.98342973
+        },
+        {
+          "chunk_id": "KIFRS1107-main-33",
+          "para": "33",
+          "standard_id": "K-IFRS 1107",
+          "score": 0.97695196
+        },
+        {
+          "chunk_id": "KIFRS1107-main-nonum-2",
+          "para": null,
+          "standard_id": "K-IFRS 1107",
+          "score": 0.9741033
+        },
+        {
+          "chunk_id": "KIFRS1107-main-32",
+          "para": "32",
+          "standard_id": "K-IFRS 1107",
+          "score": 0.97272295
+        },
+        {
+          "chunk_id": "KIFRS1107-main-1",
+          "para": "1",
+          "standard_id": "K-IFRS 1107",
+          "score": 0.9708546
+        },
+        {
+          "chunk_id": "KIFRS1107-main-24I",
+          "para": "24I",
+          "standard_id": "K-IFRS 1107",
+          "score": 0.9590278
+        },
+        {
+          "chunk_id": "KIFRS1107-main-34",
+          "para": "34",
+          "standard_id": "K-IFRS 1107",
+          "score": 0.952489
+        },
+        {
+          "chunk_id": "KIFRS1107-main-32A",
+          "para": "32A",
+          "standard_id": "K-IFRS 1107",
+          "score": 0.9210272
+        }
+      ],
+      "metrics": {
+        "recall": 0.0,
+        "mrr": 0.0,
+        "std_accuracy": 1
+      },
+      "latency_sec": 0.7
+    },
+    {
+      "id": "q029",
+      "query": "금융부채와 지분상품의 분류",
+      "expected_standard": "K-IFRS 1032",
+      "expected_paragraphs": [
+        "15",
+        "16"
+      ],
+      "category": "분류",
+      "difficulty": "medium",
+      "found_paragraphs": [
+        "AG26",
+        "18",
+        "BC21",
+        "BC17",
+        "AG27",
+        "36",
+        "BC49",
+        "BC11",
+        "BC120"
+      ],
+      "primary_standard": "K-IFRS 1032",
+      "first_correct_rank": null,
+      "all_results": [
+        {
+          "chunk_id": "KIFRS1032-main-AG26",
+          "para": "AG26",
+          "standard_id": "K-IFRS 1032",
+          "score": 0.9042408
+        },
+        {
+          "chunk_id": "KIFRS1032-main-18",
+          "para": "18",
+          "standard_id": "K-IFRS 1032",
+          "score": 0.83710235
+        },
+        {
+          "chunk_id": "KIFRS1032-main-BC21",
+          "para": "BC21",
+          "standard_id": "K-IFRS 1032",
+          "score": 0.82796705
+        },
+        {
+          "chunk_id": "KIFRS1032-main-BC17",
+          "para": "BC17",
+          "standard_id": "K-IFRS 1032",
+          "score": 0.8059926
+        },
+        {
+          "chunk_id": "KIFRS1032-main-AG27",
+          "para": "AG27",
+          "standard_id": "K-IFRS 1032",
+          "score": 0.7704955
+        },
+        {
+          "chunk_id": "KIFRS1032-main-36",
+          "para": "36",
+          "standard_id": "K-IFRS 1032",
+          "score": 0.68963104
+        },
+        {
+          "chunk_id": "KIFRS1032-main-BC49",
+          "para": "BC49",
+          "standard_id": "K-IFRS 1032",
+          "score": 0.6160459
+        },
+        {
+          "chunk_id": "KIFRS1032-main-BC11",
+          "para": "BC11",
+          "standard_id": "K-IFRS 1032",
+          "score": 0.44937554
+        },
+        {
+          "chunk_id": "KIFRS1032-ag-nonum-1",
+          "para": null,
+          "standard_id": "K-IFRS 1032",
+          "score": 0.9979629
+        },
+        {
+          "chunk_id": "KIFRS1032-ag-BC120",
+          "para": "BC120",
+          "standard_id": "K-IFRS 1032",
+          "score": 0.88454056
+        }
+      ],
+      "metrics": {
+        "recall": 0.0,
+        "mrr": 0.0,
+        "std_accuracy": 1
+      },
+      "latency_sec": 0.63
+    },
+    {
+      "id": "q030",
+      "query": "리스부채의 이자비용은 어떤 기준서를 따르는가",
+      "expected_standard": "K-IFRS 1116",
+      "expected_paragraphs": [
+        "36",
+        "37"
+      ],
+      "category": "측정",
+      "difficulty": "hard",
+      "found_paragraphs": [],
+      "primary_standard": "K-IFRS 1116",
+      "first_correct_rank": null,
+      "all_results": [],
+      "metrics": {
+        "recall": 0.0,
+        "mrr": 0.0,
+        "std_accuracy": 1
+      },
+      "latency_sec": 0.31
+    },
+    {
+      "id": "q031",
+      "query": "고객에게 환불할 의무가 있는 경우 충당부채인가 환불부채인가",
+      "expected_standard": "K-IFRS 1115",
+      "expected_paragraphs": [
+        "55"
+      ],
+      "category": "인식",
+      "difficulty": "hard",
+      "found_paragraphs": [],
+      "primary_standard": "K-IFRS 1037",
+      "first_correct_rank": null,
+      "all_results": [],
+      "metrics": {
+        "recall": 0.0,
+        "mrr": 0.0,
+        "std_accuracy": 0
+      },
+      "latency_sec": 0.3
+    },
+    {
+      "id": "q032",
+      "query": "영업권의 손상검사 절차",
+      "expected_standard": "K-IFRS 1036",
+      "expected_paragraphs": [
+        "10",
+        "80",
+        "88"
+      ],
+      "category": "측정",
+      "difficulty": "hard",
+      "found_paragraphs": [
+        "BC124",
+        "BC196",
+        "BC207",
+        "141"
+      ],
+      "primary_standard": "K-IFRS 1036",
+      "first_correct_rank": null,
+      "all_results": [
+        {
+          "chunk_id": "KIFRS1036-main-nonum-4",
+          "para": null,
+          "standard_id": "K-IFRS 1036",
+          "score": 0.9999409
+        },
+        {
+          "chunk_id": "KIFRS1036-main-BC124",
+          "para": "BC124",
+          "standard_id": "K-IFRS 1036",
+          "score": 0.99946404
+        },
+        {
+          "chunk_id": "KIFRS1036-main-BC196",
+          "para": "BC196",
+          "standard_id": "K-IFRS 1036",
+          "score": 0.67070425
+        },
+        {
+          "chunk_id": "KIFRS1036-main-BC207",
+          "para": "BC207",
+          "standard_id": "K-IFRS 1036",
+          "score": 0.59992003
+        },
+        {
+          "chunk_id": "KIFRS1036-main-141",
+          "para": "141",
+          "standard_id": "K-IFRS 1036",
+          "score": 0.5174455
+        }
+      ],
+      "metrics": {
+        "recall": 0.0,
+        "mrr": 0.0,
+        "std_accuracy": 1
+      },
+      "latency_sec": 0.62
+    },
+    {
+      "id": "q033",
+      "query": "K-IFRS 1115 문단 35의 기간에 걸쳐 이행하는 수행의무의 세 가지 조건은",
+      "expected_standard": "K-IFRS 1115",
+      "expected_paragraphs": [
+        "35"
+      ],
+      "category": "인식",
+      "difficulty": "easy",
+      "found_paragraphs": [],
+      "primary_standard": "K-IFRS 1115",
+      "first_correct_rank": null,
+      "all_results": [],
+      "metrics": {
+        "recall": 0.0,
+        "mrr": 0.0,
+        "std_accuracy": 1
+      },
+      "latency_sec": 0.45
+    },
+    {
+      "id": "q034",
+      "query": "K-IFRS 1116에서 한국 고유 추가 적용범위 규정",
+      "expected_standard": "K-IFRS 1116",
+      "expected_paragraphs": [
+        "한2.1"
+      ],
+      "category": "적용범위",
+      "difficulty": "hard",
+      "found_paragraphs": [],
+      "primary_standard": "K-IFRS 1107",
+      "first_correct_rank": null,
+      "all_results": [],
+      "metrics": {
+        "recall": 0.0,
+        "mrr": 0.0,
+        "std_accuracy": 0
+      },
+      "latency_sec": 0.48
+    },
+    {
+      "id": "q035",
+      "query": "손실부담계약 관련 한국 고유 추가 규정",
+      "expected_standard": "K-IFRS 1037",
+      "expected_paragraphs": [
+        "한92.1"
+      ],
+      "category": "인식",
+      "difficulty": "hard",
+      "found_paragraphs": [],
+      "primary_standard": "K-IFRS 1037",
+      "first_correct_rank": null,
+      "all_results": [],
+      "metrics": {
+        "recall": 0.0,
+        "mrr": 0.0,
+        "std_accuracy": 1
+      },
+      "latency_sec": 0.3
+    }
+  ]
+}
