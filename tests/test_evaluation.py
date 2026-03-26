@@ -43,6 +43,51 @@ class TestGoldenDataset:
         ids = [item["id"] for item in data]
         assert len(ids) == len(set(ids)), "중복 ID 존재"
 
+    def test_golden_min_30_items(self):
+        """최소 30문항이어야 한다."""
+        data = json.loads(GOLDEN_PATH.read_text())
+        assert len(data) >= 30, f"최소 30문항 필요, 현재 {len(data)}문항"
+
+    def test_golden_has_difficulty_field(self):
+        """각 항목에 difficulty 필드가 있어야 한다."""
+        data = json.loads(GOLDEN_PATH.read_text())
+        for item in data:
+            assert "difficulty" in item, f"{item['id']}: difficulty 필드 없음"
+            assert item["difficulty"] in ("easy", "medium", "hard")
+
+    def test_golden_difficulty_distribution(self):
+        """난이도가 3단계로 분포되어야 한다."""
+        data = json.loads(GOLDEN_PATH.read_text())
+        difficulties = {item["difficulty"] for item in data}
+        assert difficulties == {"easy", "medium", "hard"}, f"난이도 분포: {difficulties}"
+
+    def test_golden_category_diversity(self):
+        """최소 6개 이상의 카테고리가 있어야 한다."""
+        data = json.loads(GOLDEN_PATH.read_text())
+        categories = {item["category"] for item in data}
+        assert len(categories) >= 6, f"카테고리 {len(categories)}개: {categories}"
+
+    def test_golden_covers_min_14_standards(self):
+        """최소 14개 이상의 기준서를 커버해야 한다."""
+        data = json.loads(GOLDEN_PATH.read_text())
+        standards = {item["expected_standard"] for item in data}
+        assert len(standards) >= 14, f"기준서 {len(standards)}개: {standards}"
+
+    def test_golden_has_cross_reference_query(self):
+        """교차참조형 쿼리가 최소 1건 있어야 한다."""
+        data = json.loads(GOLDEN_PATH.read_text())
+        has_cross_ref = any(item.get("query_type") == "cross_reference" for item in data)
+        assert has_cross_ref, "교차참조형 쿼리 없음"
+
+    def test_golden_has_korean_specific(self):
+        """한국 고유 요소('한' prefix) 테스트가 최소 1건 있어야 한다."""
+        data = json.loads(GOLDEN_PATH.read_text())
+        has_korean = any(
+            any(p.startswith("한") for p in item["expected_paragraphs"])
+            for item in data
+        )
+        assert has_korean, "'한' prefix 문단 테스트 없음"
+
 
 class TestEvaluateModule:
     """evaluate 모듈 기능 검증."""
