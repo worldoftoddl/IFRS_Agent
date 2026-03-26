@@ -1,16 +1,16 @@
 {
-  "config": "baseline",
+  "config": "rrf_k100",
   "config_params": {
-    "rrf_k": 60,
+    "rrf_k": 100,
     "pool_size": 30,
     "mode": "hybrid"
   },
   "n_queries": 36,
-  "avg_recall": 0.563,
-  "avg_mrr": 0.542,
+  "avg_recall": 0.554,
+  "avg_mrr": 0.539,
   "std_accuracy": 0.861,
-  "avg_latency_sec": 0.53,
-  "total_time_sec": 19.2,
+  "avg_latency_sec": 0.74,
+  "total_time_sec": 26.8,
   "results": [
     {
       "id": "q001",
@@ -41,61 +41,61 @@
           "chunk_id": "KIFRS1037-main-14",
           "para": "14",
           "standard_id": "K-IFRS 1037",
-          "score": 0.017336838849365915
+          "score": 0.01081008100810081
         },
         {
           "chunk_id": "KIFRS1037-main-63",
           "para": "63",
           "standard_id": "K-IFRS 1037",
-          "score": 0.01707242848447961
+          "score": 0.01071301247771836
         },
         {
           "chunk_id": "KIFRS1037-main-61",
           "para": "61",
           "standard_id": "K-IFRS 1037",
-          "score": 0.016816412099430966
+          "score": 0.010617828773168579
         },
         {
           "chunk_id": "KIFRS1037-main-36",
           "para": "36",
           "standard_id": "K-IFRS 1037",
-          "score": 0.016568396226415094
+          "score": 0.010524475524475524
         },
         {
           "chunk_id": "KIFRS1037-main-82",
           "para": "82",
           "standard_id": "K-IFRS 1037",
-          "score": 0.01632801161103048
+          "score": 0.010432900432900433
         },
         {
           "chunk_id": "KIFRS1037-main-nonum-1",
           "para": null,
           "standard_id": "K-IFRS 1037",
-          "score": 0.016094911377930246
+          "score": 0.010343053173241853
         },
         {
           "chunk_id": "KIFRS1037-main-19",
           "para": "19",
           "standard_id": "K-IFRS 1037",
-          "score": 0.015868769360743454
+          "score": 0.010254885301614274
         },
         {
           "chunk_id": "KIFRS1037-main-29",
           "para": "29",
           "standard_id": "K-IFRS 1037",
-          "score": 0.01564927857935627
+          "score": 0.010168350168350168
         },
         {
           "chunk_id": "KIFRS1037-main-39",
           "para": "39",
           "standard_id": "K-IFRS 1037",
-          "score": 0.0154361498496035
+          "score": 0.010083402835696413
         },
         {
           "chunk_id": "KIFRS1037-main-66",
           "para": "66",
           "standard_id": "K-IFRS 1037",
-          "score": 0.01522911051212938
+          "score": 0.01
         }
       ],
       "metrics": {
@@ -103,7 +103,7 @@
         "mrr": 1.0,
         "std_accuracy": 1
       },
-      "latency_sec": 0.61
+      "latency_sec": 0.9
     },
     {
       "id": "q002",
@@ -133,61 +133,61 @@
           "chunk_id": "KIFRS1037-main-51",
           "para": "51",
           "standard_id": "K-IFRS 1037",
-          "score": 0.017336838849365915
+          "score": 0.01081008100810081
         },
         {
           "chunk_id": "KIFRS1037-main-39",
           "para": "39",
           "standard_id": "K-IFRS 1037",
-          "score": 0.01707242848447961
+          "score": 0.01071301247771836
         },
         {
           "chunk_id": "KIFRS1037-main-nonum-1",
           "para": null,
           "standard_id": "K-IFRS 1037",
-          "score": 0.016816412099430966
+          "score": 0.010617828773168579
         },
         {
           "chunk_id": "KIFRS1037-main-36",
           "para": "36",
           "standard_id": "K-IFRS 1037",
-          "score": 0.016568396226415094
+          "score": 0.010524475524475524
         },
         {
           "chunk_id": "KIFRS1037-main-41",
           "para": "41",
           "standard_id": "K-IFRS 1037",
-          "score": 0.01632801161103048
+          "score": 0.010432900432900433
         },
         {
           "chunk_id": "KIFRS1037-main-66",
           "para": "66",
           "standard_id": "K-IFRS 1037",
-          "score": 0.016094911377930246
+          "score": 0.010343053173241853
         },
         {
           "chunk_id": "KIFRS1037-main-45",
           "para": "45",
           "standard_id": "K-IFRS 1037",
-          "score": 0.015868769360743454
+          "score": 0.010254885301614274
         },
         {
           "chunk_id": "KIFRS1037-main-14",
           "para": "14",
           "standard_id": "K-IFRS 1037",
-          "score": 0.01564927857935627
+          "score": 0.010168350168350168
         },
         {
           "chunk_id": "KIFRS1037-main-49",
           "para": "49",
           "standard_id": "K-IFRS 1037",
-          "score": 0.0154361498496035
+          "score": 0.010083402835696413
         },
         {
           "chunk_id": "KIFRS1037-main-nonum",
           "para": null,
           "standard_id": "K-IFRS 1037",
-          "score": 0.01522911051212938
+          "score": 0.01
         }
       ],
       "metrics": {
@@ -195,7 +195,7 @@
         "mrr": 0.3333333333333333,
         "std_accuracy": 1
       },
-      "latency_sec": 0.47
+      "latency_sec": 0.3
     },
     {
       "id": "q003",
@@ -227,61 +227,61 @@
           "chunk_id": "KIFRS1115-main-32",
           "para": "32",
           "standard_id": "K-IFRS 1115",
-          "score": 0.017336838849365915
+          "score": 0.01081008100810081
         },
         {
           "chunk_id": "KIFRS1115-main-22",
           "para": "22",
           "standard_id": "K-IFRS 1115",
-          "score": 0.016816412099430966
+          "score": 0.010617828773168579
         },
         {
           "chunk_id": "KIFRS1115-main-B3",
           "para": "B3",
           "standard_id": "K-IFRS 1115",
-          "score": 0.016568396226415094
+          "score": 0.010524475524475524
         },
         {
           "chunk_id": "KIFRS1115-main-B4",
           "para": "B4",
           "standard_id": "K-IFRS 1115",
-          "score": 0.01632801161103048
+          "score": 0.010432900432900433
         },
         {
           "chunk_id": "KIFRS1115-main-75",
           "para": "75",
           "standard_id": "K-IFRS 1115",
-          "score": 0.016094911377930246
+          "score": 0.010343053173241853
         },
         {
           "chunk_id": "KIFRS1115-main-BC471",
           "para": "BC471",
           "standard_id": "K-IFRS 1115",
-          "score": 0.015868769360743454
+          "score": 0.010254885301614274
         },
         {
           "chunk_id": "KIFRS1115-main-30",
           "para": "30",
           "standard_id": "K-IFRS 1115",
-          "score": 0.01564927857935627
+          "score": 0.010168350168350168
         },
         {
           "chunk_id": "KIFRS1115-main-24",
           "para": "24",
           "standard_id": "K-IFRS 1115",
-          "score": 0.01522911051212938
+          "score": 0.01
         },
         {
           "chunk_id": "KIFRS1115-ag-BC405",
           "para": "BC405",
           "standard_id": "K-IFRS 1115",
-          "score": 0.01707242848447961
+          "score": 0.01071301247771836
         },
         {
           "chunk_id": "KIFRS1115-ag-BC381",
           "para": "BC381",
           "standard_id": "K-IFRS 1115",
-          "score": 0.0154361498496035
+          "score": 0.010083402835696413
         }
       ],
       "metrics": {
@@ -289,7 +289,7 @@
         "mrr": 0.5,
         "std_accuracy": 1
       },
-      "latency_sec": 0.36
+      "latency_sec": 0.7
     },
     {
       "id": "q004",
@@ -320,61 +320,61 @@
           "chunk_id": "KIFRS1115-main-31",
           "para": "31",
           "standard_id": "K-IFRS 1115",
-          "score": 0.017336838849365915
+          "score": 0.01081008100810081
         },
         {
           "chunk_id": "KIFRS1115-main-15",
           "para": "15",
           "standard_id": "K-IFRS 1115",
-          "score": 0.016816412099430966
+          "score": 0.010617828773168579
         },
         {
           "chunk_id": "KIFRS1115-main-nonum-8",
           "para": null,
           "standard_id": "K-IFRS 1115",
-          "score": 0.016568396226415094
+          "score": 0.010524475524475524
         },
         {
           "chunk_id": "KIFRS1115-main-72",
           "para": "72",
           "standard_id": "K-IFRS 1115",
-          "score": 0.01632801161103048
+          "score": 0.010432900432900433
         },
         {
           "chunk_id": "KIFRS1115-main-BC464",
           "para": "BC464",
           "standard_id": "K-IFRS 1115",
-          "score": 0.016094911377930246
+          "score": 0.010343053173241853
         },
         {
           "chunk_id": "KIFRS1115-main-B35B",
           "para": "B35B",
           "standard_id": "K-IFRS 1115",
-          "score": 0.015868769360743454
+          "score": 0.010254885301614274
         },
         {
           "chunk_id": "KIFRS1115-main-B63",
           "para": "B63",
           "standard_id": "K-IFRS 1115",
-          "score": 0.01564927857935627
+          "score": 0.010168350168350168
         },
         {
           "chunk_id": "KIFRS1115-main-B21",
           "para": "B21",
           "standard_id": "K-IFRS 1115",
-          "score": 0.0154361498496035
+          "score": 0.010083402835696413
         },
         {
           "chunk_id": "KIFRS1115-main-BC463",
           "para": "BC463",
           "standard_id": "K-IFRS 1115",
-          "score": 0.01522911051212938
+          "score": 0.01
         },
         {
           "chunk_id": "KIFRS1115-ag-BC400",
           "para": "BC400",
           "standard_id": "K-IFRS 1115",
-          "score": 0.01707242848447961
+          "score": 0.01071301247771836
         }
       ],
       "metrics": {
@@ -382,7 +382,7 @@
         "mrr": 1.0,
         "std_accuracy": 1
       },
-      "latency_sec": 0.47
+      "latency_sec": 0.52
     },
     {
       "id": "q005",
@@ -411,61 +411,61 @@
           "chunk_id": "KIFRS1115-main-nonum-2",
           "para": null,
           "standard_id": "K-IFRS 1115",
-          "score": 0.017336838849365915
+          "score": 0.01081008100810081
         },
         {
           "chunk_id": "KIFRS1115-main-nonum",
           "para": null,
           "standard_id": "K-IFRS 1115",
-          "score": 0.01707242848447961
+          "score": 0.01071301247771836
         },
         {
           "chunk_id": "KIFRS1115-main-nonum-8",
           "para": null,
           "standard_id": "K-IFRS 1115",
-          "score": 0.016816412099430966
+          "score": 0.010617828773168579
         },
         {
           "chunk_id": "KIFRS1115-main-9",
           "para": "9",
           "standard_id": "K-IFRS 1115",
-          "score": 0.016568396226415094
+          "score": 0.010524475524475524
         },
         {
           "chunk_id": "KIFRS1115-main-22",
           "para": "22",
           "standard_id": "K-IFRS 1115",
-          "score": 0.01632801161103048
+          "score": 0.010432900432900433
         },
         {
           "chunk_id": "KIFRS1115-main-24",
           "para": "24",
           "standard_id": "K-IFRS 1115",
-          "score": 0.015868769360743454
+          "score": 0.010254885301614274
         },
         {
           "chunk_id": "KIFRS1115-main-B81",
           "para": "B81",
           "standard_id": "K-IFRS 1115",
-          "score": 0.01564927857935627
+          "score": 0.010168350168350168
         },
         {
           "chunk_id": "KIFRS1115-main-BC472",
           "para": "BC472",
           "standard_id": "K-IFRS 1115",
-          "score": 0.0154361498496035
+          "score": 0.010083402835696413
         },
         {
           "chunk_id": "KIFRS1115-main-BC510",
           "para": "BC510",
           "standard_id": "K-IFRS 1115",
-          "score": 0.01522911051212938
+          "score": 0.01
         },
         {
           "chunk_id": "KIFRS1115-ag-BC405",
           "para": "BC405",
           "standard_id": "K-IFRS 1115",
-          "score": 0.016094911377930246
+          "score": 0.010343053173241853
         }
       ],
       "metrics": {
@@ -473,7 +473,7 @@
         "mrr": 1.0,
         "std_accuracy": 1
       },
-      "latency_sec": 0.42
+      "latency_sec": 1.02
     },
     {
       "id": "q006",
@@ -503,61 +503,61 @@
           "chunk_id": "KIFRS1116-main-nonum-2",
           "para": null,
           "standard_id": "K-IFRS 1116",
-          "score": 0.017336838849365915
+          "score": 0.01081008100810081
         },
         {
           "chunk_id": "KIFRS1116-main-9",
           "para": "9",
           "standard_id": "K-IFRS 1116",
-          "score": 0.01707242848447961
+          "score": 0.01071301247771836
         },
         {
           "chunk_id": "KIFRS1116-main-B12",
           "para": "B12",
           "standard_id": "K-IFRS 1116",
-          "score": 0.016816412099430966
+          "score": 0.010617828773168579
         },
         {
           "chunk_id": "KIFRS1116-main-C3",
           "para": "C3",
           "standard_id": "K-IFRS 1116",
-          "score": 0.016568396226415094
+          "score": 0.010524475524475524
         },
         {
           "chunk_id": "KIFRS1116-main-33",
           "para": "33",
           "standard_id": "K-IFRS 1116",
-          "score": 0.01632801161103048
+          "score": 0.010432900432900433
         },
         {
           "chunk_id": "KIFRS1116-main-B8",
           "para": "B8",
           "standard_id": "K-IFRS 1116",
-          "score": 0.016094911377930246
+          "score": 0.010343053173241853
         },
         {
           "chunk_id": "KIFRS1116-main-nonum-9",
           "para": null,
           "standard_id": "K-IFRS 1116",
-          "score": 0.015868769360743454
+          "score": 0.010254885301614274
         },
         {
           "chunk_id": "KIFRS1116-main-106",
           "para": "106",
           "standard_id": "K-IFRS 1116",
-          "score": 0.01564927857935627
+          "score": 0.010168350168350168
         },
         {
           "chunk_id": "KIFRS1116-main-BC287",
           "para": "BC287",
           "standard_id": "K-IFRS 1116",
-          "score": 0.0154361498496035
+          "score": 0.010083402835696413
         },
         {
           "chunk_id": "KIFRS1116-main-C8",
           "para": "C8",
           "standard_id": "K-IFRS 1116",
-          "score": 0.01522911051212938
+          "score": 0.01
         }
       ],
       "metrics": {
@@ -565,7 +565,7 @@
         "mrr": 1.0,
         "std_accuracy": 1
       },
-      "latency_sec": 0.62
+      "latency_sec": 0.52
     },
     {
       "id": "q007",
@@ -598,61 +598,61 @@
           "chunk_id": "KIFRS1116-main-22",
           "para": "22",
           "standard_id": "K-IFRS 1116",
-          "score": 0.017336838849365915
+          "score": 0.01081008100810081
         },
         {
           "chunk_id": "KIFRS1116-main-23",
           "para": "23",
           "standard_id": "K-IFRS 1116",
-          "score": 0.01707242848447961
+          "score": 0.01071301247771836
         },
         {
           "chunk_id": "KIFRS1116-main-C8",
           "para": "C8",
           "standard_id": "K-IFRS 1116",
-          "score": 0.016816412099430966
+          "score": 0.010617828773168579
         },
         {
           "chunk_id": "KIFRS1116-main-24",
           "para": "24",
           "standard_id": "K-IFRS 1116",
-          "score": 0.016568396226415094
+          "score": 0.010524475524475524
         },
         {
           "chunk_id": "KIFRS1116-main-C11",
           "para": "C11",
           "standard_id": "K-IFRS 1116",
-          "score": 0.01632801161103048
+          "score": 0.010432900432900433
         },
         {
           "chunk_id": "KIFRS1116-main-39",
           "para": "39",
           "standard_id": "K-IFRS 1116",
-          "score": 0.016094911377930246
+          "score": 0.010343053173241853
         },
         {
           "chunk_id": "KIFRS1116-main-67",
           "para": "67",
           "standard_id": "K-IFRS 1116",
-          "score": 0.015868769360743454
+          "score": 0.010254885301614274
         },
         {
           "chunk_id": "KIFRS1116-main-25",
           "para": "25",
           "standard_id": "K-IFRS 1116",
-          "score": 0.01564927857935627
+          "score": 0.010168350168350168
         },
         {
           "chunk_id": "KIFRS1116-main-nonum-9",
           "para": null,
           "standard_id": "K-IFRS 1116",
-          "score": 0.0154361498496035
+          "score": 0.010083402835696413
         },
         {
           "chunk_id": "KIFRS1116-main-BC283",
           "para": "BC283",
           "standard_id": "K-IFRS 1116",
-          "score": 0.01522911051212938
+          "score": 0.01
         }
       ],
       "metrics": {
@@ -660,7 +660,7 @@
         "mrr": 1.0,
         "std_accuracy": 1
       },
-      "latency_sec": 0.53
+      "latency_sec": 0.8
     },
     {
       "id": "q008",
@@ -691,61 +691,61 @@
           "chunk_id": "KIFRS1021-main-23",
           "para": "23",
           "standard_id": "K-IFRS 1021",
-          "score": 0.017336838849365915
+          "score": 0.01081008100810081
         },
         {
           "chunk_id": "KIFRS1021-main-28",
           "para": "28",
           "standard_id": "K-IFRS 1021",
-          "score": 0.016816412099430966
+          "score": 0.010617828773168579
         },
         {
           "chunk_id": "KIFRS1021-main-34",
           "para": "34",
           "standard_id": "K-IFRS 1021",
-          "score": 0.016568396226415094
+          "score": 0.010524475524475524
         },
         {
           "chunk_id": "KIFRS1021-main-2",
           "para": "2",
           "standard_id": "K-IFRS 1021",
-          "score": 0.01632801161103048
+          "score": 0.010432900432900433
         },
         {
           "chunk_id": "KIFRS1021-main-3",
           "para": "3",
           "standard_id": "K-IFRS 1021",
-          "score": 0.016094911377930246
+          "score": 0.010343053173241853
         },
         {
           "chunk_id": "KIFRS1021-main-29",
           "para": "29",
           "standard_id": "K-IFRS 1021",
-          "score": 0.015868769360743454
+          "score": 0.010254885301614274
         },
         {
           "chunk_id": "KIFRS1021-main-1",
           "para": "1",
           "standard_id": "K-IFRS 1021",
-          "score": 0.01564927857935627
+          "score": 0.010168350168350168
         },
         {
           "chunk_id": "KIFRS1021-main-27",
           "para": "27",
           "standard_id": "K-IFRS 1021",
-          "score": 0.0154361498496035
+          "score": 0.010083402835696413
         },
         {
           "chunk_id": "KIFRS2122-main-7",
           "para": "7",
           "standard_id": "K-IFRS 2122",
-          "score": 0.01522911051212938
+          "score": 0.01
         },
         {
           "chunk_id": "KIFRS1021-transition-60M",
           "para": "60M",
           "standard_id": "K-IFRS 1021",
-          "score": 0.01707242848447961
+          "score": 0.01071301247771836
         }
       ],
       "metrics": {
@@ -753,7 +753,7 @@
         "mrr": 1.0,
         "std_accuracy": 1
       },
-      "latency_sec": 0.51
+      "latency_sec": 0.91
     },
     {
       "id": "q009",
@@ -783,61 +783,61 @@
           "chunk_id": "KIFRS1021-main-42",
           "para": "42",
           "standard_id": "K-IFRS 1021",
-          "score": 0.017336838849365915
+          "score": 0.01081008100810081
         },
         {
           "chunk_id": "KIFRS1021-main-39",
           "para": "39",
           "standard_id": "K-IFRS 1021",
-          "score": 0.01707242848447961
+          "score": 0.01071301247771836
         },
         {
           "chunk_id": "KIFRS1021-main-nonum-1",
           "para": null,
           "standard_id": "K-IFRS 1021",
-          "score": 0.016816412099430966
+          "score": 0.010617828773168579
         },
         {
           "chunk_id": "KIFRS1021-main-38",
           "para": "38",
           "standard_id": "K-IFRS 1021",
-          "score": 0.01632801161103048
+          "score": 0.010432900432900433
         },
         {
           "chunk_id": "KIFRS1021-main-34",
           "para": "34",
           "standard_id": "K-IFRS 1021",
-          "score": 0.016094911377930246
+          "score": 0.010343053173241853
         },
         {
           "chunk_id": "KIFRS1021-main-57",
           "para": "57",
           "standard_id": "K-IFRS 1021",
-          "score": 0.015868769360743454
+          "score": 0.010254885301614274
         },
         {
           "chunk_id": "KIFRS1021-main-56",
           "para": "56",
           "standard_id": "K-IFRS 1021",
-          "score": 0.0154361498496035
+          "score": 0.010083402835696413
         },
         {
           "chunk_id": "KIFRS1021-main-21",
           "para": "21",
           "standard_id": "K-IFRS 1021",
-          "score": 0.01522911051212938
+          "score": 0.01
         },
         {
           "chunk_id": "KIFRS1021-transition-60M",
           "para": "60M",
           "standard_id": "K-IFRS 1021",
-          "score": 0.016568396226415094
+          "score": 0.010524475524475524
         },
         {
           "chunk_id": "KIFRS1021-transition-nonum",
           "para": null,
           "standard_id": "K-IFRS 1021",
-          "score": 0.01564927857935627
+          "score": 0.010168350168350168
         }
       ],
       "metrics": {
@@ -845,7 +845,7 @@
         "mrr": 0.5,
         "std_accuracy": 1
       },
-      "latency_sec": 0.42
+      "latency_sec": 0.79
     },
     {
       "id": "q010",
@@ -876,61 +876,61 @@
           "chunk_id": "KIFRS1032-main-2",
           "para": "2",
           "standard_id": "K-IFRS 1032",
-          "score": 0.01707242848447961
+          "score": 0.01071301247771836
         },
         {
           "chunk_id": "KIFRS1107-main-8",
           "para": "8",
           "standard_id": "K-IFRS 1107",
-          "score": 0.016816412099430966
+          "score": 0.010617828773168579
         },
         {
           "chunk_id": "KIFRS1107-main-45",
           "para": "45",
           "standard_id": "K-IFRS 1107",
-          "score": 0.016568396226415094
+          "score": 0.010524475524475524
         },
         {
           "chunk_id": "KIFRS1107-main-12C",
           "para": "12C",
           "standard_id": "K-IFRS 1107",
-          "score": 0.01632801161103048
+          "score": 0.010432900432900433
         },
         {
           "chunk_id": "KIFRS1107-main-42M",
           "para": "42M",
           "standard_id": "K-IFRS 1107",
-          "score": 0.016094911377930246
+          "score": 0.010343053173241853
         },
         {
           "chunk_id": "KIFRS1032-main-16A",
           "para": "16A",
           "standard_id": "K-IFRS 1032",
-          "score": 0.015868769360743454
+          "score": 0.010254885301614274
         },
         {
           "chunk_id": "KIFRS1032-main-15",
           "para": "15",
           "standard_id": "K-IFRS 1032",
-          "score": 0.01564927857935627
+          "score": 0.010168350168350168
         },
         {
           "chunk_id": "KIFRS1105-main-45",
           "para": "45",
           "standard_id": "K-IFRS 1105",
-          "score": 0.0154361498496035
+          "score": 0.010083402835696413
         },
         {
           "chunk_id": "KIFRS1032-main-16D",
           "para": "16D",
           "standard_id": "K-IFRS 1032",
-          "score": 0.01522911051212938
+          "score": 0.01
         },
         {
           "chunk_id": "KIFRS1032-ag-nonum-1",
           "para": null,
           "standard_id": "K-IFRS 1032",
-          "score": 0.017336838849365915
+          "score": 0.01081008100810081
         }
       ],
       "metrics": {
@@ -938,7 +938,7 @@
         "mrr": 0.0,
         "std_accuracy": 0
       },
-      "latency_sec": 0.3
+      "latency_sec": 0.39
     },
     {
       "id": "q011",
@@ -969,61 +969,61 @@
           "chunk_id": "KIFRS1107-main-35M",
           "para": "35M",
           "standard_id": "K-IFRS 1107",
-          "score": 0.017336838849365915
+          "score": 0.01081008100810081
         },
         {
           "chunk_id": "KIFRS1107-main-35H",
           "para": "35H",
           "standard_id": "K-IFRS 1107",
-          "score": 0.01707242848447961
+          "score": 0.01071301247771836
         },
         {
           "chunk_id": "KIFRS1107-main-35F",
           "para": "35F",
           "standard_id": "K-IFRS 1107",
-          "score": 0.016816412099430966
+          "score": 0.010617828773168579
         },
         {
           "chunk_id": "KIFRS1107-main-35G",
           "para": "35G",
           "standard_id": "K-IFRS 1107",
-          "score": 0.016568396226415094
+          "score": 0.010524475524475524
         },
         {
           "chunk_id": "KIFRS1107-main-B8C",
           "para": "B8C",
           "standard_id": "K-IFRS 1107",
-          "score": 0.01632801161103048
+          "score": 0.010432900432900433
         },
         {
           "chunk_id": "KIFRS1107-main-35K",
           "para": "35K",
           "standard_id": "K-IFRS 1107",
-          "score": 0.016094911377930246
+          "score": 0.010343053173241853
         },
         {
           "chunk_id": "KIFRS1107-main-35J",
           "para": "35J",
           "standard_id": "K-IFRS 1107",
-          "score": 0.015868769360743454
+          "score": 0.010254885301614274
         },
         {
           "chunk_id": "KIFRS1036-main-nonum-2",
           "para": null,
           "standard_id": "K-IFRS 1036",
-          "score": 0.01564927857935627
+          "score": 0.010168350168350168
         },
         {
           "chunk_id": "KIFRS1036-main-BC177",
           "para": "BC177",
           "standard_id": "K-IFRS 1036",
-          "score": 0.0154361498496035
+          "score": 0.010083402835696413
         },
         {
           "chunk_id": "KIFRS1107-main-B8E",
           "para": "B8E",
           "standard_id": "K-IFRS 1107",
-          "score": 0.01522911051212938
+          "score": 0.01
         }
       ],
       "metrics": {
@@ -1031,7 +1031,7 @@
         "mrr": 0.0,
         "std_accuracy": 0
       },
-      "latency_sec": 0.62
+      "latency_sec": 0.87
     },
     {
       "id": "q012",
@@ -1061,61 +1061,61 @@
           "chunk_id": "KIFRS1001-main-54",
           "para": "54",
           "standard_id": "K-IFRS 1001",
-          "score": 0.01707242848447961
+          "score": 0.01071301247771836
         },
         {
           "chunk_id": "실무서2중요성-main-89",
           "para": "89",
           "standard_id": "실무서 2 중요성",
-          "score": 0.016816412099430966
+          "score": 0.010617828773168579
         },
         {
           "chunk_id": "KIFRS1001-main-55",
           "para": "55",
           "standard_id": "K-IFRS 1001",
-          "score": 0.016568396226415094
+          "score": 0.010524475524475524
         },
         {
           "chunk_id": "KIFRS1001-main-29",
           "para": "29",
           "standard_id": "K-IFRS 1001",
-          "score": 0.01632801161103048
+          "score": 0.010432900432900433
         },
         {
           "chunk_id": "KIFRS1001-main-77",
           "para": "77",
           "standard_id": "K-IFRS 1001",
-          "score": 0.016094911377930246
+          "score": 0.010343053173241853
         },
         {
           "chunk_id": "KIFRS1001-main-45",
           "para": "45",
           "standard_id": "K-IFRS 1001",
-          "score": 0.015868769360743454
+          "score": 0.010254885301614274
         },
         {
           "chunk_id": "KIFRS1001-main-57",
           "para": "57",
           "standard_id": "K-IFRS 1001",
-          "score": 0.01564927857935627
+          "score": 0.010168350168350168
         },
         {
           "chunk_id": "KIFRS1001-main-15",
           "para": "15",
           "standard_id": "K-IFRS 1001",
-          "score": 0.01522911051212938
+          "score": 0.01
         },
         {
           "chunk_id": "KIFRS1001-transition-nonum-5",
           "para": null,
           "standard_id": "K-IFRS 1001",
-          "score": 0.017336838849365915
+          "score": 0.01081008100810081
         },
         {
           "chunk_id": "실무서2중요성-ie-58",
           "para": "58",
           "standard_id": "실무서 2 중요성",
-          "score": 0.0154361498496035
+          "score": 0.010083402835696413
         }
       ],
       "metrics": {
@@ -1123,7 +1123,7 @@
         "mrr": 1.0,
         "std_accuracy": 1
       },
-      "latency_sec": 0.39
+      "latency_sec": 0.42
     },
     {
       "id": "q013",
@@ -1154,61 +1154,61 @@
           "chunk_id": "KIFRS1105-main-3",
           "para": "3",
           "standard_id": "K-IFRS 1105",
-          "score": 0.017336838849365915
+          "score": 0.01081008100810081
         },
         {
           "chunk_id": "KIFRS1105-main-45",
           "para": "45",
           "standard_id": "K-IFRS 1105",
-          "score": 0.01707242848447961
+          "score": 0.01071301247771836
         },
         {
           "chunk_id": "KIFRS1105-main-5A",
           "para": "5A",
           "standard_id": "K-IFRS 1105",
-          "score": 0.016816412099430966
+          "score": 0.010617828773168579
         },
         {
           "chunk_id": "KIFRS1105-main-11",
           "para": "11",
           "standard_id": "K-IFRS 1105",
-          "score": 0.016568396226415094
+          "score": 0.010524475524475524
         },
         {
           "chunk_id": "KIFRS1105-main-2",
           "para": "2",
           "standard_id": "K-IFRS 1105",
-          "score": 0.01632801161103048
+          "score": 0.010432900432900433
         },
         {
           "chunk_id": "KIFRS1105-main-12A",
           "para": "12A",
           "standard_id": "K-IFRS 1105",
-          "score": 0.016094911377930246
+          "score": 0.010343053173241853
         },
         {
           "chunk_id": "KIFRS1105-main-41",
           "para": "41",
           "standard_id": "K-IFRS 1105",
-          "score": 0.015868769360743454
+          "score": 0.010254885301614274
         },
         {
           "chunk_id": "KIFRS1105-main-5B",
           "para": "5B",
           "standard_id": "K-IFRS 1105",
-          "score": 0.01564927857935627
+          "score": 0.010168350168350168
         },
         {
           "chunk_id": "KIFRS1105-main-6",
           "para": "6",
           "standard_id": "K-IFRS 1105",
-          "score": 0.0154361498496035
+          "score": 0.010083402835696413
         },
         {
           "chunk_id": "KIFRS1105-main-nonum",
           "para": null,
           "standard_id": "K-IFRS 1105",
-          "score": 0.01522911051212938
+          "score": 0.01
         }
       ],
       "metrics": {
@@ -1216,7 +1216,7 @@
         "mrr": 0.0,
         "std_accuracy": 0
       },
-      "latency_sec": 0.31
+      "latency_sec": 0.85
     },
     {
       "id": "q014",
@@ -1247,61 +1247,61 @@
           "chunk_id": "KIFRS1001-main-81A",
           "para": "81A",
           "standard_id": "K-IFRS 1001",
-          "score": 0.017336838849365915
+          "score": 0.01081008100810081
         },
         {
           "chunk_id": "KIFRS1001-main-87",
           "para": "87",
           "standard_id": "K-IFRS 1001",
-          "score": 0.016816412099430966
+          "score": 0.010617828773168579
         },
         {
           "chunk_id": "KIFRS1001-main-81B",
           "para": "81B",
           "standard_id": "K-IFRS 1001",
-          "score": 0.016568396226415094
+          "score": 0.010524475524475524
         },
         {
           "chunk_id": "KIFRS1107-main-20",
           "para": "20",
           "standard_id": "K-IFRS 1107",
-          "score": 0.01632801161103048
+          "score": 0.010432900432900433
         },
         {
           "chunk_id": "KIFRS1012-main-77",
           "para": "77",
           "standard_id": "K-IFRS 1012",
-          "score": 0.016094911377930246
+          "score": 0.010343053173241853
         },
         {
           "chunk_id": "KIFRS1001-main-한138.3",
           "para": "한138.3",
           "standard_id": "K-IFRS 1001",
-          "score": 0.015868769360743454
+          "score": 0.010254885301614274
         },
         {
           "chunk_id": "KIFRS1001-main-94",
           "para": "94",
           "standard_id": "K-IFRS 1001",
-          "score": 0.01564927857935627
+          "score": 0.010168350168350168
         },
         {
           "chunk_id": "KIFRS1001-main-10A",
           "para": "10A",
           "standard_id": "K-IFRS 1001",
-          "score": 0.0154361498496035
+          "score": 0.010083402835696413
         },
         {
           "chunk_id": "KIFRS1001-main-91",
           "para": "91",
           "standard_id": "K-IFRS 1001",
-          "score": 0.01522911051212938
+          "score": 0.01
         },
         {
           "chunk_id": "KIFRS1001-transition-nonum-5",
           "para": null,
           "standard_id": "K-IFRS 1001",
-          "score": 0.01707242848447961
+          "score": 0.01071301247771836
         }
       ],
       "metrics": {
@@ -1309,7 +1309,7 @@
         "mrr": 0.0,
         "std_accuracy": 1
       },
-      "latency_sec": 0.32
+      "latency_sec": 0.59
     },
     {
       "id": "q015",
@@ -1339,61 +1339,61 @@
           "chunk_id": "재무보고개념체계-main-nonum-2",
           "para": null,
           "standard_id": "재무보고 개념체계",
-          "score": 0.017336838849365915
+          "score": 0.01081008100810081
         },
         {
           "chunk_id": "재무보고개념체계-main-6.5",
           "para": "6.5",
           "standard_id": "재무보고 개념체계",
-          "score": 0.01707242848447961
+          "score": 0.01071301247771836
         },
         {
           "chunk_id": "재무보고개념체계-main-6.69",
           "para": "6.69",
           "standard_id": "재무보고 개념체계",
-          "score": 0.016816412099430966
+          "score": 0.010617828773168579
         },
         {
           "chunk_id": "재무보고개념체계-main-6.4",
           "para": "6.4",
           "standard_id": "재무보고 개념체계",
-          "score": 0.016568396226415094
+          "score": 0.010524475524475524
         },
         {
           "chunk_id": "재무보고개념체계-main-6.24",
           "para": "6.24",
           "standard_id": "재무보고 개념체계",
-          "score": 0.01632801161103048
+          "score": 0.010432900432900433
         },
         {
           "chunk_id": "재무보고개념체계-main-6.7",
           "para": "6.7",
           "standard_id": "재무보고 개념체계",
-          "score": 0.016094911377930246
+          "score": 0.010343053173241853
         },
         {
           "chunk_id": "재무보고개념체계-main-6.52",
           "para": "6.52",
           "standard_id": "재무보고 개념체계",
-          "score": 0.015868769360743454
+          "score": 0.010254885301614274
         },
         {
           "chunk_id": "재무보고개념체계-main-6.27",
           "para": "6.27",
           "standard_id": "재무보고 개념체계",
-          "score": 0.01564927857935627
+          "score": 0.010168350168350168
         },
         {
           "chunk_id": "재무보고개념체계-main-6.41",
           "para": "6.41",
           "standard_id": "재무보고 개념체계",
-          "score": 0.0154361498496035
+          "score": 0.010083402835696413
         },
         {
           "chunk_id": "재무보고개념체계-main-6.26",
           "para": "6.26",
           "standard_id": "재무보고 개념체계",
-          "score": 0.01522911051212938
+          "score": 0.01
         }
       ],
       "metrics": {
@@ -1401,7 +1401,7 @@
         "mrr": 1.0,
         "std_accuracy": 1
       },
-      "latency_sec": 0.28
+      "latency_sec": 0.3
     },
     {
       "id": "q016",
@@ -1431,61 +1431,61 @@
           "chunk_id": "재무보고개념체계-main-6.38",
           "para": "6.38",
           "standard_id": "재무보고 개념체계",
-          "score": 0.017336838849365915
+          "score": 0.01081008100810081
         },
         {
           "chunk_id": "재무보고개념체계-main-6.19",
           "para": "6.19",
           "standard_id": "재무보고 개념체계",
-          "score": 0.01707242848447961
+          "score": 0.01071301247771836
         },
         {
           "chunk_id": "재무보고개념체계-main-6.17",
           "para": "6.17",
           "standard_id": "재무보고 개념체계",
-          "score": 0.016816412099430966
+          "score": 0.010617828773168579
         },
         {
           "chunk_id": "재무보고개념체계-main-SP1.2",
           "para": "SP1.2",
           "standard_id": "재무보고 개념체계",
-          "score": 0.016568396226415094
+          "score": 0.010524475524475524
         },
         {
           "chunk_id": "재무보고개념체계-main-6.39",
           "para": "6.39",
           "standard_id": "재무보고 개념체계",
-          "score": 0.01632801161103048
+          "score": 0.010432900432900433
         },
         {
           "chunk_id": "재무보고개념체계-main-6.18",
           "para": "6.18",
           "standard_id": "재무보고 개념체계",
-          "score": 0.016094911377930246
+          "score": 0.010343053173241853
         },
         {
           "chunk_id": "재무보고개념체계-main-6.20",
           "para": "6.20",
           "standard_id": "재무보고 개념체계",
-          "score": 0.015868769360743454
+          "score": 0.010254885301614274
         },
         {
           "chunk_id": "재무보고개념체계-main-nonum",
           "para": null,
           "standard_id": "재무보고 개념체계",
-          "score": 0.01564927857935627
+          "score": 0.010168350168350168
         },
         {
           "chunk_id": "재무보고개념체계-main-6.42",
           "para": "6.42",
           "standard_id": "재무보고 개념체계",
-          "score": 0.0154361498496035
+          "score": 0.010083402835696413
         },
         {
           "chunk_id": "재무보고개념체계-main-6.21",
           "para": "6.21",
           "standard_id": "재무보고 개념체계",
-          "score": 0.01522911051212938
+          "score": 0.01
         }
       ],
       "metrics": {
@@ -1493,7 +1493,7 @@
         "mrr": 0.3333333333333333,
         "std_accuracy": 1
       },
-      "latency_sec": 0.53
+      "latency_sec": 3.9
     },
     {
       "id": "q017",
@@ -1523,61 +1523,61 @@
           "chunk_id": "KIFRS1038-main-21",
           "para": "21",
           "standard_id": "K-IFRS 1038",
-          "score": 0.017336838849365915
+          "score": 0.01081008100810081
         },
         {
           "chunk_id": "KIFRS1038-main-18",
           "para": "18",
           "standard_id": "K-IFRS 1038",
-          "score": 0.01707242848447961
+          "score": 0.01071301247771836
         },
         {
           "chunk_id": "KIFRS1038-main-57",
           "para": "57",
           "standard_id": "K-IFRS 1038",
-          "score": 0.016568396226415094
+          "score": 0.010524475524475524
         },
         {
           "chunk_id": "KIFRS1038-main-47",
           "para": "47",
           "standard_id": "K-IFRS 1038",
-          "score": 0.01632801161103048
+          "score": 0.010432900432900433
         },
         {
           "chunk_id": "KIFRS1103-main-14",
           "para": "14",
           "standard_id": "K-IFRS 1103",
-          "score": 0.016094911377930246
+          "score": 0.010343053173241853
         },
         {
           "chunk_id": "KIFRS1016-main-7",
           "para": "7",
           "standard_id": "K-IFRS 1016",
-          "score": 0.015868769360743454
+          "score": 0.010254885301614274
         },
         {
           "chunk_id": "KIFRS1038-main-34",
           "para": "34",
           "standard_id": "K-IFRS 1038",
-          "score": 0.01564927857935627
+          "score": 0.010168350168350168
         },
         {
           "chunk_id": "KIFRS1038-main-1",
           "para": "1",
           "standard_id": "K-IFRS 1038",
-          "score": 0.0154361498496035
+          "score": 0.010083402835696413
         },
         {
           "chunk_id": "KIFRS1038-main-49",
           "para": "49",
           "standard_id": "K-IFRS 1038",
-          "score": 0.01522911051212938
+          "score": 0.01
         },
         {
           "chunk_id": "KIFRS1038-transition-nonum-3",
           "para": null,
           "standard_id": "K-IFRS 1038",
-          "score": 0.016816412099430966
+          "score": 0.010617828773168579
         }
       ],
       "metrics": {
@@ -1585,7 +1585,7 @@
         "mrr": 1.0,
         "std_accuracy": 1
       },
-      "latency_sec": 0.42
+      "latency_sec": 0.92
     },
     {
       "id": "q017b",
@@ -1614,61 +1614,61 @@
           "chunk_id": "KIFRS1023-main-17",
           "para": "17",
           "standard_id": "K-IFRS 1023",
-          "score": 0.017336838849365915
+          "score": 0.01081008100810081
         },
         {
           "chunk_id": "KIFRS1023-main-19",
           "para": "19",
           "standard_id": "K-IFRS 1023",
-          "score": 0.01707242848447961
+          "score": 0.01071301247771836
         },
         {
           "chunk_id": "KIFRS1023-main-20",
           "para": "20",
           "standard_id": "K-IFRS 1023",
-          "score": 0.016816412099430966
+          "score": 0.010617828773168579
         },
         {
           "chunk_id": "KIFRS1023-main-13",
           "para": "13",
           "standard_id": "K-IFRS 1023",
-          "score": 0.016094911377930246
+          "score": 0.010343053173241853
         },
         {
           "chunk_id": "KIFRS1038-main-57",
           "para": "57",
           "standard_id": "K-IFRS 1038",
-          "score": 0.015868769360743454
+          "score": 0.010254885301614274
         },
         {
           "chunk_id": "KIFRS1023-main-9",
           "para": "9",
           "standard_id": "K-IFRS 1023",
-          "score": 0.0154361498496035
+          "score": 0.010083402835696413
         },
         {
           "chunk_id": "KIFRS1023-main-21",
           "para": "21",
           "standard_id": "K-IFRS 1023",
-          "score": 0.01522911051212938
+          "score": 0.01
         },
         {
           "chunk_id": "KIFRS1038-transition-BC98",
           "para": "BC98",
           "standard_id": "K-IFRS 1038",
-          "score": 0.016568396226415094
+          "score": 0.010524475524475524
         },
         {
           "chunk_id": "KIFRS1023-transition-nonum",
           "para": null,
           "standard_id": "K-IFRS 1023",
-          "score": 0.01632801161103048
+          "score": 0.010432900432900433
         },
         {
           "chunk_id": "KIFRS1023-transition-BC24",
           "para": "BC24",
           "standard_id": "K-IFRS 1023",
-          "score": 0.01564927857935627
+          "score": 0.010168350168350168
         }
       ],
       "metrics": {
@@ -1676,7 +1676,7 @@
         "mrr": 0.2,
         "std_accuracy": 0
       },
-      "latency_sec": 0.4
+      "latency_sec": 0.72
     },
     {
       "id": "q018",
@@ -1706,61 +1706,61 @@
           "chunk_id": "KIFRS1008-main-23",
           "para": "23",
           "standard_id": "K-IFRS 1008",
-          "score": 0.017336838849365915
+          "score": 0.01081008100810081
         },
         {
           "chunk_id": "KIFRS1008-main-19",
           "para": "19",
           "standard_id": "K-IFRS 1008",
-          "score": 0.01707242848447961
+          "score": 0.01071301247771836
         },
         {
           "chunk_id": "KIFRS1008-main-22",
           "para": "22",
           "standard_id": "K-IFRS 1008",
-          "score": 0.016816412099430966
+          "score": 0.010617828773168579
         },
         {
           "chunk_id": "KIFRS1008-main-24",
           "para": "24",
           "standard_id": "K-IFRS 1008",
-          "score": 0.016568396226415094
+          "score": 0.010524475524475524
         },
         {
           "chunk_id": "KIFRS1008-main-27",
           "para": "27",
           "standard_id": "K-IFRS 1008",
-          "score": 0.01632801161103048
+          "score": 0.010432900432900433
         },
         {
           "chunk_id": "KIFRS1008-main-29",
           "para": "29",
           "standard_id": "K-IFRS 1008",
-          "score": 0.016094911377930246
+          "score": 0.010343053173241853
         },
         {
           "chunk_id": "KIFRS1008-main-28",
           "para": "28",
           "standard_id": "K-IFRS 1008",
-          "score": 0.015868769360743454
+          "score": 0.010254885301614274
         },
         {
           "chunk_id": "KIFRS1008-main-4",
           "para": "4",
           "standard_id": "K-IFRS 1008",
-          "score": 0.01564927857935627
+          "score": 0.010168350168350168
         },
         {
           "chunk_id": "KIFRS1008-main-3",
           "para": "3",
           "standard_id": "K-IFRS 1008",
-          "score": 0.0154361498496035
+          "score": 0.010083402835696413
         },
         {
           "chunk_id": "KIFRS1008-main-nonum",
           "para": null,
           "standard_id": "K-IFRS 1008",
-          "score": 0.01522911051212938
+          "score": 0.01
         }
       ],
       "metrics": {
@@ -1768,7 +1768,7 @@
         "mrr": 0.5,
         "std_accuracy": 1
       },
-      "latency_sec": 0.82
+      "latency_sec": 0.32
     },
     {
       "id": "q019",
@@ -1798,61 +1798,61 @@
           "chunk_id": "KIFRS1016-main-60",
           "para": "60",
           "standard_id": "K-IFRS 1016",
-          "score": 0.017336838849365915
+          "score": 0.01081008100810081
         },
         {
           "chunk_id": "KIFRS1016-main-62",
           "para": "62",
           "standard_id": "K-IFRS 1016",
-          "score": 0.01707242848447961
+          "score": 0.01071301247771836
         },
         {
           "chunk_id": "KIFRS1016-main-50",
           "para": "50",
           "standard_id": "K-IFRS 1016",
-          "score": 0.016816412099430966
+          "score": 0.010617828773168579
         },
         {
           "chunk_id": "KIFRS1016-main-45",
           "para": "45",
           "standard_id": "K-IFRS 1016",
-          "score": 0.016568396226415094
+          "score": 0.010524475524475524
         },
         {
           "chunk_id": "KIFRS1016-main-61",
           "para": "61",
           "standard_id": "K-IFRS 1016",
-          "score": 0.01632801161103048
+          "score": 0.010432900432900433
         },
         {
           "chunk_id": "KIFRS1038-main-98",
           "para": "98",
           "standard_id": "K-IFRS 1038",
-          "score": 0.016094911377930246
+          "score": 0.010343053173241853
         },
         {
           "chunk_id": "KIFRS1016-main-73",
           "para": "73",
           "standard_id": "K-IFRS 1016",
-          "score": 0.015868769360743454
+          "score": 0.010254885301614274
         },
         {
           "chunk_id": "KIFRS1016-main-46",
           "para": "46",
           "standard_id": "K-IFRS 1016",
-          "score": 0.01564927857935627
+          "score": 0.010168350168350168
         },
         {
           "chunk_id": "KIFRS1016-main-47",
           "para": "47",
           "standard_id": "K-IFRS 1016",
-          "score": 0.01522911051212938
+          "score": 0.01
         },
         {
           "chunk_id": "KIFRS1016-transition-nonum-2",
           "para": null,
           "standard_id": "K-IFRS 1016",
-          "score": 0.0154361498496035
+          "score": 0.010083402835696413
         }
       ],
       "metrics": {
@@ -1860,7 +1860,7 @@
         "mrr": 1.0,
         "std_accuracy": 1
       },
-      "latency_sec": 0.71
+      "latency_sec": 0.37
     },
     {
       "id": "q020",
@@ -1890,61 +1890,61 @@
           "chunk_id": "KIFRS1002-main-29",
           "para": "29",
           "standard_id": "K-IFRS 1002",
-          "score": 0.017336838849365915
+          "score": 0.01081008100810081
         },
         {
           "chunk_id": "KIFRS1002-main-28",
           "para": "28",
           "standard_id": "K-IFRS 1002",
-          "score": 0.01707242848447961
+          "score": 0.01071301247771836
         },
         {
           "chunk_id": "KIFRS1002-main-9",
           "para": "9",
           "standard_id": "K-IFRS 1002",
-          "score": 0.016816412099430966
+          "score": 0.010617828773168579
         },
         {
           "chunk_id": "KIFRS1002-main-27",
           "para": "27",
           "standard_id": "K-IFRS 1002",
-          "score": 0.016568396226415094
+          "score": 0.010524475524475524
         },
         {
           "chunk_id": "KIFRS1002-main-34",
           "para": "34",
           "standard_id": "K-IFRS 1002",
-          "score": 0.01632801161103048
+          "score": 0.010432900432900433
         },
         {
           "chunk_id": "KIFRS1002-main-22",
           "para": "22",
           "standard_id": "K-IFRS 1002",
-          "score": 0.016094911377930246
+          "score": 0.010343053173241853
         },
         {
           "chunk_id": "KIFRS1002-main-36",
           "para": "36",
           "standard_id": "K-IFRS 1002",
-          "score": 0.015868769360743454
+          "score": 0.010254885301614274
         },
         {
           "chunk_id": "KIFRS1002-main-21",
           "para": "21",
           "standard_id": "K-IFRS 1002",
-          "score": 0.01564927857935627
+          "score": 0.010168350168350168
         },
         {
           "chunk_id": "KIFRS1002-main-33",
           "para": "33",
           "standard_id": "K-IFRS 1002",
-          "score": 0.0154361498496035
+          "score": 0.010083402835696413
         },
         {
           "chunk_id": "KIFRS1036-main-nonum-2",
           "para": null,
           "standard_id": "K-IFRS 1036",
-          "score": 0.01522911051212938
+          "score": 0.01
         }
       ],
       "metrics": {
@@ -1952,7 +1952,7 @@
         "mrr": 1.0,
         "std_accuracy": 1
       },
-      "latency_sec": 0.36
+      "latency_sec": 1.51
     },
     {
       "id": "q021",
@@ -1982,61 +1982,61 @@
           "chunk_id": "KIFRS1036-main-9",
           "para": "9",
           "standard_id": "K-IFRS 1036",
-          "score": 0.017336838849365915
+          "score": 0.01081008100810081
         },
         {
           "chunk_id": "KIFRS1036-main-nonum-5",
           "para": null,
           "standard_id": "K-IFRS 1036",
-          "score": 0.01707242848447961
+          "score": 0.01071301247771836
         },
         {
           "chunk_id": "KIFRS1036-main-110",
           "para": "110",
           "standard_id": "K-IFRS 1036",
-          "score": 0.016816412099430966
+          "score": 0.010617828773168579
         },
         {
           "chunk_id": "KIFRS1036-main-13",
           "para": "13",
           "standard_id": "K-IFRS 1036",
-          "score": 0.016568396226415094
+          "score": 0.010524475524475524
         },
         {
           "chunk_id": "KIFRS1036-main-14",
           "para": "14",
           "standard_id": "K-IFRS 1036",
-          "score": 0.01632801161103048
+          "score": 0.010432900432900433
         },
         {
           "chunk_id": "KIFRS1036-main-17",
           "para": "17",
           "standard_id": "K-IFRS 1036",
-          "score": 0.016094911377930246
+          "score": 0.010343053173241853
         },
         {
           "chunk_id": "KIFRS1036-main-8",
           "para": "8",
           "standard_id": "K-IFRS 1036",
-          "score": 0.015868769360743454
+          "score": 0.010254885301614274
         },
         {
           "chunk_id": "KIFRS1036-main-nonum-2",
           "para": null,
           "standard_id": "K-IFRS 1036",
-          "score": 0.01564927857935627
+          "score": 0.010168350168350168
         },
         {
           "chunk_id": "KIFRS1036-main-66",
           "para": "66",
           "standard_id": "K-IFRS 1036",
-          "score": 0.0154361498496035
+          "score": 0.010083402835696413
         },
         {
           "chunk_id": "KIFRS1036-main-12",
           "para": "12",
           "standard_id": "K-IFRS 1036",
-          "score": 0.01522911051212938
+          "score": 0.01
         }
       ],
       "metrics": {
@@ -2044,7 +2044,7 @@
         "mrr": 1.0,
         "std_accuracy": 1
       },
-      "latency_sec": 0.76
+      "latency_sec": 0.54
     },
     {
       "id": "q022",
@@ -2075,61 +2075,61 @@
           "chunk_id": "KIFRS1036-main-nonum-2",
           "para": null,
           "standard_id": "K-IFRS 1036",
-          "score": 0.017336838849365915
+          "score": 0.01081008100810081
         },
         {
           "chunk_id": "KIFRS1036-main-58",
           "para": "58",
           "standard_id": "K-IFRS 1036",
-          "score": 0.01707242848447961
+          "score": 0.01071301247771836
         },
         {
           "chunk_id": "KIFRS1036-main-BC177",
           "para": "BC177",
           "standard_id": "K-IFRS 1036",
-          "score": 0.016816412099430966
+          "score": 0.010617828773168579
         },
         {
           "chunk_id": "KIFRS1036-main-nonum-5",
           "para": null,
           "standard_id": "K-IFRS 1036",
-          "score": 0.016568396226415094
+          "score": 0.010524475524475524
         },
         {
           "chunk_id": "KIFRS1036-main-63",
           "para": "63",
           "standard_id": "K-IFRS 1036",
-          "score": 0.01632801161103048
+          "score": 0.010432900432900433
         },
         {
           "chunk_id": "KIFRS1036-main-115",
           "para": "115",
           "standard_id": "K-IFRS 1036",
-          "score": 0.016094911377930246
+          "score": 0.010343053173241853
         },
         {
           "chunk_id": "KIFRS1105-main-23",
           "para": "23",
           "standard_id": "K-IFRS 1105",
-          "score": 0.015868769360743454
+          "score": 0.010254885301614274
         },
         {
           "chunk_id": "KIFRS1036-main-62",
           "para": "62",
           "standard_id": "K-IFRS 1036",
-          "score": 0.01564927857935627
+          "score": 0.010168350168350168
         },
         {
           "chunk_id": "KIFRS1105-main-20",
           "para": "20",
           "standard_id": "K-IFRS 1105",
-          "score": 0.0154361498496035
+          "score": 0.010083402835696413
         },
         {
           "chunk_id": "KIFRS1036-main-130",
           "para": "130",
           "standard_id": "K-IFRS 1036",
-          "score": 0.01522911051212938
+          "score": 0.01
         }
       ],
       "metrics": {
@@ -2137,7 +2137,7 @@
         "mrr": 0.0,
         "std_accuracy": 1
       },
-      "latency_sec": 1.24
+      "latency_sec": 1.23
     },
     {
       "id": "q023",
@@ -2159,78 +2159,78 @@
         "B47",
         "B6",
         "B85",
-        "7"
+        "BC317"
       ],
       "primary_standard": "K-IFRS 1110",
-      "first_correct_rank": 9,
+      "first_correct_rank": null,
       "all_results": [
         {
           "chunk_id": "KIFRS1110-main-B2",
           "para": "B2",
           "standard_id": "K-IFRS 1110",
-          "score": 0.017336838849365915
+          "score": 0.01081008100810081
         },
         {
           "chunk_id": "KIFRS1110-main-B43",
           "para": "B43",
           "standard_id": "K-IFRS 1110",
-          "score": 0.01707242848447961
+          "score": 0.01071301247771836
         },
         {
           "chunk_id": "KIFRS1110-main-B73",
           "para": "B73",
           "standard_id": "K-IFRS 1110",
-          "score": 0.016816412099430966
+          "score": 0.010617828773168579
         },
         {
           "chunk_id": "KIFRS1110-main-B55",
           "para": "B55",
           "standard_id": "K-IFRS 1110",
-          "score": 0.016568396226415094
+          "score": 0.010524475524475524
         },
         {
           "chunk_id": "KIFRS1110-main-B5",
           "para": "B5",
           "standard_id": "K-IFRS 1110",
-          "score": 0.01632801161103048
+          "score": 0.010432900432900433
         },
         {
           "chunk_id": "KIFRS1110-main-B47",
           "para": "B47",
           "standard_id": "K-IFRS 1110",
-          "score": 0.016094911377930246
+          "score": 0.010343053173241853
         },
         {
           "chunk_id": "KIFRS1110-main-nonum-7",
           "para": null,
           "standard_id": "K-IFRS 1110",
-          "score": 0.015868769360743454
+          "score": 0.010254885301614274
         },
         {
           "chunk_id": "KIFRS1111-main-B6",
           "para": "B6",
           "standard_id": "K-IFRS 1111",
-          "score": 0.01564927857935627
+          "score": 0.010168350168350168
         },
         {
           "chunk_id": "KIFRS1110-main-B85",
           "para": "B85",
           "standard_id": "K-IFRS 1110",
-          "score": 0.0154361498496035
+          "score": 0.010083402835696413
         },
         {
-          "chunk_id": "KIFRS1110-main-7",
-          "para": "7",
+          "chunk_id": "KIFRS1110-main-BC317",
+          "para": "BC317",
           "standard_id": "K-IFRS 1110",
-          "score": 0.01522911051212938
+          "score": 0.01
         }
       ],
       "metrics": {
-        "recall": 0.3333333333333333,
-        "mrr": 0.1111111111111111,
+        "recall": 0.0,
+        "mrr": 0.0,
         "std_accuracy": 1
       },
-      "latency_sec": 0.55
+      "latency_sec": 0.52
     },
     {
       "id": "q024",
@@ -2259,61 +2259,61 @@
           "chunk_id": "KIFRS1012-main-37",
           "para": "37",
           "standard_id": "K-IFRS 1012",
-          "score": 0.016816412099430966
+          "score": 0.010617828773168579
         },
         {
           "chunk_id": "KIFRS1012-main-nonum",
           "para": null,
           "standard_id": "K-IFRS 1012",
-          "score": 0.01632801161103048
+          "score": 0.010432900432900433
         },
         {
           "chunk_id": "KIFRS1012-main-24",
           "para": "24",
           "standard_id": "K-IFRS 1012",
-          "score": 0.016094911377930246
+          "score": 0.010343053173241853
         },
         {
           "chunk_id": "KIFRS1012-main-29",
           "para": "29",
           "standard_id": "K-IFRS 1012",
-          "score": 0.015868769360743454
+          "score": 0.010254885301614274
         },
         {
           "chunk_id": "KIFRS1012-main-44",
           "para": "44",
           "standard_id": "K-IFRS 1012",
-          "score": 0.01564927857935627
+          "score": 0.010168350168350168
         },
         {
           "chunk_id": "KIFRS1012-main-51",
           "para": "51",
           "standard_id": "K-IFRS 1012",
-          "score": 0.0154361498496035
+          "score": 0.010083402835696413
         },
         {
           "chunk_id": "KIFRS1012-main-34",
           "para": "34",
           "standard_id": "K-IFRS 1012",
-          "score": 0.01522911051212938
+          "score": 0.01
         },
         {
           "chunk_id": "KIFRS1012-transition-nonum-1",
           "para": null,
           "standard_id": "K-IFRS 1012",
-          "score": 0.017336838849365915
+          "score": 0.01081008100810081
         },
         {
           "chunk_id": "KIFRS1012-transition-BC82",
           "para": "BC82",
           "standard_id": "K-IFRS 1012",
-          "score": 0.01707242848447961
+          "score": 0.01071301247771836
         },
         {
           "chunk_id": "KIFRS1012-transition-BC57",
           "para": "BC57",
           "standard_id": "K-IFRS 1012",
-          "score": 0.016568396226415094
+          "score": 0.010524475524475524
         }
       ],
       "metrics": {
@@ -2321,7 +2321,7 @@
         "mrr": 0.5,
         "std_accuracy": 1
       },
-      "latency_sec": 0.88
+      "latency_sec": 1.12
     },
     {
       "id": "q025",
@@ -2351,61 +2351,61 @@
           "chunk_id": "KIFRS1028-main-26",
           "para": "26",
           "standard_id": "K-IFRS 1028",
-          "score": 0.017336838849365915
+          "score": 0.01081008100810081
         },
         {
           "chunk_id": "KIFRS1028-main-1",
           "para": "1",
           "standard_id": "K-IFRS 1028",
-          "score": 0.01707242848447961
+          "score": 0.01071301247771836
         },
         {
           "chunk_id": "KIFRS1028-main-22",
           "para": "22",
           "standard_id": "K-IFRS 1028",
-          "score": 0.016568396226415094
+          "score": 0.010524475524475524
         },
         {
           "chunk_id": "KIFRS1028-main-25",
           "para": "25",
           "standard_id": "K-IFRS 1028",
-          "score": 0.01632801161103048
+          "score": 0.010432900432900433
         },
         {
           "chunk_id": "KIFRS1028-main-32",
           "para": "32",
           "standard_id": "K-IFRS 1028",
-          "score": 0.016094911377930246
+          "score": 0.010343053173241853
         },
         {
           "chunk_id": "KIFRS1112-main-B16",
           "para": "B16",
           "standard_id": "K-IFRS 1112",
-          "score": 0.015868769360743454
+          "score": 0.010254885301614274
         },
         {
           "chunk_id": "KIFRS1028-main-16",
           "para": "16",
           "standard_id": "K-IFRS 1028",
-          "score": 0.0154361498496035
+          "score": 0.010083402835696413
         },
         {
           "chunk_id": "KIFRS1112-main-B14",
           "para": "B14",
           "standard_id": "K-IFRS 1112",
-          "score": 0.01522911051212938
+          "score": 0.01
         },
         {
           "chunk_id": "KIFRS1028-transition-nonum-6",
           "para": null,
           "standard_id": "K-IFRS 1028",
-          "score": 0.016816412099430966
+          "score": 0.010617828773168579
         },
         {
           "chunk_id": "KIFRS1028-transition-nonum-4",
           "para": null,
           "standard_id": "K-IFRS 1028",
-          "score": 0.01564927857935627
+          "score": 0.010168350168350168
         }
       ],
       "metrics": {
@@ -2413,7 +2413,7 @@
         "mrr": 1.0,
         "std_accuracy": 1
       },
-      "latency_sec": 0.33
+      "latency_sec": 0.31
     },
     {
       "id": "q026",
@@ -2444,61 +2444,61 @@
           "chunk_id": "KIFRS1019-main-57",
           "para": "57",
           "standard_id": "K-IFRS 1019",
-          "score": 0.017336838849365915
+          "score": 0.01081008100810081
         },
         {
           "chunk_id": "KIFRS1019-main-66",
           "para": "66",
           "standard_id": "K-IFRS 1019",
-          "score": 0.01707242848447961
+          "score": 0.01071301247771836
         },
         {
           "chunk_id": "KIFRS1019-main-55",
           "para": "55",
           "standard_id": "K-IFRS 1019",
-          "score": 0.016816412099430966
+          "score": 0.010617828773168579
         },
         {
           "chunk_id": "KIFRS1019-main-87",
           "para": "87",
           "standard_id": "K-IFRS 1019",
-          "score": 0.016568396226415094
+          "score": 0.010524475524475524
         },
         {
           "chunk_id": "KIFRS1019-main-64",
           "para": "64",
           "standard_id": "K-IFRS 1019",
-          "score": 0.01632801161103048
+          "score": 0.010432900432900433
         },
         {
           "chunk_id": "KIFRS1019-main-71",
           "para": "71",
           "standard_id": "K-IFRS 1019",
-          "score": 0.016094911377930246
+          "score": 0.010343053173241853
         },
         {
           "chunk_id": "KIFRS1019-main-67",
           "para": "67",
           "standard_id": "K-IFRS 1019",
-          "score": 0.015868769360743454
+          "score": 0.010254885301614274
         },
         {
           "chunk_id": "KIFRS1019-main-116",
           "para": "116",
           "standard_id": "K-IFRS 1019",
-          "score": 0.01564927857935627
+          "score": 0.010168350168350168
         },
         {
           "chunk_id": "KIFRS1019-main-70",
           "para": "70",
           "standard_id": "K-IFRS 1019",
-          "score": 0.0154361498496035
+          "score": 0.010083402835696413
         },
         {
           "chunk_id": "KIFRS1019-main-39",
           "para": "39",
           "standard_id": "K-IFRS 1019",
-          "score": 0.01522911051212938
+          "score": 0.01
         }
       ],
       "metrics": {
@@ -2506,7 +2506,7 @@
         "mrr": 1.0,
         "std_accuracy": 1
       },
-      "latency_sec": 0.32
+      "latency_sec": 0.4
     },
     {
       "id": "q027",
@@ -2535,61 +2535,61 @@
           "chunk_id": "KIFRS1113-main-4",
           "para": "4",
           "standard_id": "K-IFRS 1113",
-          "score": 0.017336838849365915
+          "score": 0.01081008100810081
         },
         {
           "chunk_id": "KIFRS1113-main-1",
           "para": "1",
           "standard_id": "K-IFRS 1113",
-          "score": 0.01707242848447961
+          "score": 0.01071301247771836
         },
         {
           "chunk_id": "KIFRS1113-main-nonum-7",
           "para": null,
           "standard_id": "K-IFRS 1113",
-          "score": 0.016816412099430966
+          "score": 0.010617828773168579
         },
         {
           "chunk_id": "KIFRS1113-main-nonum-5",
           "para": null,
           "standard_id": "K-IFRS 1113",
-          "score": 0.016568396226415094
+          "score": 0.010524475524475524
         },
         {
           "chunk_id": "KIFRS1113-main-9",
           "para": "9",
           "standard_id": "K-IFRS 1113",
-          "score": 0.01632801161103048
+          "score": 0.010432900432900433
         },
         {
           "chunk_id": "KIFRS1113-main-22",
           "para": "22",
           "standard_id": "K-IFRS 1113",
-          "score": 0.016094911377930246
+          "score": 0.010343053173241853
         },
         {
           "chunk_id": "KIFRS1113-main-3",
           "para": "3",
           "standard_id": "K-IFRS 1113",
-          "score": 0.015868769360743454
+          "score": 0.010254885301614274
         },
         {
           "chunk_id": "KIFRS1113-main-nonum",
           "para": null,
           "standard_id": "K-IFRS 1113",
-          "score": 0.01564927857935627
+          "score": 0.010168350168350168
         },
         {
           "chunk_id": "KIFRS1113-main-2",
           "para": "2",
           "standard_id": "K-IFRS 1113",
-          "score": 0.0154361498496035
+          "score": 0.010083402835696413
         },
         {
           "chunk_id": "KIFRS1113-main-B2",
           "para": "B2",
           "standard_id": "K-IFRS 1113",
-          "score": 0.01522911051212938
+          "score": 0.01
         }
       ],
       "metrics": {
@@ -2597,7 +2597,7 @@
         "mrr": 0.3333333333333333,
         "std_accuracy": 1
       },
-      "latency_sec": 1.18
+      "latency_sec": 0.6
     },
     {
       "id": "q028",
@@ -2626,61 +2626,61 @@
           "chunk_id": "KIFRS1107-main-33",
           "para": "33",
           "standard_id": "K-IFRS 1107",
-          "score": 0.03278688524590164
+          "score": 0.019801980198019802
         },
         {
           "chunk_id": "KIFRS1107-main-nonum-2",
           "para": null,
           "standard_id": "K-IFRS 1107",
-          "score": 0.03200204813108039
+          "score": 0.01951265943270512
         },
         {
           "chunk_id": "KIFRS1107-main-34",
           "para": "34",
           "standard_id": "K-IFRS 1107",
-          "score": 0.03200204813108039
+          "score": 0.01951265943270512
         },
         {
           "chunk_id": "KIFRS1107-main-32A",
           "para": "32A",
           "standard_id": "K-IFRS 1107",
-          "score": 0.02970950704225352
+          "score": 0.018706293706293706
         },
         {
           "chunk_id": "KIFRS1107-main-nonum-3",
           "para": null,
           "standard_id": "K-IFRS 1107",
-          "score": 0.029273504273504274
+          "score": 0.018452380952380953
         },
         {
           "chunk_id": "KIFRS1107-main-32",
           "para": "32",
           "standard_id": "K-IFRS 1107",
-          "score": 0.016568396226415094
+          "score": 0.010524475524475524
         },
         {
           "chunk_id": "KIFRS1107-main-B21",
           "para": "B21",
           "standard_id": "K-IFRS 1107",
-          "score": 0.01632801161103048
+          "score": 0.010432900432900433
         },
         {
           "chunk_id": "KIFRS1107-main-31",
           "para": "31",
           "standard_id": "K-IFRS 1107",
-          "score": 0.016094911377930246
+          "score": 0.010343053173241853
         },
         {
           "chunk_id": "KIFRS1107-main-24G",
           "para": "24G",
           "standard_id": "K-IFRS 1107",
-          "score": 0.015868769360743454
+          "score": 0.010254885301614274
         },
         {
           "chunk_id": "KIFRS1107-main-B25",
           "para": "B25",
           "standard_id": "K-IFRS 1107",
-          "score": 0.01564927857935627
+          "score": 0.010168350168350168
         }
       ],
       "metrics": {
@@ -2688,7 +2688,7 @@
         "mrr": 0.16666666666666666,
         "std_accuracy": 1
       },
-      "latency_sec": 0.31
+      "latency_sec": 0.94
     },
     {
       "id": "q029",
@@ -2718,61 +2718,61 @@
           "chunk_id": "KIFRS1032-main-36",
           "para": "36",
           "standard_id": "K-IFRS 1032",
-          "score": 0.01707242848447961
+          "score": 0.01071301247771836
         },
         {
           "chunk_id": "KIFRS1032-main-2",
           "para": "2",
           "standard_id": "K-IFRS 1032",
-          "score": 0.016816412099430966
+          "score": 0.010617828773168579
         },
         {
           "chunk_id": "KIFRS1032-main-15",
           "para": "15",
           "standard_id": "K-IFRS 1032",
-          "score": 0.016568396226415094
+          "score": 0.010524475524475524
         },
         {
           "chunk_id": "KIFRS1032-main-18",
           "para": "18",
           "standard_id": "K-IFRS 1032",
-          "score": 0.01632801161103048
+          "score": 0.010432900432900433
         },
         {
           "chunk_id": "KIFRS1032-main-16A",
           "para": "16A",
           "standard_id": "K-IFRS 1032",
-          "score": 0.016094911377930246
+          "score": 0.010343053173241853
         },
         {
           "chunk_id": "KIFRS1032-main-AG29A",
           "para": "AG29A",
           "standard_id": "K-IFRS 1032",
-          "score": 0.015868769360743454
+          "score": 0.010254885301614274
         },
         {
           "chunk_id": "KIFRS1032-main-16",
           "para": "16",
           "standard_id": "K-IFRS 1032",
-          "score": 0.01564927857935627
+          "score": 0.010168350168350168
         },
         {
           "chunk_id": "KIFRS1032-main-28",
           "para": "28",
           "standard_id": "K-IFRS 1032",
-          "score": 0.0154361498496035
+          "score": 0.010083402835696413
         },
         {
           "chunk_id": "KIFRS1032-main-16C",
           "para": "16C",
           "standard_id": "K-IFRS 1032",
-          "score": 0.01522911051212938
+          "score": 0.01
         },
         {
           "chunk_id": "KIFRS1032-ag-nonum-1",
           "para": null,
           "standard_id": "K-IFRS 1032",
-          "score": 0.017336838849365915
+          "score": 0.01081008100810081
         }
       ],
       "metrics": {
@@ -2780,7 +2780,7 @@
         "mrr": 0.3333333333333333,
         "std_accuracy": 1
       },
-      "latency_sec": 0.51
+      "latency_sec": 0.6
     },
     {
       "id": "q030",
@@ -2810,61 +2810,61 @@
           "chunk_id": "KIFRS1116-main-49",
           "para": "49",
           "standard_id": "K-IFRS 1116",
-          "score": 0.017336838849365915
+          "score": 0.01081008100810081
         },
         {
           "chunk_id": "KIFRS1116-main-nonum-9",
           "para": null,
           "standard_id": "K-IFRS 1116",
-          "score": 0.01707242848447961
+          "score": 0.01071301247771836
         },
         {
           "chunk_id": "KIFRS1116-main-C12",
           "para": "C12",
           "standard_id": "K-IFRS 1116",
-          "score": 0.016816412099430966
+          "score": 0.010617828773168579
         },
         {
           "chunk_id": "KIFRS1116-main-50",
           "para": "50",
           "standard_id": "K-IFRS 1116",
-          "score": 0.016568396226415094
+          "score": 0.010524475524475524
         },
         {
           "chunk_id": "KIFRS1116-main-96",
           "para": "96",
           "standard_id": "K-IFRS 1116",
-          "score": 0.01632801161103048
+          "score": 0.010432900432900433
         },
         {
           "chunk_id": "KIFRS1116-main-58",
           "para": "58",
           "standard_id": "K-IFRS 1116",
-          "score": 0.016094911377930246
+          "score": 0.010343053173241853
         },
         {
           "chunk_id": "KIFRS1116-main-B44",
           "para": "B44",
           "standard_id": "K-IFRS 1116",
-          "score": 0.015868769360743454
+          "score": 0.010254885301614274
         },
         {
           "chunk_id": "KIFRS1116-main-53",
           "para": "53",
           "standard_id": "K-IFRS 1116",
-          "score": 0.01564927857935627
+          "score": 0.010168350168350168
         },
         {
           "chunk_id": "KIFRS1116-main-C8",
           "para": "C8",
           "standard_id": "K-IFRS 1116",
-          "score": 0.0154361498496035
+          "score": 0.010083402835696413
         },
         {
           "chunk_id": "KIFRS1116-main-84",
           "para": "84",
           "standard_id": "K-IFRS 1116",
-          "score": 0.01522911051212938
+          "score": 0.01
         }
       ],
       "metrics": {
@@ -2872,7 +2872,7 @@
         "mrr": 0.0,
         "std_accuracy": 1
       },
-      "latency_sec": 0.73
+      "latency_sec": 0.44
     },
     {
       "id": "q031",
@@ -2902,61 +2902,61 @@
           "chunk_id": "KIFRS1115-main-55",
           "para": "55",
           "standard_id": "K-IFRS 1115",
-          "score": 0.01707242848447961
+          "score": 0.01071301247771836
         },
         {
           "chunk_id": "KIFRS1115-main-B22",
           "para": "B22",
           "standard_id": "K-IFRS 1115",
-          "score": 0.01632801161103048
+          "score": 0.010432900432900433
         },
         {
           "chunk_id": "KIFRS1115-main-B21",
           "para": "B21",
           "standard_id": "K-IFRS 1115",
-          "score": 0.015868769360743454
+          "score": 0.010254885301614274
         },
         {
           "chunk_id": "KIFRS1115-main-B25",
           "para": "B25",
           "standard_id": "K-IFRS 1115",
-          "score": 0.01564927857935627
+          "score": 0.010168350168350168
         },
         {
           "chunk_id": "KIFRS1115-main-B47",
           "para": "B47",
           "standard_id": "K-IFRS 1115",
-          "score": 0.0154361498496035
+          "score": 0.010083402835696413
         },
         {
           "chunk_id": "KIFRS1115-ag-BC366",
           "para": "BC366",
           "standard_id": "K-IFRS 1115",
-          "score": 0.017336838849365915
+          "score": 0.01081008100810081
         },
         {
           "chunk_id": "KIFRS1115-ag-BC367",
           "para": "BC367",
           "standard_id": "K-IFRS 1115",
-          "score": 0.016816412099430966
+          "score": 0.010617828773168579
         },
         {
           "chunk_id": "KIFRS1115-ag-BC364",
           "para": "BC364",
           "standard_id": "K-IFRS 1115",
-          "score": 0.016568396226415094
+          "score": 0.010524475524475524
         },
         {
           "chunk_id": "KIFRS1115-ag-BC365",
           "para": "BC365",
           "standard_id": "K-IFRS 1115",
-          "score": 0.016094911377930246
+          "score": 0.010343053173241853
         },
         {
           "chunk_id": "KIFRS1115-ag-BC428",
           "para": "BC428",
           "standard_id": "K-IFRS 1115",
-          "score": 0.01522911051212938
+          "score": 0.01
         }
       ],
       "metrics": {
@@ -2964,7 +2964,7 @@
         "mrr": 1.0,
         "std_accuracy": 1
       },
-      "latency_sec": 0.51
+      "latency_sec": 0.56
     },
     {
       "id": "q032",
@@ -2984,8 +2984,8 @@
         "BC165",
         "98",
         "88",
-        "BC229",
-        "BC131B"
+        "BC131B",
+        "BC229"
       ],
       "primary_standard": "K-IFRS 1036",
       "first_correct_rank": 6,
@@ -2994,61 +2994,61 @@
           "chunk_id": "KIFRS1036-main-BC164",
           "para": "BC164",
           "standard_id": "K-IFRS 1036",
-          "score": 0.017336838849365915
+          "score": 0.01081008100810081
         },
         {
           "chunk_id": "KIFRS1036-main-BC160",
           "para": "BC160",
           "standard_id": "K-IFRS 1036",
-          "score": 0.01707242848447961
+          "score": 0.01071301247771836
         },
         {
           "chunk_id": "KIFRS1036-main-nonum-4",
           "para": null,
           "standard_id": "K-IFRS 1036",
-          "score": 0.016816412099430966
+          "score": 0.010617828773168579
         },
         {
           "chunk_id": "KIFRS1036-main-97",
           "para": "97",
           "standard_id": "K-IFRS 1036",
-          "score": 0.016568396226415094
+          "score": 0.010524475524475524
         },
         {
           "chunk_id": "KIFRS1036-main-BC165",
           "para": "BC165",
           "standard_id": "K-IFRS 1036",
-          "score": 0.01632801161103048
+          "score": 0.010432900432900433
         },
         {
           "chunk_id": "KIFRS1036-main-nonum-5",
           "para": null,
           "standard_id": "K-IFRS 1036",
-          "score": 0.016094911377930246
+          "score": 0.010343053173241853
         },
         {
           "chunk_id": "KIFRS1036-main-98",
           "para": "98",
           "standard_id": "K-IFRS 1036",
-          "score": 0.015868769360743454
+          "score": 0.010254885301614274
         },
         {
           "chunk_id": "KIFRS1036-main-88",
           "para": "88",
           "standard_id": "K-IFRS 1036",
-          "score": 0.01564927857935627
-        },
-        {
-          "chunk_id": "KIFRS1036-main-BC229",
-          "para": "BC229",
-          "standard_id": "K-IFRS 1036",
-          "score": 0.0154361498496035
+          "score": 0.010168350168350168
         },
         {
           "chunk_id": "KIFRS1036-main-BC131B",
           "para": "BC131B",
           "standard_id": "K-IFRS 1036",
-          "score": 0.01522911051212938
+          "score": 0.010083402835696413
+        },
+        {
+          "chunk_id": "KIFRS1036-main-BC229",
+          "para": "BC229",
+          "standard_id": "K-IFRS 1036",
+          "score": 0.01
         }
       ],
       "metrics": {
@@ -3056,7 +3056,7 @@
         "mrr": 0.16666666666666666,
         "std_accuracy": 1
       },
-      "latency_sec": 0.51
+      "latency_sec": 0.34
     },
     {
       "id": "q033",
@@ -3086,61 +3086,61 @@
           "chunk_id": "KIFRS1115-main-32",
           "para": "32",
           "standard_id": "K-IFRS 1115",
-          "score": 0.017336838849365915
+          "score": 0.01081008100810081
         },
         {
           "chunk_id": "KIFRS1115-main-121",
           "para": "121",
           "standard_id": "K-IFRS 1115",
-          "score": 0.01707242848447961
+          "score": 0.01071301247771836
         },
         {
           "chunk_id": "KIFRS1115-main-39",
           "para": "39",
           "standard_id": "K-IFRS 1115",
-          "score": 0.016816412099430966
+          "score": 0.010617828773168579
         },
         {
           "chunk_id": "KIFRS1115-main-B2",
           "para": "B2",
           "standard_id": "K-IFRS 1115",
-          "score": 0.01632801161103048
+          "score": 0.010432900432900433
         },
         {
           "chunk_id": "KIFRS1115-main-35",
           "para": "35",
           "standard_id": "K-IFRS 1115",
-          "score": 0.016094911377930246
+          "score": 0.010343053173241853
         },
         {
           "chunk_id": "KIFRS1115-main-B55",
           "para": "B55",
           "standard_id": "K-IFRS 1115",
-          "score": 0.015868769360743454
+          "score": 0.010254885301614274
         },
         {
           "chunk_id": "KIFRS1115-main-B60",
           "para": "B60",
           "standard_id": "K-IFRS 1115",
-          "score": 0.01564927857935627
+          "score": 0.010168350168350168
         },
         {
           "chunk_id": "KIFRS1115-main-23",
           "para": "23",
           "standard_id": "K-IFRS 1115",
-          "score": 0.0154361498496035
+          "score": 0.010083402835696413
         },
         {
           "chunk_id": "KIFRS1115-ag-BC414V",
           "para": "BC414V",
           "standard_id": "K-IFRS 1115",
-          "score": 0.016568396226415094
+          "score": 0.010524475524475524
         },
         {
           "chunk_id": "KIFRS1115-ag-BC414",
           "para": "BC414",
           "standard_id": "K-IFRS 1115",
-          "score": 0.01522911051212938
+          "score": 0.01
         }
       ],
       "metrics": {
@@ -3148,7 +3148,7 @@
         "mrr": 0.2,
         "std_accuracy": 1
       },
-      "latency_sec": 0.34
+      "latency_sec": 0.73
     },
     {
       "id": "q034",
@@ -3173,61 +3173,61 @@
           "chunk_id": "KIFRS1116-main-nonum-6",
           "para": null,
           "standard_id": "K-IFRS 1116",
-          "score": 0.017336838849365915
+          "score": 0.01081008100810081
         },
         {
           "chunk_id": "KIFRS1115-main-nonum-5",
           "para": null,
           "standard_id": "K-IFRS 1115",
-          "score": 0.01707242848447961
+          "score": 0.01071301247771836
         },
         {
           "chunk_id": "KIFRS1107-main-44Z",
           "para": "44Z",
           "standard_id": "K-IFRS 1107",
-          "score": 0.016816412099430966
+          "score": 0.010617828773168579
         },
         {
           "chunk_id": "KIFRS1107-main-nonum-3",
           "para": null,
           "standard_id": "K-IFRS 1107",
-          "score": 0.016568396226415094
+          "score": 0.010524475524475524
         },
         {
           "chunk_id": "KIFRS1115-main-BC510",
           "para": "BC510",
           "standard_id": "K-IFRS 1115",
-          "score": 0.015868769360743454
+          "score": 0.010254885301614274
         },
         {
           "chunk_id": "KIFRS1037-main-5",
           "para": "5",
           "standard_id": "K-IFRS 1037",
-          "score": 0.01564927857935627
+          "score": 0.010168350168350168
         },
         {
           "chunk_id": "KIFRS1107-main-44L",
           "para": "44L",
           "standard_id": "K-IFRS 1107",
-          "score": 0.0154361498496035
+          "score": 0.010083402835696413
         },
         {
           "chunk_id": "KIFRS1116-main-nonum-5",
           "para": null,
           "standard_id": "K-IFRS 1116",
-          "score": 0.01522911051212938
+          "score": 0.01
         },
         {
           "chunk_id": "KIFRS1112-transition-nonum",
           "para": null,
           "standard_id": "K-IFRS 1112",
-          "score": 0.01632801161103048
+          "score": 0.010432900432900433
         },
         {
           "chunk_id": "KIFRS1112-transition-C1D",
           "para": "C1D",
           "standard_id": "K-IFRS 1112",
-          "score": 0.016094911377930246
+          "score": 0.010343053173241853
         }
       ],
       "metrics": {
@@ -3235,7 +3235,7 @@
         "mrr": 0.0,
         "std_accuracy": 0
       },
-      "latency_sec": 0.78
+      "latency_sec": 0.4
     },
     {
       "id": "q035",
@@ -3264,61 +3264,61 @@
           "chunk_id": "KIFRS1037-main-105",
           "para": "105",
           "standard_id": "K-IFRS 1037",
-          "score": 0.017336838849365915
+          "score": 0.01081008100810081
         },
         {
           "chunk_id": "KIFRS1037-main-94A",
           "para": "94A",
           "standard_id": "K-IFRS 1037",
-          "score": 0.01707242848447961
+          "score": 0.01071301247771836
         },
         {
           "chunk_id": "KIFRS1037-main-한92.1",
           "para": "한92.1",
           "standard_id": "K-IFRS 1037",
-          "score": 0.016816412099430966
+          "score": 0.010617828773168579
         },
         {
           "chunk_id": "KIFRS1037-main-69",
           "para": "69",
           "standard_id": "K-IFRS 1037",
-          "score": 0.016568396226415094
+          "score": 0.010524475524475524
         },
         {
           "chunk_id": "KIFRS1037-main-5",
           "para": "5",
           "standard_id": "K-IFRS 1037",
-          "score": 0.01632801161103048
+          "score": 0.010432900432900433
         },
         {
           "chunk_id": "KIFRS1037-main-1",
           "para": "1",
           "standard_id": "K-IFRS 1037",
-          "score": 0.016094911377930246
+          "score": 0.010343053173241853
         },
         {
           "chunk_id": "KIFRS1037-main-66",
           "para": "66",
           "standard_id": "K-IFRS 1037",
-          "score": 0.015868769360743454
+          "score": 0.010254885301614274
         },
         {
           "chunk_id": "KIFRS1037-main-67",
           "para": "67",
           "standard_id": "K-IFRS 1037",
-          "score": 0.01564927857935627
+          "score": 0.010168350168350168
         },
         {
           "chunk_id": "KIFRS1107-main-45",
           "para": "45",
           "standard_id": "K-IFRS 1107",
-          "score": 0.0154361498496035
+          "score": 0.010083402835696413
         },
         {
           "chunk_id": "KIFRS1036-main-nonum-5",
           "para": null,
           "standard_id": "K-IFRS 1036",
-          "score": 0.01522911051212938
+          "score": 0.01
         }
       ],
       "metrics": {

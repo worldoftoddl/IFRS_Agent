@@ -64,3 +64,21 @@ class TestConfiguredEvaluation:
             assert isinstance(result["found_paragraphs"], list), (
                 f"{name} 설정에서 결과 없음"
             )
+
+    def test_golden_has_36_items(self):
+        """현재 golden dataset이 36문항이어야 한다."""
+        golden = load_golden()
+        assert len(golden) == 36, f"36문항 기대, 현재 {len(golden)}문항"
+
+    def test_all_configs_run_on_hard_query(self):
+        """hard 난이도 쿼리에서 모든 설정이 결과를 반환해야 한다."""
+        golden = load_golden()
+        hard_items = [g for g in golden if g.get("difficulty") == "hard"]
+        assert len(hard_items) > 0, "hard 쿼리 없음"
+        item = hard_items[0]
+
+        for name, config in SEARCH_CONFIGS.items():
+            result = run_evaluation(item, config=config)
+            assert isinstance(result["found_paragraphs"], list), (
+                f"{name} 설정에서 hard 쿼리 결과 없음"
+            )

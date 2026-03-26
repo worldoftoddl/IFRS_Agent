@@ -165,9 +165,15 @@ def compute_metrics(result: dict) -> dict:
     }
 
 
-def run_full_evaluation(config_name: str = "baseline") -> dict:
-    """전체 golden dataset 평가 실행."""
+def run_full_evaluation(config_name: str = "baseline", output_name: str = "") -> dict:
+    """전체 golden dataset 평가 실행.
+
+    Args:
+        config_name: SEARCH_CONFIGS 키 이름
+        output_name: 결과 파일명 (미지정 시 config_name 사용)
+    """
     config = SEARCH_CONFIGS.get(config_name, SEARCH_CONFIGS["baseline"])
+    output_name = output_name or config_name
     golden = load_golden()
     results = []
     total_time = 0.0
@@ -211,7 +217,7 @@ def run_full_evaluation(config_name: str = "baseline") -> dict:
     }
 
     # 결과 저장
-    out_path = Path(__file__).parent / "results" / f"{config_name}.json"
+    out_path = Path(__file__).parent / "results" / f"{output_name}.json"
     out_path.parent.mkdir(parents=True, exist_ok=True)
     out_path.write_text(json.dumps(summary, ensure_ascii=False, indent=2, default=str))
     print(f"\n{'='*60}")
@@ -228,4 +234,5 @@ def run_full_evaluation(config_name: str = "baseline") -> dict:
 
 if __name__ == "__main__":
     config_name = sys.argv[1] if len(sys.argv) > 1 else "baseline"
-    run_full_evaluation(config_name)
+    output_name = sys.argv[2] if len(sys.argv) > 2 else config_name
+    run_full_evaluation(config_name, output_name)
