@@ -232,6 +232,7 @@ def _step2_search_hybrid(
     standard_ids: list[str],
     top_k: int = 10,
     rrf_k: int = 60,
+    pool_size: int = 0,
 ) -> tuple[list[tuple], list[str]]:
     """Step 2 BM25 + Dense 순수 RRF 하이브리드 검색.
 
@@ -301,7 +302,7 @@ def _step2_search_hybrid(
             "sids": sids,
             "auths": auths,
             "query": query_text,
-            "pool": top_k * 3,
+            "pool": pool_size if pool_size > 0 else top_k * 3,
             "rrf_k": rrf_k,
             "top_k": top_k,
         },
