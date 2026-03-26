@@ -31,12 +31,14 @@ GOLDEN_PATH = Path(__file__).parent / "golden_dataset.json"
 # ---------------------------------------------------------------------------
 
 SEARCH_CONFIGS: dict[str, dict] = {
-    "baseline": {"rrf_k": 60, "pool_size": 30, "mode": "hybrid"},
-    "rrf_k20": {"rrf_k": 20, "pool_size": 30, "mode": "hybrid"},
-    "rrf_k100": {"rrf_k": 100, "pool_size": 30, "mode": "hybrid"},
-    "pool50": {"rrf_k": 60, "pool_size": 50, "mode": "hybrid"},
-    "dense_only": {"rrf_k": 60, "pool_size": 30, "mode": "dense_only"},
-    "bm25_only": {"rrf_k": 60, "pool_size": 30, "mode": "bm25_only"},
+    "baseline": {"rrf_k": 60, "pool_size": 30, "mode": "hybrid", "rerank": False},
+    "rrf_k20": {"rrf_k": 20, "pool_size": 30, "mode": "hybrid", "rerank": False},
+    "rrf_k100": {"rrf_k": 100, "pool_size": 30, "mode": "hybrid", "rerank": False},
+    "pool50": {"rrf_k": 60, "pool_size": 50, "mode": "hybrid", "rerank": False},
+    "dense_only": {"rrf_k": 60, "pool_size": 30, "mode": "dense_only", "rerank": False},
+    "bm25_only": {"rrf_k": 60, "pool_size": 30, "mode": "bm25_only", "rerank": False},
+    "reranker": {"rrf_k": 60, "pool_size": 30, "mode": "hybrid", "rerank": True},
+    "dense_reranker": {"rrf_k": 60, "pool_size": 30, "mode": "dense_only", "rerank": True},
 }
 
 
@@ -90,6 +92,7 @@ def run_evaluation(item: dict, config: dict | None = None, top_k: int = 10) -> d
     mode = config.get("mode", "hybrid")
     rrf_k = config.get("rrf_k", 60)
     pool_size = config.get("pool_size", 30)
+    use_rerank = config.get("rerank", False)
 
     query_emb = embed_query(query)
 
@@ -107,17 +110,30 @@ def run_evaluation(item: dict, config: dict | None = None, top_k: int = 10) -> d
 
         standard_ids = [s[0] for s in standards if s[2] >= _SIMILARITY_THRESHOLD]
 
+        # 검색 실행 — rerank 시 pool 확대(20)
+        search_top_k = 20 if use_rerank else top_k
+
         if mode == "hybrid":
             rows, _ = _step2_search_hybrid(
                 conn, query_emb, query, standard_ids,
-                top_k=top_k, rrf_k=rrf_k, pool_size=pool_size,
+                top_k=search_top_k, rrf_k=rrf_k, pool_size=pool_size,
             )
         elif mode == "dense_only":
-            rows, _ = _step2_search_multi(conn, query_emb, standard_ids, top_k=top_k)
+            rows, _ = _step2_search_multi(
+                conn, query_emb, standard_ids, top_k=search_top_k
+            )
         elif mode == "bm25_only":
-            rows = _search_bm25_only(conn, query, standard_ids, top_k=top_k)
+            rows = _search_bm25_only(conn, query, standard_ids, top_k=search_top_k)
         else:
             raise ValueError(f"Unknown mode: {mode}")
+
+    # Reranker 적용 (graceful degradation)
+    if use_rerank and rows:
+        from app.reranker import rerank as cohere_rerank
+
+        docs = [r[4] for r in rows]  # content_markdown
+        reranked_indices = cohere_rerank(query, docs, top_n=top_k)
+        rows = [rows[i] for i in reranked_indices]
 
     # primary_standard 판정
     std_col = 6  # standard_id 컬럼 인덱스

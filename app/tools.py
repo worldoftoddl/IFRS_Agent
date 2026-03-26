@@ -465,7 +465,18 @@ def search_ifrs(query: str) -> str:
         standard_ids = [s[0] for s in standards if s[2] >= _SIMILARITY_THRESHOLD]
 
         # Step 2: 임계값 통과 기준서에서 BM25+Dense 하이브리드 검색 (순수 RRF)
-        main_chunks, _ = _step2_search_hybrid(conn, query_emb, query, standard_ids)
+        # pool 확대(20)하여 reranker에 충분한 후보 제공
+        main_chunks, _ = _step2_search_hybrid(
+            conn, query_emb, query, standard_ids, top_k=20
+        )
+
+        # Step 2.5: Cohere Reranker로 재정렬 (graceful degradation)
+        if main_chunks:
+            from app.reranker import rerank
+
+            docs = [r[4] for r in main_chunks]  # content_markdown
+            reranked_indices = rerank(query, docs, top_n=10)
+            main_chunks = [main_chunks[i] for i in reranked_indices]
 
         # 결과에서 가장 많이 등장한 기준서를 주 기준서로 판정
         if main_chunks:
