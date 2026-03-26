@@ -260,6 +260,7 @@
     "query": "손상차손의 인식과 측정",
     "expected_standard": "K-IFRS 1036",
     "expected_paragraphs": [
+      "6",
       "18",
       "59",
       "60"
@@ -292,11 +293,12 @@
   },
   {
     "id": "q025",
-    "query": "관계기업에 대한 지분법 적용 절차",
+    "query": "관계기업에 대한 지분법 회계처리 절차",
     "expected_standard": "K-IFRS 1028",
     "expected_paragraphs": [
-      "10",
-      "16"
+      "26",
+      "27",
+      "28"
     ],
     "category": "측정",
     "difficulty": "medium"
@@ -373,7 +375,8 @@
     "expected_standard": "K-IFRS 1036",
     "expected_paragraphs": [
       "10",
-      "134"
+      "80",
+      "88"
     ],
     "category": "측정",
     "difficulty": "hard"
