@@ -20,6 +20,7 @@ from app.tokenizer import tokenize_for_query  # noqa: E402
 from app.tools import (  # noqa: E402
     _COMPONENT_ORDER,
     _SIMILARITY_THRESHOLD,
+    _expand_adjacent_paragraphs,
     _step1_identify_standard,
     _step2_search_hybrid,
     _step2_search_multi,
@@ -43,6 +44,19 @@ SEARCH_CONFIGS: dict[str, dict] = {
     "dense_reranker": {"rrf_k": 60, "pool_size": 30, "mode": "dense_only", "rerank": True},
     "multi_query": {"rrf_k": 60, "pool_size": 30, "mode": "multi_query", "rerank": False},
     "multi_query_reranker": {"rrf_k": 60, "pool_size": 30, "mode": "multi_query", "rerank": True},
+    # Phase 1 개선 설정
+    "weighted_rrf": {
+        "rrf_k": 60, "pool_size": 50, "mode": "hybrid", "rerank": False,
+        "w_dense": 0.7, "w_bm25": 0.3,
+    },
+    "expand_adjacent": {
+        "rrf_k": 60, "pool_size": 50, "mode": "hybrid", "rerank": False,
+        "w_dense": 0.7, "w_bm25": 0.3, "expand_adjacent": True,
+    },
+    "phase1": {
+        "rrf_k": 60, "pool_size": 50, "mode": "hybrid", "rerank": True,
+        "w_dense": 0.7, "w_bm25": 0.3, "expand_adjacent": True,
+    },
 }
 
 
@@ -97,6 +111,9 @@ def run_evaluation(item: dict, config: dict | None = None, top_k: int = 10) -> d
     rrf_k = config.get("rrf_k", 60)
     pool_size = config.get("pool_size", 30)
     use_rerank = config.get("rerank", False)
+    w_dense = config.get("w_dense", 1.0)
+    w_bm25 = config.get("w_bm25", 1.0)
+    expand_adjacent = config.get("expand_adjacent", False)
 
     query_emb = embed_query(query)
 
@@ -114,13 +131,14 @@ def run_evaluation(item: dict, config: dict | None = None, top_k: int = 10) -> d
 
         standard_ids = [s[0] for s in standards if s[2] >= _SIMILARITY_THRESHOLD]
 
-        # 검색 실행 — rerank 시 pool 확대(20)
+        # 검색 실행 — rerank 시 pool 확대(20)하여 reranker에 후보 제공
         search_top_k = 20 if use_rerank else top_k
 
         if mode == "hybrid":
             rows, _ = _step2_search_hybrid(
                 conn, query_emb, query, standard_ids,
                 top_k=search_top_k, rrf_k=rrf_k, pool_size=pool_size,
+                w_dense=w_dense, w_bm25=w_bm25,
             )
         elif mode == "dense_only":
             rows, _ = _step2_search_multi(
@@ -135,6 +153,10 @@ def run_evaluation(item: dict, config: dict | None = None, top_k: int = 10) -> d
         else:
             raise ValueError(f"Unknown mode: {mode}")
 
+        # 인접 문단 확장 (reranker 전에 후보 풀 확대, 유사도 점수 부여)
+        if expand_adjacent and rows:
+            rows = _expand_adjacent_paragraphs(conn, rows, query_emb=query_emb)
+
     # Reranker 적용 (graceful degradation)
     if use_rerank and rows:
         from app.reranker import rerank as cohere_rerank
@@ -142,6 +164,9 @@ def run_evaluation(item: dict, config: dict | None = None, top_k: int = 10) -> d
         docs = [r[4] for r in rows]  # content_markdown
         reranked_indices = cohere_rerank(query, docs, top_n=top_k)
         rows = [rows[i] for i in reranked_indices]
+
+    # 항상 top_k로 제한 (공정한 Recall@K 비교)
+    rows = rows[:top_k]
 
     # primary_standard 판정
     std_col = 6  # standard_id 컬럼 인덱스

@@ -234,13 +234,15 @@ def _step2_search_hybrid(
     top_k: int = 10,
     rrf_k: int = 60,
     pool_size: int = 0,
+    w_dense: float = 1.0,
+    w_bm25: float = 1.0,
 ) -> tuple[list[tuple], list[str]]:
-    """Step 2 BM25 + Dense 순수 RRF 하이브리드 검색.
+    """Step 2 BM25 + Dense Weighted RRF 하이브리드 검색.
 
     Dense(벡터 유사도)와 BM25(키워드 매칭) 결과를
-    순수 RRF(Reciprocal Rank Fusion)로 결합.
-    rrf_score = 1/(k + rank_dense) + 1/(k + rank_bm25)
-    가중치 없음 — 스코어 스케일 차이를 무시하고 순위만 사용.
+    Weighted RRF(Reciprocal Rank Fusion)로 결합.
+    rrf_score = w_dense/(k + rank_dense) + w_bm25/(k + rank_bm25)
+    가중치로 Dense/BM25 기여도를 조절.
 
     반환 튜플 형식: (chunk_id, para_number, component, section_title,
                     content_markdown, rrf_score, standard_id)
@@ -290,8 +292,8 @@ def _step2_search_hybrid(
                COALESCE(d.component, b.component) AS component,
                COALESCE(d.section_title, b.section_title) AS section_title,
                COALESCE(d.content_markdown, b.content_markdown) AS content_markdown,
-               1.0/(%(rrf_k)s + COALESCE(d.rank_dense, 1000))
-                 + 1.0/(%(rrf_k)s + COALESCE(b.rank_bm25, 1000)) AS rrf_score,
+               %(w_dense)s * 1.0/(%(rrf_k)s + COALESCE(d.rank_dense, 1000))
+                 + %(w_bm25)s * 1.0/(%(rrf_k)s + COALESCE(b.rank_bm25, 1000)) AS rrf_score,
                COALESCE(d.standard_id, b.standard_id) AS standard_id
         FROM dense d
         FULL OUTER JOIN bm25 b ON d.chunk_id = b.chunk_id
@@ -306,6 +308,8 @@ def _step2_search_hybrid(
             "pool": pool_size if pool_size > 0 else top_k * 3,
             "rrf_k": rrf_k,
             "top_k": top_k,
+            "w_dense": w_dense,
+            "w_bm25": w_bm25,
         },
     ).fetchall()
 
@@ -361,6 +365,100 @@ def _step2_search_multi_query(
     )
     para_numbers = [r[1] for r in top_rows if r[1]]
     return rows_sorted, para_numbers
+
+
+def _expand_adjacent_paragraphs(
+    conn: psycopg.Connection,
+    rows: list[tuple],
+    window: int = 1,
+    query_emb: list[float] | None = None,
+) -> list[tuple]:
+    """검색된 문단의 인접 ±window 문단을 자동 포함.
+
+    연속 문단 누락 문제 해결: 예) 14를 찾았으면 15, 16도 포함.
+    같은 standard_id 내에서만 확장하며, 중복은 제거한다.
+    query_emb가 제공되면 확장된 문단에 실제 코사인 유사도를 부여한다.
+
+    입력 행 형식 (7-tuple): (chunk_id, para_number, component, section_title,
+                            content_markdown, score, standard_id)
+    """
+    if not rows:
+        return []
+
+    existing_ids = {r[0] for r in rows}
+
+    # 인접 문단 번호 수집: (standard_id, para_number) 쌍
+    neighbor_paras: list[tuple[str, str]] = []
+    for row in rows:
+        para = row[1]
+        std_id = row[6]
+        if not para:
+            continue
+        # 숫자 문단만 ±window 확장 (예: "14" → "13", "15")
+        # "82A" 같은 비숫자는 건너뜀
+        try:
+            para_int = int(para)
+        except (ValueError, TypeError):
+            continue
+        for offset in range(-window, window + 1):
+            if offset == 0:
+                continue
+            neighbor_paras.append((std_id, str(para_int + offset)))
+
+    if not neighbor_paras:
+        return list(rows)
+
+    # 기준서별로 인접 문단 그룹화
+    from collections import defaultdict
+    by_standard: dict[str, set[str]] = defaultdict(set)
+    for std_id, para in neighbor_paras:
+        by_standard[std_id].add(para)
+
+    # 인접 문단 일괄 조회 — query_emb가 있으면 실제 유사도 계산
+    added: list[tuple] = []
+    for std_id, paras in by_standard.items():
+        if query_emb is not None:
+            neighbor_rows = conn.execute(
+                """
+                SELECT chunk_id, para_number, component, section_title,
+                       content_markdown,
+                       1 - (embedding <=> %s::vector) AS similarity,
+                       standard_id
+                FROM chunks
+                WHERE standard_id = %s
+                  AND para_number = ANY(%s)
+                  AND authority <= (
+                      SELECT COALESCE(base_authority, 1)
+                      FROM standards WHERE standard_id = %s
+                  )
+                """,
+                (query_emb, std_id, list(paras), std_id),
+            ).fetchall()
+        else:
+            neighbor_rows = conn.execute(
+                """
+                SELECT chunk_id, para_number, component, section_title,
+                       content_markdown,
+                       0.0 AS score,
+                       standard_id
+                FROM chunks
+                WHERE standard_id = %s
+                  AND para_number = ANY(%s)
+                  AND authority <= (
+                      SELECT COALESCE(base_authority, 1)
+                      FROM standards WHERE standard_id = %s
+                  )
+                """,
+                (std_id, list(paras), std_id),
+            ).fetchall()
+
+        for nr in neighbor_rows:
+            if nr[0] not in existing_ids:
+                existing_ids.add(nr[0])
+                added.append(nr)
+
+    # 원본 순�� 유지 + 확장 문단 append (reranker가 최종 순서 결정)
+    return list(rows) + added
 
 
 def _step3_4_find_related(
