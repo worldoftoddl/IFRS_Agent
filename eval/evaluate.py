@@ -57,9 +57,6 @@ SEARCH_CONFIGS: dict[str, dict] = {
         "rrf_k": 60, "pool_size": 50, "mode": "hybrid", "rerank": True,
         "w_dense": 0.7, "w_bm25": 0.3, "expand_adjacent": True,
     },
-    # HyDE 설정
-    "hyde": {"rrf_k": 60, "pool_size": 30, "mode": "hybrid", "rerank": False, "hyde": True},
-    "hyde_reranker": {"rrf_k": 60, "pool_size": 30, "mode": "hybrid", "rerank": True, "hyde": True},
 }
 
 
@@ -117,15 +114,8 @@ def run_evaluation(item: dict, config: dict | None = None, top_k: int = 10) -> d
     w_dense = config.get("w_dense", 1.0)
     w_bm25 = config.get("w_bm25", 1.0)
     expand_adjacent = config.get("expand_adjacent", False)
-    use_hyde = config.get("hyde", False)
 
-    # HyDE: 가상 답변을 임베딩 (Step 1도 가상 답변으로 검색)
-    if use_hyde:
-        from app.hyde import generate_hypothetical_answer
-        hypo = generate_hypothetical_answer(query)
-        query_emb = embed_query(hypo)
-    else:
-        query_emb = embed_query(query)
+    query_emb = embed_query(query)
 
     with get_connection() as conn:
         standards = _step1_identify_standard(conn, query_emb, top_k=5)
