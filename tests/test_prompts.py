@@ -38,3 +38,9 @@ class TestSystemPromptContents:
         """근거 문단 인용 지시가 포함되어야 한다."""
         assert "문단" in SYSTEM_PROMPT
         assert "인용" in SYSTEM_PROMPT
+
+    def test_contains_description_conciseness_instruction(self):
+        """서브에이전트 task description 간결화 지시가 포함되어야 한다."""
+        assert "원본 질문" in SYSTEM_PROMPT or "원문 질문" in SYSTEM_PROMPT, (
+            "description 간결화 지시가 메인 프롬프트에 없음"
+        )
