@@ -12,6 +12,7 @@ import cohere
 logger = logging.getLogger(__name__)
 
 _client: cohere.Client | None = None
+_client_lock = threading.Lock()
 
 # ---------------------------------------------------------------------------
 # 리랭커 캐시 — 동일 (query, documents) 조합 재호출 방지 (~1-2s 절감)
@@ -34,8 +35,10 @@ def _rerank_cache_key(query: str, documents: list[str], top_n: int) -> str:
     """(query, documents, top_n)의 해시 키 생성."""
     h = hashlib.sha256()
     h.update(query.encode())
+    h.update(b"\x00")
     for doc in documents:
         h.update(doc.encode())
+        h.update(b"\x00")
     h.update(str(top_n).encode())
     return h.hexdigest()
 
@@ -43,10 +46,14 @@ def _rerank_cache_key(query: str, documents: list[str], top_n: int) -> str:
 def _get_client() -> cohere.Client:
     global _client
     if _client is None:
-        api_key = os.environ.get("COHERE_API_KEY")
-        if not api_key:
-            raise RuntimeError("COHERE_API_KEY 환경변수가 설정되지 않았습니다.")
-        _client = cohere.Client(api_key=api_key)
+        with _client_lock:
+            if _client is None:
+                api_key = os.environ.get("COHERE_API_KEY")
+                if not api_key:
+                    raise RuntimeError(
+                        "COHERE_API_KEY 환경변수가 설정되지 않았습니다."
+                    )
+                _client = cohere.Client(api_key=api_key)
     return _client
 
 

@@ -10,8 +10,8 @@ class TestSystemPromptContents:
     """시스템 프롬프트 필수 지침 검증."""
 
     def test_contains_tool_usage_instruction(self):
-        """도구 사용 지시가 포함되어야 한다."""
-        assert "search_ifrs" in SYSTEM_PROMPT
+        """서브에이전트 위임 지시가 포함되어야 한다."""
+        assert "retrieval-distiller" in SYSTEM_PROMPT
 
     def test_contains_authority_level_guidance(self):
         """권위 수준 구분 지침이 포함되어야 한다."""

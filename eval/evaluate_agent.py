@@ -271,6 +271,8 @@ def run_full_agent_evaluation(output_name: str = "subagent") -> dict:
         )
 
     # 집계
+    if not results:
+        raise ValueError(f"Golden dataset이 비어 있습니다: {GOLDEN_PATH}")
     avg_recall = sum(r["metrics"]["cited_recall"] for r in results) / len(results)
     std_acc = sum(r["metrics"]["std_hit"] for r in results) / len(results)
     avg_latency = total_time / len(results)
