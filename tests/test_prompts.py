@@ -44,3 +44,12 @@ class TestSystemPromptContents:
         assert "원본 질문" in SYSTEM_PROMPT or "원문 질문" in SYSTEM_PROMPT, (
             "description 간결화 지시가 메인 프롬프트에 없음"
         )
+
+    def test_contains_clarification_instruction(self):
+        """정보 부족 시 역질문 지시가 포함되어야 한다."""
+        assert "사전 확인" in SYSTEM_PROMPT, (
+            "역질문 섹션이 메인 프롬프트에 없음"
+        )
+        assert "역질문" in SYSTEM_PROMPT or "먼저 질문" in SYSTEM_PROMPT, (
+            "사용자에게 질문하라는 지시가 없음"
+        )
