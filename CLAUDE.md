@@ -95,7 +95,8 @@ K-IFRS(한국채택국제회계기준) 벡터 DB를 활용한 **질의응답 Age
 LangGraph + DeepAgents 프레임워크 기반으로, 사용자 질문에 대해 관련 기준서를 검색하고 Claude가 답변을 생성한다.
 
 - **백엔드**: `deepagents` (`create_deep_agent`) + LangGraph 서버 (`langgraph dev`)
-- **프론트엔드**: `deep-agents-ui` (Next.js 16) — `ui/` 디렉토리
+- **프론트엔드**: 커스텀 챗봇 UI (Next.js 15, React 19) — `chatbot/` 디렉토리
+  - 참고용 원본: `deep-agents-ui` (Next.js 16) — `ui/` 디렉토리
 - **DB**: PostgreSQL+pgvector (`kifrs` DB) — `_IFRS_parsing` 프로젝트에서 구축
 - **LLM**: Claude Sonnet 4.6 (`anthropic:claude-sonnet-4-6`)
 - **임베딩**: Upstage Solar (`embedding-query`, 4096차원)
@@ -114,7 +115,9 @@ LangGraph + DeepAgents 프레임워크 기반으로, 사용자 질문에 대해 
 │   ├── tools.py                ← 4개 도구 + 내부 검색 파이프라인
 │   ├── db.py                   ← psycopg ConnectionPool + pgvector (thread-safe)
 │   ├── embedder.py             ← Upstage embedding-query 래퍼 (thread-safe)
-│   ├── prompts.py              ← K-IFRS 전문가 시스템 프롬프트
+│   ├── prompts.py              ← K-IFRS 전문가 시스템 프롬프트 (메인)
+│   ├── subagent_prompts.py     ← retrieval-distiller 서브에이전트 프롬프트
+│   ├── subagent_tools.py       ← 서브에이전트 전용 도구 3개
 │   ├── tokenizer.py            ← kiwipiepy 형태소 분석 + 사용자 사전
 │   ├── reranker.py             ← Cohere rerank-v3.5 래퍼 (graceful degradation)
 │   ├── multi_query.py          ← Multi-Query 변형 생성 (Haiku, 비교용)
@@ -125,7 +128,8 @@ LangGraph + DeepAgents 프레임워크 기반으로, 사용자 질문에 대해 
 │       └── 002_rebuild_tsvector_kiwi.py ← kiwipiepy 토큰화로 tsvector 재빌드
 ├── eval/
 │   ├── golden_dataset.json     ← 36문항 평가 데이터셋
-│   ├── evaluate.py             ← Recall/MRR/StdAcc 평가 프레임워크
+│   ├── evaluate.py             ← Recall/MRR/StdAcc 검색 평가 프레임워크
+│   ├── evaluate_agent.py       ← E2E 에이전트 평가 (Cited Recall, StdAcc)
 │   └── results/                ← 평가 결과 JSON 파일들
 ├── tests/                      ← 94개 테스트
 │   ├── test_step2_authority.py
@@ -140,11 +144,20 @@ LangGraph + DeepAgents 프레임워크 기반으로, 사용자 질문에 대해 
 │   ├── test_multi_query.py
 │   ├── test_tokenizer.py
 │   └── test_user_dict.py
+├── chatbot/                    ← 커스텀 K-IFRS 챗봇 UI (Next.js 15)
+│   ├── package.json            ← concurrently로 backend+frontend 동시 실행
+│   ├── src/
+│   │   ├── app/                ← layout, page, globals.css
+│   │   ├── components/         ← ChatContainer, ChatInput, MessageList 등 8개
+│   │   ├── hooks/useChat.ts    ← useStream 래퍼 (간소화)
+│   │   ├── lib/                ← client, config (localStorage), utils
+│   │   └── types/              ← StateType, AppConfig
+│   └── public/
 ├── problems.md                 ← 진단된 문제점 및 개선 과제
 ├── DB_USAGE_GUIDE.md           ← 벡터 DB 사용 가이드
 ├── DB_QUALITY_REPORT.md        ← IAS 본문 누락 진단 리포트
 ├── DB_QUALITY_REPORT_RESPONSE.md ← 파싱 수정 대응 리포트
-├── ui/                         ← deep-agents-ui (git clone, .gitignore)
+├── ui/                         ← deep-agents-ui 원본 (참고용, .gitignore)
 └── CLAUDE.md
 ```
 
@@ -166,12 +179,19 @@ python -m pytest tests/ -v    # 94개 전체 통과 확인
 # --- 평가 ---
 python eval/evaluate.py baseline                   # 36문항 평가
 
-# --- LangGraph 서버 시작 (터미널 1) ---
-langgraph dev --no-browser    # http://127.0.0.1:2024
+# --- 챗봇 UI (백엔드+프론트 동시 실행) ---
+cd chatbot && npm install && npm run dev
+# → langgraph dev (포트 2024) + next dev (포트 3001) 동시 시작
+# 브라우저에서 http://localhost:3001 → 설정 패널에서 API URL 입력
 
-# --- 프론트엔드 (터미널 2) ---
-cd ui && yarn install && yarn dev   # http://localhost:3000
-# 설정: Deployment URL = http://127.0.0.1:2024, Assistant ID = ifrs-agent
+# --- 프론트만 실행 (백엔드가 별도 실행 중일 때) ---
+cd chatbot && npm run dev:ui  # http://localhost:3001
+
+# --- 백엔드만 실행 ---
+source .venv/bin/activate && langgraph dev --no-browser  # http://localhost:2024
+
+# --- 참고: deep-agents-ui 원본 (별도 사용 시) ---
+# cd ui && yarn install && yarn dev   # http://localhost:3000
 
 # --- 환경변수 (.env) ---
 # ANTHROPIC_API_KEY=...       ← Claude API
@@ -185,12 +205,25 @@ cd ui && yarn install && yarn dev   # http://localhost:3000
 
 ### Agent 구성 (`app/agent.py`)
 
+메인 에이전트(Sonnet 4.6) + retrieval-distiller 서브에이전트(Haiku 4.5) 2계층 구조.
+
 ```python
 from deepagents import create_deep_agent
 
+# 메인 도구: IE, BC, 메타데이터 (Level 1 검색은 서브에이전트에 위임)
+MAIN_TOOLS = [search_ifrs_examples, search_ifrs_rationale, get_standard_info]
+
+# 서브에이전트: Level 1 하이브리드 검색 전담
+SUBAGENT_CONFIGS = [{
+    "name": "retrieval-distiller",
+    "tools": [retrieve_ifrs, lookup_paragraph, search_single_standard],
+    "model": "anthropic:claude-haiku-4-5-20251001",
+}]
+
 agent = create_deep_agent(
     model="anthropic:claude-sonnet-4-6",
-    tools=[search_ifrs, search_ifrs_examples, search_ifrs_rationale, get_standard_info],
+    tools=MAIN_TOOLS,
+    subagents=SUBAGENT_CONFIGS,
     system_prompt=SYSTEM_PROMPT,
     name="kifrs-agent",
 )
@@ -215,12 +248,22 @@ agent = create_deep_agent(
 
 ### 도구별 역할
 
+**메인 에이전트 도구** (Sonnet 4.6):
+
 | 도구 | 용도 | 호출 시점 |
 |------|------|----------|
-| `search_ifrs` | 하이브리드 검색 + Reranker | 항상 (기본) |
+| `task("retrieval-distiller", ...)` | Level 1 검색 위임 | 항상 (기본, 질문당 1회) |
 | `search_ifrs_examples` | IE 적용사례 (paragraph_links) | 실무 처리 방법 필요 시 |
 | `search_ifrs_rationale` | BC 결론도출근거 (paragraph_links) | 기준 제정 배경 질문 |
 | `get_standard_info` | 기준서 메타데이터 | 기본 정보 확인 |
+
+**서브에이전트 도구** (Haiku 4.5, `app/subagent_tools.py`):
+
+| 도구 | 용도 |
+|------|------|
+| `retrieve_ifrs` | 하이브리드 검색 + Reranker → raw dict 반환 |
+| `lookup_paragraph` | 특정 기준서·문단 직접 조회 |
+| `search_single_standard` | 단일 기준서 내 dense 검색 |
 
 ### 핵심 설계 결정
 
@@ -257,7 +300,9 @@ agent = create_deep_agent(
 | `kiwipiepy` | 한국어 형태소 분석 (BM25 토큰화) |
 | `psycopg` + `pgvector` | PostgreSQL + 벡터 검색 |
 | `openai` | Upstage Solar Embedding (호환 API) |
-| `deep-agents-ui` | 프론트엔드 (Next.js 16) |
+| `next` (15.x) | 챗봇 프론트엔드 (커스텀 UI, `chatbot/`) |
+| `@langchain/langgraph-sdk` | LangGraph 서버 연동 + `useStream` 스트리밍 |
+| `react-markdown` + `remark-gfm` | K-IFRS 답변 마크다운 렌더링 |
 
 ## 코드 품질
 
