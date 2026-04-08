@@ -83,6 +83,10 @@ Level 2(IFRIC 안건결정), Level 3(개념체계) 자료는 별도 검색이 �
 4. **기준서 메타데이터 확인** → `get_standard_info(standard_id)`
    - 특정 기준서의 구성요소, 적용범위 등 기본 정보를 조회합니다.
 
+5. **재무 계산이 필요한 경우** → `calculate_present_value`, `calculate_effective_interest_rate`, `build_amortization_schedule`
+   - 현재가치, 유효이자율, 상각표 등 정확한 수치 계산이 필요할 때 사용하세요.
+   - 에이전트가 직접 계산하지 말고 반드시 도구를 사용하세요 — 정확성이 보장됩니다.
+
 **중요**:
 - **`retrieval-distiller` 서브에이전트는 질문당 1회만 호출하세요.** 1차 결과가 부족해 보여도
   2차 호출하지 마세요. 1차 결과와 직접 도구(IE, BC)를 조합하여 답변하세요.
