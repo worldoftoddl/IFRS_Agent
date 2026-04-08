@@ -96,7 +96,6 @@ LangGraph + DeepAgents 프레임워크 기반으로, 사용자 질문에 대해 
 
 - **백엔드**: `deepagents` (`create_deep_agent`) + LangGraph 서버 (`langgraph dev`)
 - **프론트엔드**: 커스텀 챗봇 UI (Next.js 15, React 19) — `chatbot/` 디렉토리
-  - 참고용 원본: `deep-agents-ui` (Next.js 16) — `ui/` 디렉토리
 - **DB**: PostgreSQL+pgvector (`kifrs` DB) — `_IFRS_parsing` 프로젝트에서 구축
 - **LLM**: Claude Sonnet 4.6 (`anthropic:claude-sonnet-4-6`)
 - **임베딩**: Upstage Solar (`embedding-query`, 4096차원)
@@ -109,7 +108,9 @@ LangGraph + DeepAgents 프레임워크 기반으로, 사용자 질문에 대해 
 ├── pyproject.toml              ← 프로젝트 설정 + 의존성 (hatchling 빌드)
 ├── langgraph.json              ← LangGraph 서버 설정 (ifrs-agent 그래프)
 ├── .env                        ← 환경변수 (API 키, DB URL) — .gitignore
-├── app/
+├── CLAUDE.md
+│
+├── app/                        ← 런타임 백엔드
 │   ├── __init__.py
 │   ├── agent.py                ← create_deep_agent() 메인 진입점
 │   ├── tools.py                ← 4개 도구 + 내부 검색 파이프라인
@@ -126,25 +127,8 @@ LangGraph + DeepAgents 프레임워크 기반으로, 사용자 질문에 대해 
 │   └── migrations/
 │       ├── 001_add_tsvector.sql         ← tsvector 컬럼 + GIN 인덱스 (초기)
 │       └── 002_rebuild_tsvector_kiwi.py ← kiwipiepy 토큰화로 tsvector 재빌드
-├── eval/
-│   ├── golden_dataset.json     ← 36문항 평가 데이터셋
-│   ├── evaluate.py             ← Recall/MRR/StdAcc 검색 평가 프레임워크
-│   ├── evaluate_agent.py       ← E2E 에이전트 평가 (Cited Recall, StdAcc)
-│   └── results/                ← 평가 결과 JSON 파일들
-├── tests/                      ← 94개 테스트
-│   ├── test_step2_authority.py
-│   ├── test_multi_standard_search.py
-│   ├── test_prompts.py
-│   ├── test_similarity_threshold.py
-│   ├── test_tsvector.py
-│   ├── test_hybrid_search.py
-│   ├── test_evaluation.py
-│   ├── test_param_tuning.py
-│   ├── test_reranker.py
-│   ├── test_multi_query.py
-│   ├── test_tokenizer.py
-│   └── test_user_dict.py
-├── chatbot/                    ← 커스텀 K-IFRS 챗봇 UI (Next.js 15)
+│
+├── chatbot/                    ← 런타임 프론트엔드 (Next.js 15)
 │   ├── package.json            ← concurrently로 backend+frontend 동시 실행
 │   ├── src/
 │   │   ├── app/                ← layout, page, globals.css
@@ -153,12 +137,20 @@ LangGraph + DeepAgents 프레임워크 기반으로, 사용자 질문에 대해 
 │   │   ├── lib/                ← client, config (localStorage), utils
 │   │   └── types/              ← StateType, AppConfig
 │   └── public/
-├── problems.md                 ← 진단된 문제점 및 개선 과제
-├── DB_USAGE_GUIDE.md           ← 벡터 DB 사용 가이드
-├── DB_QUALITY_REPORT.md        ← IAS 본문 누락 진단 리포트
-├── DB_QUALITY_REPORT_RESPONSE.md ← 파싱 수정 대응 리포트
-├── ui/                         ← deep-agents-ui 원본 (참고용, .gitignore)
-└── CLAUDE.md
+│
+├── dev/                        ← 개발 과정 산출물
+│   ├── eval/                   ← 평가 프레임워크
+│   │   ├── golden_dataset.json ← 36문항 평가 데이터셋
+│   │   ├── evaluate.py         ← Recall/MRR/StdAcc 검색 평가
+│   │   ├── evaluate_agent.py   ← E2E 에이전트 평가 (Cited Recall)
+│   │   └── results/            ← 평가 결과 JSON 파일들
+│   ├── tests/                  ← pytest 테스트
+│   ├── notebooks/              ← Jupyter 노트북 (agent_evaluation.ipynb)
+│   ├── docs/                   ← 회고, 문제점 문서
+│   └── reports/                ← DB 품질 리포트
+│
+└── data/                       ← 참조 데이터
+    └── search_chunks/          ← K-IFRS 기준서별 청크 JSON 64개
 ```
 
 ## 빌드 & 실행
@@ -174,10 +166,10 @@ python app/extract_terms.py                        # K-IFRS 용어 사전 생성
 python app/migrations/002_rebuild_tsvector_kiwi.py  # kiwipiepy tsvector 재빌드
 
 # --- 테스트 ---
-python -m pytest tests/ -v    # 94개 전체 통과 확인
+python -m pytest dev/tests/ -v    # 94개 전체 통과 확인
 
 # --- 평가 ---
-python eval/evaluate.py baseline                   # 36문항 평가
+python dev/eval/evaluate.py baseline               # 36문항 평가
 
 # --- 챗봇 UI (백엔드+프론트 동시 실행) ---
 cd chatbot && npm install && npm run dev
@@ -306,8 +298,8 @@ agent = create_deep_agent(
 
 ## 코드 품질
 
-- `ruff check app/ eval/` — 전체 통과
-- `python -m pytest tests/` — 94개 테스트 전체 통과
+- `ruff check app/ dev/eval/` — 전체 통과
+- `python -m pytest dev/tests/` — 94개 테스트 전체 통과
 - 모든 SQL은 파라미터화 (`%s`, `ANY(%s)`, `UNNEST`, named `%(key)s`)
 - thread-safe 싱글턴 (double-checked locking): db, embedder, tokenizer, reranker
 
@@ -334,5 +326,5 @@ agent = create_deep_agent(
 ## 관련 프로젝트
 
 - **`_IFRS_parsing`** (`/home/shin/Project/_IFRS_parsing/`): docx → 마크다운 → 벡터 DB 적재 파이프라인
-- **DB 사용 가이드**: `DB_USAGE_GUIDE.md`
-- **DB 품질 리포트**: `DB_QUALITY_REPORT.md`, `DB_QUALITY_REPORT_RESPONSE.md`
+- **DB 사용 가이드**: `dev/reports/DB_USAGE_GUIDE.md`
+- **DB 품질 리포트**: `dev/reports/DB_QUALITY_REPORT.md`, `dev/reports/DB_QUALITY_REPORT_RESPONSE.md`

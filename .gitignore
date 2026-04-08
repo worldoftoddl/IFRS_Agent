@@ -12,10 +12,13 @@ build/
 .ruff_cache/
 .pytest_cache/
 
-# UI
-ui/node_modules/
-ui/.next/
-ui/.env.local
+# Chatbot UI
+chatbot/node_modules/
+chatbot/.next/
+chatbot/.env.local
+
+# Dev artifacts
+result
 
 # IDE
 .vscode/
