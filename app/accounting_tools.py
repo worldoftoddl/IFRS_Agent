@@ -1,8 +1,11 @@
-"""K-IFRS 재무 계산 도구 — 현재가치, 유효이자율, 상각표.
+"""K-IFRS 재무 계산 도구 — 현재가치, 유효이자율, 상각표, 산술 검증.
 
 LLM이 자체적으로 할 수 없는 정확한 수치 계산을 제공한다.
 모든 도구는 마크다운 테이블을 반환하여 챗봇 UI에서 깔끔하게 렌더링된다.
 """
+
+import ast
+import operator
 
 from langchain_core.tools import tool
 
@@ -201,3 +204,69 @@ def build_amortization_schedule(
     )
 
     return header + "\n".join(rows) + footer
+
+
+# ---------------------------------------------------------------------------
+# 안전한 수식 평가를 위한 연산자 매핑
+# ---------------------------------------------------------------------------
+
+_ALLOWED_OPS = {
+    ast.Add: operator.add,
+    ast.Sub: operator.sub,
+    ast.Mult: operator.mul,
+    ast.Div: operator.truediv,
+    ast.FloorDiv: operator.floordiv,
+    ast.Mod: operator.mod,
+    ast.Pow: operator.pow,
+    ast.USub: operator.neg,
+    ast.UAdd: operator.pos,
+}
+
+
+def _safe_eval(node: ast.AST) -> float:
+    """AST 노드를 재귀적으로 평가. 허용된 연산만 수행."""
+    if isinstance(node, ast.Expression):
+        return _safe_eval(node.body)
+    if isinstance(node, ast.Constant) and isinstance(node.value, (int, float)):
+        return float(node.value)
+    if isinstance(node, ast.BinOp):
+        op_func = _ALLOWED_OPS.get(type(node.op))
+        if op_func is None:
+            raise ValueError(f"허용되지 않는 연산: {type(node.op).__name__}")
+        left = _safe_eval(node.left)
+        right = _safe_eval(node.right)
+        return op_func(left, right)
+    if isinstance(node, ast.UnaryOp):
+        op_func = _ALLOWED_OPS.get(type(node.op))
+        if op_func is None:
+            raise ValueError(f"허용되지 않는 연산: {type(node.op).__name__}")
+        return op_func(_safe_eval(node.operand))
+    if isinstance(node, ast.Call):
+        # round() 함수만 허용
+        if isinstance(node.func, ast.Name) and node.func.id == "round":
+            args = [_safe_eval(a) for a in node.args]
+            return round(*args)
+        raise ValueError(f"허용되지 않는 함수: {ast.dump(node.func)}")
+    raise ValueError(f"허용되지 않는 표현식: {type(node).__name__}")
+
+
+@tool
+def verify_arithmetic(expression: str) -> str:
+    """수식의 계산 결과를 검증합니다.
+
+    중간 계산값이 올바른지 확인할 때 사용하세요.
+    연결재무제표의 대차균형, 영업권 산출, 내부거래 조정 등의 교차검증에 특히 유용합니다.
+
+    Args:
+        expression: 계산식 (예: "750000 + 460000 - 1150000", "100000 * 0.6")
+    """
+    if not expression or not expression.strip():
+        return "**오류**: 수식이 비어 있습니다."
+
+    try:
+        tree = ast.parse(expression.strip(), mode="eval")
+        result = _safe_eval(tree)
+    except (ValueError, SyntaxError, ZeroDivisionError) as e:
+        return f"**오류**: 수식을 계산할 수 없습니다 — {e}"
+
+    return f"`{expression.strip()}` = **{_fmt(result)}**"

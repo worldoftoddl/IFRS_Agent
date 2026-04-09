@@ -13,17 +13,18 @@ from deepagents import create_deep_agent
 from deepagents.backends import FilesystemBackend
 from deepagents.middleware.subagents import SubAgent
 
+from app.accounting_tools import (
+    build_amortization_schedule,
+    calculate_effective_interest_rate,
+    calculate_present_value,
+    verify_arithmetic,
+)
 from app.prompts import SYSTEM_PROMPT
 from app.subagent_prompts import SUBAGENT_RETRIEVAL_PROMPT
 from app.subagent_tools import (
     lookup_paragraph,
     retrieve_ifrs,
     search_single_standard,
-)
-from app.accounting_tools import (
-    build_amortization_schedule,
-    calculate_effective_interest_rate,
-    calculate_present_value,
 )
 from app.tools import (
     get_standard_info,
@@ -39,6 +40,7 @@ MAIN_TOOLS = [
     calculate_present_value,
     calculate_effective_interest_rate,
     build_amortization_schedule,
+    verify_arithmetic,
 ]
 
 # retrieval-distiller: Level 1 검색 + 선별·요약 전담 서브에이전트.
