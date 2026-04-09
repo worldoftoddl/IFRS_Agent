@@ -1,17 +1,27 @@
-"""K-IFRS 질의응답 Agent — DeepAgents + LangGraph.
+"""K-IFRS 질의응답 Agent — LangGraph + deepagents 미들웨어.
 
 구조:
 - 메인 Agent (Sonnet 4.6): 답변 생성, BC/IE·메타데이터 직접 조회
 - retrieval-distiller 서브에이전트 (Haiku 4.5): Level 1 하이브리드 검색 전담
   → 원문 + 요약을 JSON으로 반환하여 메인 컨텍스트 절감
 
+create_deep_agent 대신 create_agent를 직접 사용하여
+미들웨어 스택을 자유롭게 조합한다 (EnhancedTodoMiddleware 등).
+
 langgraph.json의 "env": ".env"가 환경변수를 로딩하므로,
 이 모듈에서 load_dotenv()를 호출하지 않는다.
 """
 
-from deepagents import create_deep_agent
+from deepagents._models import resolve_model
 from deepagents.backends import FilesystemBackend
-from deepagents.middleware.subagents import SubAgent
+from deepagents.graph import BASE_AGENT_PROMPT
+from deepagents.middleware.filesystem import FilesystemMiddleware
+from deepagents.middleware.patch_tool_calls import PatchToolCallsMiddleware
+from deepagents.middleware.skills import SkillsMiddleware
+from deepagents.middleware.subagents import SubAgentMiddleware
+from deepagents.middleware.summarization import create_summarization_middleware
+from langchain.agents import create_agent
+from langchain_anthropic.middleware import AnthropicPromptCachingMiddleware
 
 from app.accounting_tools import (
     build_amortization_schedule,
@@ -19,6 +29,7 @@ from app.accounting_tools import (
     calculate_present_value,
     verify_arithmetic,
 )
+from app.middleware import EnhancedTodoMiddleware
 from app.prompts import SYSTEM_PROMPT
 from app.subagent_prompts import SUBAGENT_RETRIEVAL_PROMPT
 from app.subagent_tools import (
@@ -32,7 +43,15 @@ from app.tools import (
     search_ifrs_rationale,
 )
 
-# 메인 에이전트가 직접 쥐는 도구 — Level 1 검색은 서브에이전트 경유.
+# ── 모델 ──────────────────────────────────────────────
+MAIN_MODEL = resolve_model("anthropic:claude-sonnet-4-6")
+SUBAGENT_MODEL = resolve_model("anthropic:claude-haiku-4-5-20251001")
+
+# ── 백엔드 ────────────────────────────────────────────
+backend = FilesystemBackend(root_dir="./", virtual_mode=False)
+
+# ── 메인 에이전트 도구 ────────────────────────────────
+# Level 1 검색은 서브에이전트 경유.
 MAIN_TOOLS = [
     search_ifrs_examples,
     search_ifrs_rationale,
@@ -43,8 +62,9 @@ MAIN_TOOLS = [
     verify_arithmetic,
 ]
 
-# retrieval-distiller: Level 1 검색 + 선별·요약 전담 서브에이전트.
-SUBAGENT_CONFIGS: list[SubAgent] = [
+# ── 서브에이전트 설정 ─────────────────────────────────
+# create_deep_agent가 자동으로 채우던 기본값(middleware)을 명시적으로 설정.
+SUBAGENT_CONFIGS = [
     {
         "name": "retrieval-distiller",
         "description": (
@@ -54,16 +74,41 @@ SUBAGENT_CONFIGS: list[SubAgent] = [
         ),
         "system_prompt": SUBAGENT_RETRIEVAL_PROMPT,
         "tools": [retrieve_ifrs, lookup_paragraph, search_single_standard],
-        "model": "anthropic:claude-haiku-4-5-20251001",
+        "model": SUBAGENT_MODEL,
+        "middleware": [
+            EnhancedTodoMiddleware(),
+            FilesystemMiddleware(backend=backend),
+            create_summarization_middleware(SUBAGENT_MODEL, backend),
+            AnthropicPromptCachingMiddleware(
+                unsupported_model_behavior="ignore"
+            ),
+            PatchToolCallsMiddleware(),
+        ],
     },
 ]
 
-agent = create_deep_agent(
-    model="anthropic:claude-sonnet-4-6",
+# ── 메인 에이전트 미들웨어 스택 ───────────────────────
+# create_deep_agent의 하드코딩 순서를 직접 조합.
+# EnhancedTodoMiddleware: write_todos + update_todo 제공.
+MIDDLEWARE = [
+    EnhancedTodoMiddleware(),
+    SkillsMiddleware(backend=backend, sources=["./app/skills/"]),
+    FilesystemMiddleware(backend=backend),
+    SubAgentMiddleware(backend=backend, subagents=SUBAGENT_CONFIGS),
+    create_summarization_middleware(MAIN_MODEL, backend),
+    AnthropicPromptCachingMiddleware(unsupported_model_behavior="ignore"),
+    PatchToolCallsMiddleware(),
+]
+
+# ── 시스템 프롬프트 합성 ──────────────────────────────
+# create_deep_agent는 user_prompt + "\n\n" + BASE_AGENT_PROMPT 형태로 합성.
+FINAL_SYSTEM_PROMPT = SYSTEM_PROMPT + "\n\n" + BASE_AGENT_PROMPT
+
+# ── 에이전트 생성 ────────────────────────────────────
+agent = create_agent(
+    model=MAIN_MODEL,
     tools=MAIN_TOOLS,
-    system_prompt=SYSTEM_PROMPT,
-    subagents=SUBAGENT_CONFIGS,
-    backend=FilesystemBackend(root_dir="./"),
-    skills=["./app/skills/"],
+    system_prompt=FINAL_SYSTEM_PROMPT,
+    middleware=MIDDLEWARE,
     name="kifrs-agent",
-)
+).with_config({"recursion_limit": 1000})
