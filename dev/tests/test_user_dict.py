@@ -10,7 +10,7 @@ from pathlib import Path
 
 load_dotenv()
 
-DICT_PATH = Path(__file__).parent.parent / "app" / "kiwi_user_dict.txt"
+DICT_PATH = Path(__file__).parent.parent.parent / "app" / "kiwi_user_dict.txt"
 
 
 class TestUserDictFile:
