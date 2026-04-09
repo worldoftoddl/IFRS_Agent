@@ -97,7 +97,7 @@ If no type-checker is configured, state that explicitly instead of claiming succ
 K-IFRS(한국채택국제회계기준) 벡터 DB 기반 **질의응답 Agent**.
 LangGraph + DeepAgents 프레임워크로, 사용자 질문 → 관련 기준서 검색 → Claude 답변 생성.
 
-- **백엔드**: `deepagents` (`create_deep_agent`) + LangGraph 서버 (`langgraph dev`)
+- **백엔드**: `langchain.agents.create_agent` + deepagents 미들웨어 + LangGraph 서버 (`langgraph dev`)
 - **프론트엔드**: Next.js 15 + React 19 챗봇 UI (`chatbot/`)
 - **DB**: PostgreSQL + pgvector (`kifrs` DB, `_IFRS_parsing` 프로젝트에서 구축)
 - **LLM**: Claude Sonnet 4.6 (메인) + Haiku 4.5 (서브에이전트)
@@ -150,15 +150,23 @@ langgraph dev --no-browser       # http://localhost:2024
 ### 2계층 Agent 구조 (`app/agent.py`)
 
 ```
-메인 Agent (Sonnet 4.6)
+메인 Agent (Sonnet 4.6) — create_agent + 미들웨어 수동 조합
 ├── 도구: search_ifrs_examples, search_ifrs_rationale, get_standard_info
 ├── 재무 계산: calculate_present_value, calculate_effective_interest_rate, build_amortization_schedule
-├── 스킬: app/skills/ (7개 — 리스분류, 수익인식, 충당부채, 손상검사, 금융상품, 기준서비교, 분개작성)
+├── 산술 검증: verify_arithmetic
+├── 스킬: app/skills/ (7개 — 리스분류, 수익인식, 충당부채, 손상검사, 금융상품, 기준서비교, 분개작성, 연결재무제표)
+│
+├── 미들웨어 스택 (순서 중요):
+│   EnhancedTodoMiddleware → SkillsMiddleware → FilesystemMiddleware
+│   → SubAgentMiddleware → SummarizationMiddleware
+│   → AnthropicPromptCachingMiddleware → PatchToolCallsMiddleware
 │
 └── 서브에이전트: retrieval-distiller (Haiku 4.5)
     └── 도구: retrieve_ifrs, lookup_paragraph, search_single_standard
 ```
 
+`create_deep_agent` 대신 `create_agent`를 직접 사용하여 미들웨어 스택을 자유롭게 조합.
+`EnhancedTodoMiddleware`(`app/middleware.py`)는 `write_todos`(전체 교체) + `update_todo`(개별 항목 변경)를 제공.
 메인 에이전트는 Level 1 검색을 **서브에이전트에 위임**하여 컨텍스트를 절감.
 서브에이전트는 검색 결과를 선별·정리한 JSON(`synthesis`, `chunks`, `notes`)으로 반환.
 
@@ -190,6 +198,7 @@ langgraph dev --no-browser       # http://localhost:2024
 | `calculate_present_value` | 현금흐름 현재가치 (충당부채, 리스부채) |
 | `calculate_effective_interest_rate` | 유효이자율 Newton-Raphson (상각후원가) |
 | `build_amortization_schedule` | 상각표 생성 (리스부채, 사채) |
+| `verify_arithmetic` | 산술 교차검증 (AST 기반 안전 평가) |
 
 **서브에이전트 도구** (`app/subagent_tools.py`):
 
@@ -221,6 +230,16 @@ langgraph dev --no-browser       # http://localhost:2024
 
 `db`, `embedder`, `tokenizer`, `reranker` 모두 **double-checked locking** thread-safe 싱글턴.
 `langgraph.json`의 `"env": ".env"`가 환경변수를 로딩하므로 `agent.py`에서 `load_dotenv()` 미호출.
+
+### 미들웨어 구조 (`app/middleware.py`, `app/agent.py`)
+
+- `create_deep_agent()` 대신 `langchain.agents.create_agent()`를 직접 사용
+- deepagents의 개별 미들웨어(SubAgentMiddleware, SkillsMiddleware, SummarizationMiddleware 등)는 그대로 import하여 재사용
+- `EnhancedTodoMiddleware`: langchain의 `TodoListMiddleware`(write_todos만 제공)를 대체
+  - `write_todos(todos)`: 전체 목록 교체 (최초 계획 수립용)
+  - `update_todo(index, status)`: 개별 항목 상태 변경 (`ToolRuntime` 주입으로 state 접근)
+- 시스템 프롬프트: `SYSTEM_PROMPT + "\n\n" + BASE_AGENT_PROMPT` 형태로 수동 합성
+- `deepagents._models.resolve_model`, `deepagents.graph.BASE_AGENT_PROMPT`는 private API — deepagents 버전 업 시 주의
 
 ## 코드 품질 규칙
 
