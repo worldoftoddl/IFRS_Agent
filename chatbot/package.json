@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "concurrently -n bot,ui -c blue,green \"langgraph dev --no-browser\" \"next dev --turbopack -p 3001\"",
+    "dev": "concurrently -n bot,ui -c blue,green \"cd .. && langgraph dev --no-browser\" \"next dev --turbopack -p 3001\"",
     "dev:ui": "next dev --turbopack -p 3001",
     "build": "next build",
     "start": "next start"
