@@ -30,3 +30,6 @@ result
 
 # Persistent tasks (TaskMiddleware)
 .tasks/
+
+# Layer 1 compact archive (MicroCompactMiddleware)
+.transcripts/

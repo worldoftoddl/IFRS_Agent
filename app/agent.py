@@ -19,7 +19,10 @@ from deepagents.middleware.filesystem import FilesystemMiddleware
 from deepagents.middleware.patch_tool_calls import PatchToolCallsMiddleware
 from deepagents.middleware.skills import SkillsMiddleware
 from deepagents.middleware.subagents import SubAgentMiddleware
-from deepagents.middleware.summarization import create_summarization_middleware
+from deepagents.middleware.summarization import (
+    SummarizationToolMiddleware,
+    create_summarization_middleware,
+)
 from langchain.agents import create_agent
 from langchain_anthropic.middleware import AnthropicPromptCachingMiddleware
 
@@ -29,6 +32,7 @@ from app.accounting_tools import (
     calculate_present_value,
     verify_arithmetic,
 )
+from app.compact_middleware import MicroCompactMiddleware
 from app.middleware import EnhancedTodoMiddleware
 from app.prompts import SYSTEM_PROMPT
 from app.subagent_prompts import SUBAGENT_RETRIEVAL_PROMPT
@@ -85,20 +89,30 @@ SUBAGENT_CONFIGS = [
             ),
             PatchToolCallsMiddleware(),
         ],
+        # 서브에이전트에는 SummarizationToolMiddleware/MicroCompact 미적용
+        # 단발 검색이라 누적 컨텍스트 없음.
     },
 ]
 
 # ── 메인 에이전트 미들웨어 스택 ───────────────────────
 # create_deep_agent의 하드코딩 순서를 직접 조합.
-# EnhancedTodoMiddleware: write_todos + update_todo 제공 (스레드 수명).
-# TaskMiddleware: task_create/update/list/get — .tasks/*.json 영속 저장.
+# 3계층 컨텍스트 압축 (s06 패턴):
+#   Layer 1 (tool_result 플레이스홀더, 조건부): MicroCompactMiddleware
+#   Layer 2 (threshold auto 요약): _DeepAgentsSummarizationMiddleware
+#   Layer 3 (manual tool): SummarizationToolMiddleware → compact_conversation
+SUMMARIZATION = create_summarization_middleware(MAIN_MODEL, backend)
+
+# MicroCompactMiddleware는 AnthropicPromptCachingMiddleware 앞에 배치.
+# trigger_tokens(50K) 미만일 때 no-op이므로 초반 대화는 캐시 영향 없음.
 MIDDLEWARE = [
     EnhancedTodoMiddleware(),
     TaskMiddleware(),
     SkillsMiddleware(backend=backend, sources=["./app/skills/"]),
     FilesystemMiddleware(backend=backend),
     SubAgentMiddleware(backend=backend, subagents=SUBAGENT_CONFIGS),
-    create_summarization_middleware(MAIN_MODEL, backend),
+    SUMMARIZATION,
+    SummarizationToolMiddleware(SUMMARIZATION),
+    MicroCompactMiddleware(trigger_tokens=50_000, keep_recent=3),
     AnthropicPromptCachingMiddleware(unsupported_model_behavior="ignore"),
     PatchToolCallsMiddleware(),
 ]
