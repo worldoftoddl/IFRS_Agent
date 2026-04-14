@@ -157,7 +157,7 @@ langgraph dev --no-browser       # http://localhost:2024
 ├── 스킬: app/skills/ (7개 — 리스분류, 수익인식, 충당부채, 손상검사, 금융상품, 기준서비교, 분개작성, 연결재무제표)
 │
 ├── 미들웨어 스택 (순서 중요):
-│   EnhancedTodoMiddleware → SkillsMiddleware → FilesystemMiddleware
+│   EnhancedTodoMiddleware → TaskMiddleware → SkillsMiddleware → FilesystemMiddleware
 │   → SubAgentMiddleware → SummarizationMiddleware
 │   → AnthropicPromptCachingMiddleware → PatchToolCallsMiddleware
 │
@@ -166,7 +166,8 @@ langgraph dev --no-browser       # http://localhost:2024
 ```
 
 `create_deep_agent` 대신 `create_agent`를 직접 사용하여 미들웨어 스택을 자유롭게 조합.
-`EnhancedTodoMiddleware`(`app/middleware.py`)는 `write_todos`(전체 교체) + `update_todo`(개별 항목 변경)를 제공.
+`EnhancedTodoMiddleware`(`app/middleware.py`)는 `write_todos`(전체 교체) + `update_todo`(개별 항목 변경)를 제공 — **스레드 수명**.
+`TaskMiddleware`(`app/task_middleware.py`)는 `.tasks/*.json`에 저장되는 **세션 초월 영속 Task** 4종 도구 제공.
 메인 에이전트는 Level 1 검색을 **서브에이전트에 위임**하여 컨텍스트를 절감.
 서브에이전트는 검색 결과를 선별·정리한 JSON(`synthesis`, `chunks`, `notes`)으로 반환.
 
@@ -200,6 +201,17 @@ langgraph dev --no-browser       # http://localhost:2024
 | `build_amortization_schedule` | 상각표 생성 (리스부채, 사채) |
 | `verify_arithmetic` | 산술 교차검증 (AST 기반 안전 평가) |
 
+**진행 추적 도구** (미들웨어 제공):
+
+| 도구 | 수명 | 용도 |
+|------|------|------|
+| `write_todos(todos)` | 스레드 | 한 질문의 단계 계획 (전체 교체) |
+| `update_todo(index, status)` | 스레드 | 개별 todo 상태 변경 (토큰 절약) |
+| `task_create(subject, description, blocked_by)` | **영속** | 다중 세션 프로젝트/목표 생성 |
+| `task_update(task_id, status, ...)` | **영속** | Task 상태/의존성 변경 (completed 시 blockedBy 자동 해제) |
+| `task_list()` | **영속** | 전체 Task 조회 (세션 복구용) |
+| `task_get(task_id)` | **영속** | 특정 Task 상세 |
+
 **서브에이전트 도구** (`app/subagent_tools.py`):
 
 | 도구 | 용도 |
@@ -231,15 +243,32 @@ langgraph dev --no-browser       # http://localhost:2024
 `db`, `embedder`, `tokenizer`, `reranker` 모두 **double-checked locking** thread-safe 싱글턴.
 `langgraph.json`의 `"env": ".env"`가 환경변수를 로딩하므로 `agent.py`에서 `load_dotenv()` 미호출.
 
-### 미들웨어 구조 (`app/middleware.py`, `app/agent.py`)
+### 미들웨어 구조 (`app/middleware.py`, `app/task_middleware.py`, `app/agent.py`)
 
 - `create_deep_agent()` 대신 `langchain.agents.create_agent()`를 직접 사용
 - deepagents의 개별 미들웨어(SubAgentMiddleware, SkillsMiddleware, SummarizationMiddleware 등)는 그대로 import하여 재사용
 - `EnhancedTodoMiddleware`: langchain의 `TodoListMiddleware`(write_todos만 제공)를 대체
   - `write_todos(todos)`: 전체 목록 교체 (최초 계획 수립용)
   - `update_todo(index, status)`: 개별 항목 상태 변경 (`ToolRuntime` 주입으로 state 접근)
+- `TaskMiddleware`: 파일 기반 영속 Task 저장 (`app/task_store.py` + `.tasks/*.json`)
+  - **state를 사용하지 않음** — 도구는 TaskStore 인스턴스에 클로저로 바인딩
+  - 원자적 쓰기(`tmp → os.replace`), 재시작 후 ID 카운터 복구
+  - `completed` 상태 변경 시 다른 Task의 `blockedBy` 자동 해제
+  - 용도: 다중 세션 프로젝트(예: "분기 결산", "연결재무제표 작성")
 - 시스템 프롬프트: `SYSTEM_PROMPT + "\n\n" + BASE_AGENT_PROMPT` 형태로 수동 합성
 - `deepagents._models.resolve_model`, `deepagents.graph.BASE_AGENT_PROMPT`는 private API — deepagents 버전 업 시 주의
+
+### Todos vs Tasks — 판단 기준
+
+| 기준 | Todos (EnhancedTodoMiddleware) | Tasks (TaskMiddleware) |
+|------|-------------------------------|------------------------|
+| 저장소 | LangGraph PlanningState | 파일시스템 (`.tasks/*.json`) |
+| 수명 | 스레드 종료 시 소멸 | 영속 (세션/프로세스 초월) |
+| 의존성 | 없음 (순서만) | `blockedBy` 그래프 |
+| 용도 | 한 질문의 실행 단계 | 다중 세션 프로젝트 |
+| 예시 | "리스부채 계산 3단계" | "이번 분기 IFRS 전환 프로젝트" |
+
+판단 규칙: **"이 계획이 다음 대화에도 남아있어야 하는가?"** → YES면 Tasks, NO면 Todos.
 
 ## 코드 품질 규칙
 
