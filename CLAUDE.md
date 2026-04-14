@@ -158,8 +158,8 @@ langgraph dev --no-browser       # http://localhost:2024
 │
 ├── 미들웨어 스택 (순서 중요):
 │   EnhancedTodoMiddleware → TaskMiddleware → SkillsMiddleware → FilesystemMiddleware
-│   → SubAgentMiddleware → SummarizationMiddleware
-│   → AnthropicPromptCachingMiddleware → PatchToolCallsMiddleware
+│   → SubAgentMiddleware → SummarizationMiddleware → SummarizationToolMiddleware
+│   → MicroCompactMiddleware → AnthropicPromptCachingMiddleware → PatchToolCallsMiddleware
 │
 └── 서브에이전트: retrieval-distiller (Haiku 4.5)
     └── 도구: retrieve_ifrs, lookup_paragraph, search_single_standard
@@ -168,6 +168,9 @@ langgraph dev --no-browser       # http://localhost:2024
 `create_deep_agent` 대신 `create_agent`를 직접 사용하여 미들웨어 스택을 자유롭게 조합.
 `EnhancedTodoMiddleware`(`app/middleware.py`)는 `write_todos`(전체 교체) + `update_todo`(개별 항목 변경)를 제공 — **스레드 수명**.
 `TaskMiddleware`(`app/task_middleware.py`)는 `.tasks/*.json`에 저장되는 **세션 초월 영속 Task** 4종 도구 제공.
+3계층 컨텍스트 압축(s06 패턴): **Layer 1** `MicroCompactMiddleware` 조건부 tool_result 플레이스홀더화,
+**Layer 2** `_DeepAgentsSummarizationMiddleware` threshold 자동 요약,
+**Layer 3** `SummarizationToolMiddleware` → `compact_conversation` 수동 호출.
 메인 에이전트는 Level 1 검색을 **서브에이전트에 위임**하여 컨텍스트를 절감.
 서브에이전트는 검색 결과를 선별·정리한 JSON(`synthesis`, `chunks`, `notes`)으로 반환.
 
@@ -269,6 +272,23 @@ langgraph dev --no-browser       # http://localhost:2024
 | 예시 | "리스부채 계산 3단계" | "이번 분기 IFRS 전환 프로젝트" |
 
 판단 규칙: **"이 계획이 다음 대화에도 남아있어야 하는가?"** → YES면 Tasks, NO면 Todos.
+
+### 3계층 컨텍스트 압축 (`app/compact_middleware.py` + deepagents)
+
+s06 패턴을 이식하여 긴 대화에서도 컨텍스트 팽창을 제어.
+
+| Layer | 구현 | 트리거 | 동작 |
+|-------|------|-------|------|
+| 1 | `MicroCompactMiddleware` | 추정 토큰 ≥ 50K | 오래된 `tool_result` content를 `[Previous: used X]`로 교체. 최근 3개는 보존. |
+| 2 | `_DeepAgentsSummarizationMiddleware` | 컨텍스트 크기(기본 85%) | 전체 대화를 LLM이 요약, 원본은 `/conversation_history/{thread_id}.md` 보관. |
+| 3 | `SummarizationToolMiddleware` → `compact_conversation` | LLM이 수동 호출 | Layer 2와 동일 엔진, 타이밍을 LLM이 판단. |
+
+**Layer 1 설계 결정:**
+- **캐시 무효화 리스크 방지**: `trigger_tokens` 미만이면 no-op → 짧은 대화는 `AnthropicPromptCachingMiddleware`와 충돌 없음.
+- **PRESERVE_TOOLS**: `verify_arithmetic`, `get_standard_info`, `calculate_*`, `build_amortization_schedule`, `task_get`, `read_file`, `ls`, `grep`, `glob` — 재실행 비용이 크거나 답변 일관성에 중요한 도구 결과는 보존.
+- **구현 트릭**: LangGraph `add_messages` 리듀서가 동일 ID 메시지를 교체하는 특성을 활용. 같은 `id`·`tool_call_id`로 새 ToolMessage 반환 → content만 치환됨.
+- **치환 전 원본 아카이브**: `.transcripts/{thread_id}_{yyyymmdd}.jsonl`에 JSONL append. 각 줄 = 압축 이벤트 1회, 필드: `timestamp`, `thread_id`, `messages[{msg_id, tool_call_id, tool_name, original_content}]`. 디버깅·감사 용도. 비활성화: `MicroCompactMiddleware(archive_dir=None)`.
+- 서브에이전트에는 미적용 (단발 검색이라 누적 없음).
 
 ## 코드 품질 규칙
 
