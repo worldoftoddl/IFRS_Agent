@@ -27,3 +27,6 @@ result
 # LangGraph
 .langgraph/
 .langgraph_api/
+
+# Persistent tasks (TaskMiddleware)
+.tasks/

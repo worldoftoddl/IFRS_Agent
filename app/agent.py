@@ -37,6 +37,7 @@ from app.subagent_tools import (
     retrieve_ifrs,
     search_single_standard,
 )
+from app.task_middleware import TaskMiddleware
 from app.tools import (
     get_standard_info,
     search_ifrs_examples,
@@ -89,9 +90,11 @@ SUBAGENT_CONFIGS = [
 
 # ── 메인 에이전트 미들웨어 스택 ───────────────────────
 # create_deep_agent의 하드코딩 순서를 직접 조합.
-# EnhancedTodoMiddleware: write_todos + update_todo 제공.
+# EnhancedTodoMiddleware: write_todos + update_todo 제공 (스레드 수명).
+# TaskMiddleware: task_create/update/list/get — .tasks/*.json 영속 저장.
 MIDDLEWARE = [
     EnhancedTodoMiddleware(),
+    TaskMiddleware(),
     SkillsMiddleware(backend=backend, sources=["./app/skills/"]),
     FilesystemMiddleware(backend=backend),
     SubAgentMiddleware(backend=backend, subagents=SUBAGENT_CONFIGS),

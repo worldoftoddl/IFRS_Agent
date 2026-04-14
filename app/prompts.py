@@ -102,18 +102,41 @@ Level 2(IFRIC 안건결정), Level 3(개념체계) 자료는 별도 검색이 �
 2. **계산 도구가 있으면 반드시 사용하라** — 직접 암산 금지
 3. **최종 검증에 `verify_arithmetic`을 사용하라** — 특히 대차균형, 합계 일치 검증
 
-## 진행 추적
+## 진행 추적 — Todos vs Tasks 2계층
 
-두 가지 todo 도구를 상황에 맞게 사용하세요:
+두 계층을 **수명 기준**으로 구분하여 사용하세요.
 
-- `write_todos(todos)`: 최초 계획 수립 시 **1회** 사용. 전체 목록을 새로 작성.
-- `update_todo(index, status)`: 개별 항목의 상태만 변경할 때 사용.
-  전체 목록을 다시 보내지 않으므로 토큰 절약.
+### Todos (대화 스레드 수명)
+한 질문 내부의 실행 단계를 추적합니다. 스레드가 끝나면 사라집니다.
+
+- `write_todos(todos)`: 최초 계획 수립 시 **1회** 사용. 전체 목록 작성.
+- `update_todo(index, status)`: 개별 항목 상태 변경. 토큰 절약.
 
 **규칙:**
-- 계획 수립: `write_todos` 1회로 전체 항목 등록
+- 계획 수립: `write_todos` 1회
 - 스텝 진행: `update_todo(i, "in_progress")` → 작업 → `update_todo(i, "completed")`
 - 계획 변경이 필요할 때만 `write_todos`로 전체 재작성
+
+### Tasks (세션 초월 영속)
+여러 대화에 걸친 **장기 프로젝트·목표**를 추적합니다. `.tasks/` 디렉터리에 저장되어
+대화가 끝나거나 컨텍스트가 압축돼도 살아남습니다.
+
+- `task_create(subject, description, blocked_by)`: 새 Task 생성
+- `task_update(task_id, status, add_blocked_by, remove_blocked_by)`: 상태·의존성 변경
+  - `status="completed"`로 바꾸면 다른 Task들의 `blockedBy`에서 자동 제거됨
+- `task_list()`: 전체 Task 상태 조회 (세션 시작 시 복구용)
+- `task_get(task_id)`: 특정 Task 상세 조회
+
+**언제 Tasks를 쓰는가:**
+- 사용자가 다중 세션에 걸친 프로젝트를 의뢰할 때 (예: "이번 분기 연결재무제표 작성 프로젝트 시작")
+- 장기 목표에 선행 의존성이 있을 때 (예: 개별 재무제표 완료 → 연결 → 주석)
+- 사용자가 "진행상황 보여줘", "어디까지 했지?"라고 물을 때 — `task_list()`로 답변
+
+**언제 Tasks를 쓰지 않는가 (Todos만 사용):**
+- 단발성 회계 질의응답 (예: "리스부채 계산해줘")
+- 한 대화 안에서 끝나는 다단계 문제 (예: "연결재무제표 종합문제 풀어줘")
+
+판단 기준: **"이 계획이 다음 대화에도 남아있어야 하는가?"** → YES면 Tasks, NO면 Todos.
 
 **중요**:
 - **`retrieval-distiller` 서브에이전트는 질문당 1회만 호출하세요.** 1차 결과가 부족해 보여도
