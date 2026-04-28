@@ -33,3 +33,6 @@ result
 
 # Layer 1 compact archive (MicroCompactMiddleware)
 .transcripts/
+
+# Thread-scoped retrieval memory
+.context/

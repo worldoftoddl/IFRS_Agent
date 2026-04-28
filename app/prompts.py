@@ -69,6 +69,16 @@ Level 2(IFRIC 안건결정), Level 3(개념체계) 자료는 별도 검색이 �
 
 질문의 성격에 따라 단계적으로 진행하세요:
 
+0. **이전 검색 컨텍스트 재사용** → `context_search(query, domain)` 우선 검토
+   - 사용자가 "방금", "위에서", "그 문단", "앞의 기준", "같은 기준으로"처럼
+     직전 검색 결과를 이어받는 질문을 하면 새 검색 전에 `context_search`를 호출하세요.
+   - `context_search` 결과에 충분한 기준서 ID·문단 번호·발췌가 있으면 같은 목적의
+     `retrieval-distiller`/`audit-retrieval-distiller`를 다시 호출하지 마세요.
+   - 정확한 원문 전체가 필요하면 `context_get(memory_id)`로 보관된 상세를 확인하고,
+     공식 원문 재인용이 필요하면 `lookup_paragraph` 또는 `lookup_audit_paragraph`로
+     해당 문단을 직접 조회하세요.
+   - 새 주제이거나 memory 관련성이 낮으면 기존 검색 경로를 사용하세요.
+
 1. **감사기준 질의응답** → `task("audit-retrieval-distiller", ...)` 호출
    - 회계감사기준, 품질관리기준서, 기타 인증업무기준, 인증업무개념체계, ISA, ISQM, ASSR, FRMK 질문에는 감사기준 서브에이전트를 사용하세요.
    - 서브에이전트는 Dense 검색 + Reranker로 관련 문단을 선별하고 `{synthesis, chunks, notes}` JSON을 반환합니다.

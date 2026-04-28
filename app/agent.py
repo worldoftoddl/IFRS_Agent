@@ -39,6 +39,8 @@ from app.audit_subagent_tools import (
     search_single_audit_standard,
 )
 from app.compact_middleware import MicroCompactMiddleware
+from app.context_memory import RetrievalMemoryStore
+from app.context_memory_middleware import ContextMemoryMiddleware
 from app.middleware import EnhancedTodoMiddleware
 from app.prompts import SYSTEM_PROMPT
 from app.subagent_prompts import (
@@ -135,18 +137,24 @@ SUBAGENT_CONFIGS = [
 #   Layer 2 (threshold auto 요약): _DeepAgentsSummarizationMiddleware
 #   Layer 3 (manual tool): SummarizationToolMiddleware → compact_conversation
 SUMMARIZATION = create_summarization_middleware(MAIN_MODEL, backend)
+CONTEXT_MEMORY = RetrievalMemoryStore()
 
 # MicroCompactMiddleware는 AnthropicPromptCachingMiddleware 앞에 배치.
 # trigger_tokens(50K) 미만일 때 no-op이므로 초반 대화는 캐시 영향 없음.
 MIDDLEWARE = [
     EnhancedTodoMiddleware(),
     TaskMiddleware(),
+    ContextMemoryMiddleware(store=CONTEXT_MEMORY),
     SkillsMiddleware(backend=backend, sources=["./app/skills/"]),
     FilesystemMiddleware(backend=backend),
     SubAgentMiddleware(backend=backend, subagents=SUBAGENT_CONFIGS),
     SUMMARIZATION,
     SummarizationToolMiddleware(SUMMARIZATION),
-    MicroCompactMiddleware(trigger_tokens=50_000, keep_recent=3),
+    MicroCompactMiddleware(
+        trigger_tokens=50_000,
+        keep_recent=3,
+        context_store=CONTEXT_MEMORY,
+    ),
     AnthropicPromptCachingMiddleware(unsupported_model_behavior="ignore"),
     PatchToolCallsMiddleware(),
 ]

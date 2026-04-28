@@ -18,21 +18,25 @@ AnthropicPromptCachingMiddleware와의 충돌을 피하기 위해
 
 from __future__ import annotations
 
-import ast
 import json
 import logging
+import os
 import time
 from pathlib import Path
 from typing import Any
 
 from langchain.agents.middleware import AgentMiddleware
-from langchain_core.messages import AnyMessage, ToolMessage
+from langchain_core.messages import AIMessage, AnyMessage, ToolMessage
+
+from app.context_memory import RetrievalMemoryStore, extract_structured_content
 
 logger = logging.getLogger(__name__)
 
 PLACEHOLDER_TEMPLATE = "[Previous: used {tool_name}]"
 MIN_COMPACT_LENGTH = 100  # 짧은 content는 교체 이득 없음
 DEFAULT_MAX_DIGEST_CHARS = 2400
+DEFAULT_ARCHIVE_RETENTION_DAYS = 7
+DEFAULT_ARCHIVE_MAX_FILE_MB = 10.0
 
 RETRIEVAL_CONTEXT_TOOLS: set[str] = {
     "retrieval-distiller",
@@ -77,6 +81,33 @@ def estimate_tokens(messages: list[AnyMessage]) -> int:
     return total_chars // 4
 
 
+def _env_bool(name: str, default: bool) -> bool:
+    raw = os.getenv(name)
+    if raw is None:
+        return default
+    return raw.strip().lower() not in {"0", "false", "no", "off"}
+
+
+def _env_int(name: str, default: int) -> int:
+    raw = os.getenv(name)
+    if raw is None:
+        return default
+    try:
+        return int(raw)
+    except ValueError:
+        return default
+
+
+def _env_float(name: str, default: float) -> float:
+    raw = os.getenv(name)
+    if raw is None:
+        return default
+    try:
+        return float(raw)
+    except ValueError:
+        return default
+
+
 def _one_line(value: Any, limit: int = 500) -> str:
     text = str(value or "")
     text = " ".join(text.split())
@@ -97,24 +128,7 @@ def _truncate(value: str, limit: int) -> str:
 
 def _load_structured_content(content: Any) -> Any | None:
     """ToolMessage content에서 JSON/list/dict 구조를 best-effort로 복원."""
-    if isinstance(content, (dict, list)):
-        return content
-    if not isinstance(content, str):
-        return None
-
-    stripped = content.strip()
-    if not stripped or stripped[0] not in "[{":
-        return None
-
-    try:
-        return json.loads(stripped)
-    except json.JSONDecodeError:
-        pass
-
-    try:
-        return ast.literal_eval(stripped)
-    except (SyntaxError, ValueError):
-        return None
+    return extract_structured_content(content)
 
 
 def _chunk_ref(chunk: dict[str, Any]) -> str:
@@ -231,6 +245,44 @@ def _extract_thread_id(runtime: Any) -> str:
         return "unknown"
 
 
+def _tool_calls_by_id(messages: list[AnyMessage]) -> dict[str, dict[str, Any]]:
+    calls: dict[str, dict[str, Any]] = {}
+    for msg in messages:
+        tool_calls = getattr(msg, "tool_calls", None)
+        if not tool_calls and isinstance(msg, AIMessage):
+            tool_calls = msg.tool_calls
+        if not isinstance(tool_calls, list):
+            continue
+        for call in tool_calls:
+            if not isinstance(call, dict):
+                continue
+            call_id = call.get("id")
+            if call_id:
+                calls[str(call_id)] = call
+    return calls
+
+
+def _tool_call_args(
+    msg: ToolMessage,
+    tool_calls_by_id: dict[str, dict[str, Any]],
+) -> dict[str, Any]:
+    call = tool_calls_by_id.get(msg.tool_call_id or "")
+    args = call.get("args") if call else None
+    return args if isinstance(args, dict) else {}
+
+
+def _source_tool_name(
+    msg: ToolMessage,
+    tool_calls_by_id: dict[str, dict[str, Any]],
+) -> str:
+    tool_name = msg.name or "unknown"
+    if tool_name == "task":
+        subagent_type = _tool_call_args(msg, tool_calls_by_id).get("subagent_type")
+        if isinstance(subagent_type, str) and subagent_type:
+            return subagent_type
+    return tool_name
+
+
 class MicroCompactMiddleware(AgentMiddleware):
     """오래된 tool_result를 플레이스홀더로 교체하여 토큰 절감.
 
@@ -240,6 +292,11 @@ class MicroCompactMiddleware(AgentMiddleware):
         max_digest_chars: 검색 결과를 digest로 치환할 때 남길 최대 문자 수.
         archive_dir: 치환 전 원본을 JSONL로 append 저장할 디렉터리.
             None이면 아카이브 비활성. 기본값: ``./.transcripts``.
+        archive_enabled: transcript archive 활성화 여부. None이면 환경변수 사용.
+        archive_retention_days: 오래된 transcript 파일 삭제 기준(일).
+        archive_max_file_mb: transcript 파일 크기 삭제 기준(MB).
+        context_store: retrieval memory 저장소. None이면 memory 저장 비활성.
+        memory_enabled: retrieval memory 저장 활성화 여부. None이면 환경변수 사용.
     """
 
     def __init__(
@@ -248,12 +305,38 @@ class MicroCompactMiddleware(AgentMiddleware):
         keep_recent: int = 3,
         max_digest_chars: int = DEFAULT_MAX_DIGEST_CHARS,
         archive_dir: Path | str | None = DEFAULT_ARCHIVE_DIR,
+        archive_enabled: bool | None = None,
+        archive_retention_days: int | None = None,
+        archive_max_file_mb: float | None = None,
+        context_store: RetrievalMemoryStore | None = None,
+        memory_enabled: bool | None = None,
     ) -> None:
         self.trigger_tokens = trigger_tokens
         self.keep_recent = keep_recent
         self.max_digest_chars = max_digest_chars
+        enabled = (
+            _env_bool("TRANSCRIPT_ARCHIVE_ENABLED", True)
+            if archive_enabled is None
+            else archive_enabled
+        )
         self.archive_dir: Path | None = (
-            Path(archive_dir) if archive_dir is not None else None
+            Path(archive_dir) if enabled and archive_dir is not None else None
+        )
+        self.archive_retention_days = (
+            _env_int("TRANSCRIPT_RETENTION_DAYS", DEFAULT_ARCHIVE_RETENTION_DAYS)
+            if archive_retention_days is None
+            else archive_retention_days
+        )
+        self.archive_max_file_mb = (
+            _env_float("TRANSCRIPT_MAX_FILE_MB", DEFAULT_ARCHIVE_MAX_FILE_MB)
+            if archive_max_file_mb is None
+            else archive_max_file_mb
+        )
+        self.context_store = context_store
+        self.memory_enabled = (
+            _env_bool("CONTEXT_MEMORY_ENABLED", True)
+            if memory_enabled is None
+            else memory_enabled
         )
 
     def before_model(self, state: Any, runtime: Any) -> dict[str, Any] | None:
@@ -272,11 +355,12 @@ class MicroCompactMiddleware(AgentMiddleware):
 
         # 최근 N개 제외 → 오래된 것만 후보
         old = tool_msgs[: -self.keep_recent] if self.keep_recent > 0 else tool_msgs
+        tool_calls = _tool_calls_by_id(messages)
 
         updates: list[ToolMessage] = []
         originals: list[ToolMessage] = []
         for msg in old:
-            tool_name = msg.name or "unknown"
+            tool_name = _source_tool_name(msg, tool_calls)
             if tool_name in PRESERVE_TOOLS:
                 continue
 
@@ -303,18 +387,41 @@ class MicroCompactMiddleware(AgentMiddleware):
 
         # 치환 전 원본 아카이브 (best-effort, 실패해도 압축은 진행)
         if self.archive_dir is not None:
-            self._archive(originals, runtime)
+            self._archive(originals, runtime, tool_calls)
+
+        if self.context_store is not None and self.memory_enabled:
+            self._save_context_memory(originals, runtime, tool_calls)
 
         return {"messages": updates}
+
+    def _cleanup_archive_dir(self) -> None:
+        if self.archive_dir is None or not self.archive_dir.exists():
+            return
+
+        now = time.time()
+        max_age_seconds = max(self.archive_retention_days, 0) * 86400
+        max_bytes = max(self.archive_max_file_mb, 0) * 1024 * 1024
+
+        for path in self.archive_dir.glob("*.jsonl"):
+            try:
+                stat = path.stat()
+                too_old = max_age_seconds > 0 and now - stat.st_mtime > max_age_seconds
+                too_large = max_bytes > 0 and stat.st_size > max_bytes
+                if too_old or too_large:
+                    path.unlink()
+            except OSError as exc:
+                logger.warning("Transcript cleanup failed for %s: %s", path, exc)
 
     def _archive(
         self,
         originals: list[ToolMessage],
         runtime: Any,
+        tool_calls_by_id: dict[str, dict[str, Any]],
     ) -> None:
         """JSONL 한 줄로 한 압축 이벤트 기록. thread별 파일 append."""
         try:
             self.archive_dir.mkdir(parents=True, exist_ok=True)
+            self._cleanup_archive_dir()
             thread_id = _extract_thread_id(runtime)
             date = time.strftime("%Y%m%d", time.localtime())
             path = self.archive_dir / f"{thread_id}_{date}.jsonl"
@@ -326,6 +433,7 @@ class MicroCompactMiddleware(AgentMiddleware):
                         "msg_id": m.id,
                         "tool_call_id": m.tool_call_id,
                         "tool_name": m.name or "unknown",
+                        "source_tool": _source_tool_name(m, tool_calls_by_id),
                         "original_content": m.content,
                     }
                     for m in originals
@@ -336,3 +444,24 @@ class MicroCompactMiddleware(AgentMiddleware):
         except Exception as exc:
             # 아카이브 실패는 무시 (압축 자체는 성공해야 함)
             logger.warning("MicroCompact archive failed: %s", exc)
+
+    def _save_context_memory(
+        self,
+        originals: list[ToolMessage],
+        runtime: Any,
+        tool_calls_by_id: dict[str, dict[str, Any]],
+    ) -> None:
+        thread_id = _extract_thread_id(runtime)
+        for msg in originals:
+            source_tool = _source_tool_name(msg, tool_calls_by_id)
+            if source_tool not in RETRIEVAL_CONTEXT_TOOLS:
+                continue
+            try:
+                self.context_store.save_from_tool_result(
+                    thread_id=thread_id,
+                    source_tool=source_tool,
+                    content=msg.content,
+                    tool_args=_tool_call_args(msg, tool_calls_by_id),
+                )
+            except Exception as exc:
+                logger.warning("Context memory save failed: %s", exc)

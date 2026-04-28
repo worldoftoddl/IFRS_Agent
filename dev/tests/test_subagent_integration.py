@@ -183,6 +183,24 @@ class TestSubagentConfigs:
         }, f"unexpected tools: {tool_names}"
 
 
+class TestContextMemoryIntegration:
+    """컨텍스트 메모리 미들웨어 구성."""
+
+    def test_context_memory_middleware_registered(self):
+        from app.agent import MIDDLEWARE
+        from app.context_memory_middleware import ContextMemoryMiddleware
+
+        assert any(isinstance(mw, ContextMemoryMiddleware) for mw in MIDDLEWARE)
+
+    def test_context_memory_tools_available(self):
+        from app.agent import MIDDLEWARE
+        from app.context_memory_middleware import ContextMemoryMiddleware
+
+        mw = next(mw for mw in MIDDLEWARE if isinstance(mw, ContextMemoryMiddleware))
+        tool_names = {tool.name for tool in mw.tools}
+        assert tool_names == {"context_search", "context_get", "context_list"}
+
+
 class TestMainSystemPrompt:
     """메인 에이전트 프롬프트의 서브에이전트 위임 지시."""
 

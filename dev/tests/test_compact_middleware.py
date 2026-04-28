@@ -7,6 +7,8 @@
 from __future__ import annotations
 
 import json
+import os
+import time
 from pathlib import Path
 
 import pytest
@@ -20,6 +22,7 @@ from app.compact_middleware import (
     MicroCompactMiddleware,
     estimate_tokens,
 )
+from app.context_memory import RetrievalMemoryStore
 
 
 def _tool_msg(content: str, name: str, tool_call_id: str, msg_id: str) -> ToolMessage:
@@ -303,6 +306,69 @@ class TestRetrievalContextDigest:
         assert "문단 14" in digest
         assert "현재의무" in digest
 
+    def test_task_subagent_result_uses_subagent_source_and_saves_memory(
+        self,
+        tmp_path: Path,
+    ):
+        store = RetrievalMemoryStore(root_dir=tmp_path / "context")
+        mw = MicroCompactMiddleware(
+            trigger_tokens=1,
+            keep_recent=0,
+            archive_dir=None,
+            context_store=store,
+        )
+        payload = {
+            "synthesis": "충당부채는 보고기간 말 최선의 추정치로 조정한다.",
+            "chunks": [
+                {
+                    "standard_id": "K-IFRS 1037",
+                    "para_number": "59",
+                    "component": "main",
+                    "section_title": "충당부채의 변동",
+                    "original_text": "59\t보고기간 말마다 충당부채 잔액을 검토한다.",
+                    "key_excerpt": "보고기간 말마다 충당부채 잔액을 검토",
+                }
+            ],
+        }
+        msgs = [
+            HumanMessage(content="q"),
+            AIMessage(
+                content="",
+                tool_calls=[
+                    {
+                        "name": "task",
+                        "args": {
+                            "subagent_type": "retrieval-distiller",
+                            "description": "충당부채 후속 측정",
+                        },
+                        "id": "c1",
+                    }
+                ],
+            ),
+            ToolMessage(
+                content="```json\n" + json.dumps(payload, ensure_ascii=False) + "\n```",
+                name="task",
+                tool_call_id="c1",
+                id="t1",
+            ),
+        ]
+
+        result = mw.before_model({"messages": msgs}, _FakeRuntime("thread-1"))
+        assert result is not None
+        digest = result["messages"][0].content
+        assert digest.startswith("[Previous retrieval context: retrieval-distiller]")
+
+        memories = store.search(
+            thread_id="thread-1",
+            query="충당부채",
+            domain="ifrs",
+            include_original=True,
+        )
+        assert len(memories) == 1
+        assert memories[0]["source_tool"] == "retrieval-distiller"
+        assert memories[0]["query"] == "충당부채 후속 측정"
+        assert memories[0]["chunks"][0]["standard_id"] == "K-IFRS 1037"
+
 
 class TestEdgeCases:
     def test_short_tool_result_skipped(self):
@@ -393,6 +459,11 @@ class TestArchiveStructure:
     def test_custom_archive_dir(self, tmp_path: Path):
         mw = MicroCompactMiddleware(archive_dir=tmp_path / "t")
         assert mw.archive_dir == tmp_path / "t"
+
+    def test_archive_can_be_disabled_by_env(self, tmp_path: Path, monkeypatch):
+        monkeypatch.setenv("TRANSCRIPT_ARCHIVE_ENABLED", "false")
+        mw = MicroCompactMiddleware(archive_dir=tmp_path / "t")
+        assert mw.archive_dir is None
 
 
 class TestArchiveBehavior:
@@ -545,3 +616,20 @@ class TestArchiveBehavior:
         event = json.loads(files[0].read_text().strip())
         tool_names = [m["tool_name"] for m in event["messages"]]
         assert "verify_arithmetic" not in tool_names
+
+    def test_archive_cleanup_removes_old_files(self, tmp_path: Path):
+        archive_dir = tmp_path / "transcripts"
+        archive_dir.mkdir()
+        old = archive_dir / "old_20000101.jsonl"
+        old.write_text("stale\n", encoding="utf-8")
+        old_time = time.time() - 10 * 86400
+        os.utime(old, (old_time, old_time))
+
+        mw = MicroCompactMiddleware(
+            trigger_tokens=10_000,
+            keep_recent=3,
+            archive_dir=archive_dir,
+            archive_retention_days=7,
+        )
+        mw.before_model(self._state_with_compacting(10), _FakeRuntime("thread-1"))
+        assert not old.exists()

@@ -53,3 +53,9 @@ class TestSystemPromptContents:
         assert "역질문" in SYSTEM_PROMPT or "먼저 질문" in SYSTEM_PROMPT, (
             "사용자에게 질문하라는 지시가 없음"
         )
+
+    def test_contains_context_memory_instruction(self):
+        """후속 질문에서 이전 retrieval memory 재사용 지시가 포함되어야 한다."""
+        assert "context_search" in SYSTEM_PROMPT
+        assert "context_get" in SYSTEM_PROMPT
+        assert "재사용" in SYSTEM_PROMPT
