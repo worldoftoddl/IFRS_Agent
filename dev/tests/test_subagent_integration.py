@@ -29,6 +29,16 @@ class TestSubagentPrompt:
         assert "lookup_paragraph" in SUBAGENT_RETRIEVAL_PROMPT
         assert "search_single_standard" in SUBAGENT_RETRIEVAL_PROMPT
 
+    def test_audit_prompt_mentions_dense_reranker_without_bm25(self):
+        from app.subagent_prompts import AUDIT_SUBAGENT_RETRIEVAL_PROMPT
+
+        assert "retrieve_audit_standards" in AUDIT_SUBAGENT_RETRIEVAL_PROMPT
+        assert "lookup_audit_paragraph" in AUDIT_SUBAGENT_RETRIEVAL_PROMPT
+        assert "search_single_audit_standard" in AUDIT_SUBAGENT_RETRIEVAL_PROMPT
+        assert "Dense" in AUDIT_SUBAGENT_RETRIEVAL_PROMPT
+        assert "Reranker" in AUDIT_SUBAGENT_RETRIEVAL_PROMPT
+        assert "BM25는 사용하지 않습니다" in AUDIT_SUBAGENT_RETRIEVAL_PROMPT
+
     def test_prompt_specifies_return_format(self):
         """반환 형식(synthesis + chunks + why_relevant)이 프롬프트에 포함되어야 한다."""
         from app.subagent_prompts import SUBAGENT_RETRIEVAL_PROMPT
@@ -93,6 +103,14 @@ class TestMainAgentTools:
         assert "search_ifrs_rationale" in tool_names
         assert "get_standard_info" in tool_names
 
+    def test_main_tools_does_not_include_direct_audit_search(self):
+        from app.agent import MAIN_TOOLS
+
+        tool_names = {t.name for t in MAIN_TOOLS}
+        assert "search_audit_standards_k1" not in tool_names
+        assert "search_audit_standards_k3" not in tool_names
+        assert "search_audit_standards_k5" not in tool_names
+
 
 class TestSubagentConfigs:
     """deepagents subagents 파라미터 구성."""
@@ -108,6 +126,7 @@ class TestSubagentConfigs:
 
         names = [cfg["name"] for cfg in SUBAGENT_CONFIGS]
         assert "retrieval-distiller" in names
+        assert "audit-retrieval-distiller" in names
 
     def test_retrieval_distiller_has_required_fields(self):
         from app.agent import SUBAGENT_CONFIGS
@@ -144,6 +163,19 @@ class TestSubagentConfigs:
         model_str = model if isinstance(model, str) else str(model)
         assert "haiku" in model_str.lower(), f"haiku 모델 아님: {model_str}"
 
+    def test_audit_retrieval_distiller_has_three_tools(self):
+        from app.agent import SUBAGENT_CONFIGS
+
+        distiller = next(
+            c for c in SUBAGENT_CONFIGS if c["name"] == "audit-retrieval-distiller"
+        )
+        tool_names = {t.name for t in distiller["tools"]}
+        assert tool_names == {
+            "retrieve_audit_standards",
+            "lookup_audit_paragraph",
+            "search_single_audit_standard",
+        }, f"unexpected tools: {tool_names}"
+
 
 class TestMainSystemPrompt:
     """메인 에이전트 프롬프트의 서브에이전트 위임 지시."""
@@ -154,6 +186,7 @@ class TestMainSystemPrompt:
         assert "retrieval-distiller" in SYSTEM_PROMPT, (
             "메인 프롬프트에 서브에이전트 이름이 없음"
         )
+        assert "audit-retrieval-distiller" in SYSTEM_PROMPT
 
     def test_main_prompt_no_longer_promotes_search_ifrs_directly(self):
         """메인 프롬프트에서 'search_ifrs 도구로 검색' 같은 직접 호출 지시 제거."""

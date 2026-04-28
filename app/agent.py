@@ -3,6 +3,7 @@
 구조:
 - 메인 Agent (Sonnet 4.6): 답변 생성, BC/IE·메타데이터 직접 조회
 - retrieval-distiller 서브에이전트 (Haiku 4.5): Level 1 하이브리드 검색 전담
+- audit-retrieval-distiller 서브에이전트 (Haiku 4.5): 감사기준 Dense+Reranker 검색 전담
   → 원문 + 요약을 JSON으로 반환하여 메인 컨텍스트 절감
 
 create_deep_agent 대신 create_agent를 직접 사용하여
@@ -32,15 +33,18 @@ from app.accounting_tools import (
     calculate_present_value,
     verify_arithmetic,
 )
-from app.audit_tools import (
-    search_audit_standards_k1,
-    search_audit_standards_k3,
-    search_audit_standards_k5,
+from app.audit_subagent_tools import (
+    lookup_audit_paragraph,
+    retrieve_audit_standards,
+    search_single_audit_standard,
 )
 from app.compact_middleware import MicroCompactMiddleware
 from app.middleware import EnhancedTodoMiddleware
 from app.prompts import SYSTEM_PROMPT
-from app.subagent_prompts import SUBAGENT_RETRIEVAL_PROMPT
+from app.subagent_prompts import (
+    AUDIT_SUBAGENT_RETRIEVAL_PROMPT,
+    SUBAGENT_RETRIEVAL_PROMPT,
+)
 from app.subagent_tools import (
     lookup_paragraph,
     retrieve_ifrs,
@@ -70,9 +74,6 @@ MAIN_TOOLS = [
     calculate_effective_interest_rate,
     build_amortization_schedule,
     verify_arithmetic,
-    search_audit_standards_k1,
-    search_audit_standards_k3,
-    search_audit_standards_k5,
 ]
 
 # ── 서브에이전트 설정 ─────────────────────────────────
@@ -99,6 +100,31 @@ SUBAGENT_CONFIGS = [
         ],
         # 서브에이전트에는 SummarizationToolMiddleware/MicroCompact 미적용
         # 단발 검색이라 누적 컨텍스트 없음.
+    },
+    {
+        "name": "audit-retrieval-distiller",
+        "description": (
+            "감사기준 검색 및 선별 전담 서브에이전트. "
+            "회계감사기준, 품질관리기준서, 기타 인증업무기준, 인증업무개념체계 질문에서 "
+            "BM25 없이 Dense 검색과 reranker로 관련 문단을 찾고, 핵심 근거만 JSON으로 반환. "
+            "감사기준 질문에는 반드시 이 서브에이전트를 호출하라."
+        ),
+        "system_prompt": AUDIT_SUBAGENT_RETRIEVAL_PROMPT,
+        "tools": [
+            retrieve_audit_standards,
+            lookup_audit_paragraph,
+            search_single_audit_standard,
+        ],
+        "model": SUBAGENT_MODEL,
+        "middleware": [
+            EnhancedTodoMiddleware(),
+            FilesystemMiddleware(backend=backend),
+            create_summarization_middleware(SUBAGENT_MODEL, backend),
+            AnthropicPromptCachingMiddleware(
+                unsupported_model_behavior="ignore"
+            ),
+            PatchToolCallsMiddleware(),
+        ],
     },
 ]
 

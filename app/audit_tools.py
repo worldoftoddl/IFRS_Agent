@@ -77,61 +77,27 @@ def _search_audit_chunks(
     if not standard_ids:
         return []
 
-    pool_size = max(20, top_k * 10)
     with get_connection() as conn:
         rows = conn.execute(
             sql.SQL(
                 """
-                WITH dense AS (
-                    SELECT c.chunk_id, c.standard_id, s.title, c.para_number,
-                           c.component, c.section_title, c.content_markdown,
-                           ROW_NUMBER() OVER (
-                               ORDER BY c.embedding <=> %(emb)s::vector
-                           ) AS rank_dense
-                    FROM {} c
-                    JOIN {} s ON s.standard_id = c.standard_id
-                    WHERE c.standard_id = ANY(%(standard_ids)s)
-                      AND c.embedding IS NOT NULL
-                    ORDER BY c.embedding <=> %(emb)s::vector
-                    LIMIT %(pool_size)s
-                ),
-                bm25 AS (
-                    SELECT c.chunk_id, c.standard_id, s.title, c.para_number,
-                           c.component, c.section_title, c.content_markdown,
-                           ROW_NUMBER() OVER (ORDER BY ts_rank(c.content_tsv, q) DESC) AS rank_bm25
-                    FROM {} c
-                    JOIN {} s ON s.standard_id = c.standard_id,
-                         plainto_tsquery('simple', %(query)s) q
-                    WHERE c.standard_id = ANY(%(standard_ids)s)
-                      AND c.content_tsv @@ q
-                    ORDER BY ts_rank(c.content_tsv, q) DESC
-                    LIMIT %(pool_size)s
-                )
-                SELECT COALESCE(d.chunk_id, b.chunk_id) AS chunk_id,
-                       COALESCE(d.standard_id, b.standard_id) AS standard_id,
-                       COALESCE(d.title, b.title) AS title,
-                       COALESCE(d.para_number, b.para_number) AS para_number,
-                       COALESCE(d.component, b.component) AS component,
-                       COALESCE(d.section_title, b.section_title) AS section_title,
-                       COALESCE(d.content_markdown, b.content_markdown) AS content_markdown,
-                       1.0 / (60 + COALESCE(d.rank_dense, 1000))
-                         + 1.0 / (60 + COALESCE(b.rank_bm25, 1000)) AS score
-                FROM dense d
-                FULL OUTER JOIN bm25 b ON d.chunk_id = b.chunk_id
-                ORDER BY score DESC
+                SELECT c.chunk_id, c.standard_id, s.title, c.para_number,
+                       c.component, c.section_title, c.content_markdown,
+                       1 - (c.embedding <=> %(emb)s::vector) AS score
+                FROM {} c
+                JOIN {} s ON s.standard_id = c.standard_id
+                WHERE c.standard_id = ANY(%(standard_ids)s)
+                  AND c.embedding IS NOT NULL
+                ORDER BY c.embedding <=> %(emb)s::vector
                 LIMIT %(top_k)s
                 """
             ).format(
                 _table("chunks"),
                 _table("standards"),
-                _table("chunks"),
-                _table("standards"),
             ),
             {
                 "emb": query_emb,
-                "query": query,
                 "standard_ids": standard_ids,
-                "pool_size": pool_size,
                 "top_k": top_k,
             },
         ).fetchall()

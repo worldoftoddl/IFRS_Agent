@@ -1,5 +1,7 @@
 """감사기준 PostgreSQL 검색 도구 테스트."""
 
+import inspect
+
 import pytest
 
 from app import audit_tools
@@ -64,15 +66,23 @@ def test_invalid_audit_schema_env_is_rejected(monkeypatch):
         audit_tools._audit_schema()
 
 
-def test_audit_tools_are_registered_on_main_agent():
+def test_direct_audit_tools_do_not_use_bm25():
+    source = inspect.getsource(audit_tools)
+
+    assert "plainto_tsquery" not in source
+    assert "ts_rank" not in source
+    assert "content_tsv" not in source
+
+
+def test_direct_audit_tools_are_not_registered_on_main_agent():
     from app.agent import MAIN_TOOLS
 
     tool_names = {tool.name for tool in MAIN_TOOLS}
-    assert {
+    assert not {
         "search_audit_standards_k1",
         "search_audit_standards_k3",
         "search_audit_standards_k5",
-    } <= tool_names
+    } & tool_names
 
 
 def test_audit_tool_descriptions_guide_k_selection():
@@ -85,6 +95,6 @@ def test_audit_tool_descriptions_guide_k_selection():
 def test_system_prompt_limits_audit_tool_repetition():
     from app.prompts import SYSTEM_PROMPT
 
-    assert "감사기준 도구 중 정확히 하나만 1회 호출" in SYSTEM_PROMPT
-    assert "검색어만 바꿔 반복 호출하지 마세요" in SYSTEM_PROMPT
-    assert "명확한 단일 개념" in SYSTEM_PROMPT
+    assert "task(\"audit-retrieval-distiller\"" in SYSTEM_PROMPT
+    assert "감사기준 서브에이전트는 사용자 질문당 1회만 호출" in SYSTEM_PROMPT
+    assert "검색어를 여러 개로 바꾸거나 k 값을 지정하지 마세요" in SYSTEM_PROMPT
