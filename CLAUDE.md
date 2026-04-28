@@ -180,9 +180,8 @@ langgraph dev --no-browser       # http://localhost:2024
 질문 → embed_query() (Upstage Solar)
   → Step 1: _step1_identify_standard — standard_summaries에서 top-5 후보
   → 유사도 임계값 필터 (< 0.2 차단)
-  → Step 2: _step2_search_hybrid — BM25(kiwipiepy) + Dense 순수 RRF
-  │   Dense CTE + BM25 CTE → FULL OUTER JOIN
-  │   rrf_score = 1/(60+rank_dense) + 1/(60+rank_bm25)
+  → Step 2: _step2_search_dense — pgvector Dense passage 검색
+  │   기준서별 base_authority를 적용해 권위 문단만 검색
   │   pool=20 (reranker에 충분한 후보)
   → Step 2.5: Cohere rerank-v3.5 — pool 20 → top 10
   → primary_id 판정 (Counter로 최다 기준서)
@@ -219,27 +218,26 @@ langgraph dev --no-browser       # http://localhost:2024
 
 | 도구 | 용도 |
 |------|------|
-| `retrieve_ifrs(query)` | 하이브리드 검색 + Reranker → raw dict 리스트 |
+| `retrieve_ifrs(query)` | Dense 검색 + Reranker → raw dict 리스트 |
 | `lookup_paragraph(standard_id, para_number)` | 특정 문단 직접 조회 (O(1)) |
 | `search_single_standard(query, standard_id)` | 단일 기준서 Dense 검색 (경량) |
 
 ### 핵심 설계 결정
 
-- **하이브리드 RRF**: Dense + BM25(kiwipiepy) 순수 RRF. 가중치 없음 — 순위만 사용.
-- **Cohere Reranker**: RRF 후보 20 → rerank-v3.5 → top-10. 실패 시 RRF 순서 유지 (graceful degradation).
-- **kiwipiepy 사용자 사전**: 158개 K-IFRS 복합명사 (`app/kiwi_user_dict.txt`). "충당부채", "사용권자산" 등 형태소 보존.
+- **Dense 검색**: Step 1은 `standard_summaries`, Step 2는 `chunks.embedding`을 pgvector로 검색.
+- **Cohere Reranker**: Dense 후보 20 → rerank-v3.5 → top-10. 실패 시 기존 후보 순서 유지 (graceful degradation).
+- **kiwipiepy 사용자 사전**: 158개 K-IFRS 복합명사 (`app/kiwi_user_dict.txt`). 레거시 토큰/용어 추출 도구에서 사용.
 - **복수 기준서 통합 검색**: UNNEST JOIN으로 top-5 후보를 단일 쿼리 처리 (N+1 방지).
 - **authority 동적 필터**: `authority <= base_authority`. 개념체계(3), 실무서(4) 자동 조절.
 - **유사도 임계값 0.2**: 회계 무관 질문 조기 차단.
 - **Step 2 캐시**: 동일 (query, standard_id) 60초 TTL 캐시로 중복 임베딩 호출 방지.
 - **인접 문단 확장**: `_expand_adjacent_paragraphs()` — 검색된 문단 ±1 자동 포함, reranker가 최종 순서 결정.
 
-### BM25 토큰화 (`app/tokenizer.py`)
+### 레거시 토큰화 (`app/tokenizer.py`)
 
 - kiwipiepy 형태소 분석 + 158개 사용자 사전
-- `tokenize_for_index()` / `tokenize_for_query()` — 동일 분석기
-- PostgreSQL `to_tsvector('simple', 토큰문자열)` + GIN 인덱스
-- DB 재적재 시 `002_rebuild_tsvector_kiwi.py` 실행 필요 (DB 트리거 없음, 수동)
+- `tokenize_for_index()` / `tokenize_for_query()` — 레거시 보조 스크립트와 용어 추출용
+- 현재 K-IFRS 검색 런타임은 `embedding` 기반 Dense 검색 + reranker를 사용
 
 ### 싱글턴 패턴
 
@@ -303,8 +301,8 @@ s06 패턴을 이식하여 긴 대화에서도 컨텍스트 팽창을 제어.
 - **Golden Dataset**: `dev/eval/golden_dataset.json` — 36문항, 15개 기준서, 8개 카테고리, easy/medium/hard
 - **검색 평가**: `dev/eval/evaluate.py` — Recall@10, MRR, Standard Accuracy
 - **E2E 평가**: `dev/eval/evaluate_agent.py` — Cited Recall
-- **SEARCH_CONFIGS**: 10개 설정 (baseline, rrf_k변형, dense_only, bm25_only, reranker, multi_query 등)
-- **최신 결과**: baseline Recall=0.540, reranker Recall=0.539, StdAcc=0.889
+- **SEARCH_CONFIGS**: Dense 계열 설정 (baseline, dense_only, dense_pool50, dense_reranker, multi_query 등)
+- **최신 결과**: Dense 전환 후 전체 재측정 필요
 
 ## K-IFRS 도메인 지식
 
@@ -323,7 +321,7 @@ s06 패턴을 이식하여 긴 대화에서도 컨텍스트 팽창을 제어.
 | 테이블 | 용도 | 행 수 |
 |--------|------|------|
 | `standards` | 기준서 메타데이터 | 63 |
-| `chunks` | 검색 청크 (embedding + content_tsv) | 16,616 |
+| `chunks` | 검색 청크 (embedding + 원문/메타데이터) | 16,616 |
 | `standard_summaries` | 기준서 식별용 요약 (embedding) | 63 |
 | `footnotes` | 각주 | 852 |
 | `paragraph_links` | BC/IE → 본문 참조 링크 | 7,952 |

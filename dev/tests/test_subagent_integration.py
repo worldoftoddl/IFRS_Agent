@@ -29,6 +29,16 @@ class TestSubagentPrompt:
         assert "lookup_paragraph" in SUBAGENT_RETRIEVAL_PROMPT
         assert "search_single_standard" in SUBAGENT_RETRIEVAL_PROMPT
 
+    def test_kifrs_prompt_mentions_dense_reranker_without_bm25(self):
+        from app.subagent_prompts import SUBAGENT_RETRIEVAL_PROMPT
+
+        assert "Dense summary 검색" in SUBAGENT_RETRIEVAL_PROMPT
+        assert "Dense passage 검색" in SUBAGENT_RETRIEVAL_PROMPT
+        assert "Cohere Reranker" in SUBAGENT_RETRIEVAL_PROMPT
+        assert "BM25" not in SUBAGENT_RETRIEVAL_PROMPT
+        assert "RRF" not in SUBAGENT_RETRIEVAL_PROMPT
+        assert "하이브리드" not in SUBAGENT_RETRIEVAL_PROMPT
+
     def test_audit_prompt_mentions_dense_reranker_without_bm25(self):
         from app.subagent_prompts import AUDIT_SUBAGENT_RETRIEVAL_PROMPT
 

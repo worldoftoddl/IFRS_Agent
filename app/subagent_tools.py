@@ -1,7 +1,7 @@
 """Retrieval-distiller 서브에이전트용 검색 도구.
 
 메인 에이전트가 아닌 서브에이전트가 호출하는 3개 도구:
-- retrieve_ifrs: 무거운 파이프라인 (hybrid RRF + reranker), raw list 반환
+- retrieve_ifrs: Dense 검색 + reranker 파이프라인, raw list 반환
 - lookup_paragraph: (standard_id, para_number) 직접 조회 (검색 없음)
 - search_single_standard: 단일 기준서 내 Dense-only 검색 (reranker 없음)
 
@@ -18,7 +18,7 @@ from app.tools import (
     _STANDARD_ID_RE,
     _step1_identify_standard,
     _step2_search_authoritative,
-    _step2_search_hybrid,
+    _step2_search_dense,
 )
 
 
@@ -38,7 +38,7 @@ def _row_to_dict(row: tuple, standard_id: str | None = None) -> dict:
 
 @tool
 def retrieve_ifrs(query: str) -> list[dict]:
-    """K-IFRS 기준서에서 관련 문단을 하이브리드 검색합니다 (BM25+Dense RRF+Reranker).
+    """K-IFRS 기준서에서 관련 문단을 Dense 검색 + Reranker로 검색합니다.
 
     search_ifrs와 동일한 파이프라인이지만 마크다운 포맷팅 대신
     구조화된 dict 리스트를 반환합니다.
@@ -62,9 +62,7 @@ def retrieve_ifrs(query: str) -> list[dict]:
         standard_ids = [s[0] for s in standards if s[2] >= _SIMILARITY_THRESHOLD]
 
         # pool=20 → reranker에 충분한 후보
-        main_chunks, _ = _step2_search_hybrid(
-            conn, query_emb, query, standard_ids, top_k=20
-        )
+        main_chunks, _ = _step2_search_dense(conn, query_emb, standard_ids, top_k=20)
 
     if not main_chunks:
         return []
@@ -125,7 +123,7 @@ def lookup_paragraph(standard_id: str, para_number: str) -> dict | None:
 
 @tool
 def search_single_standard(query: str, standard_id: str) -> list[dict]:
-    """단일 기준서 내에서 Dense 벡터 검색만 수행합니다 (BM25/Reranker 없음).
+    """단일 기준서 내에서 Dense 벡터 검색만 수행합니다 (reranker 없음).
 
     이미 기준서가 확정된 상태에서 추가 관련 문단을 찾을 때 사용합니다.
     retrieve_ifrs보다 훨씬 빠름(임베딩 1회 + SQL 1회).

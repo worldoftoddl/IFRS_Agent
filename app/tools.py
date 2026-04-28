@@ -12,7 +12,6 @@ from langchain_core.tools import tool
 
 from app.db import get_connection
 from app.embedder import embed_query
-from app.tokenizer import tokenize_for_query
 
 logger = logging.getLogger(__name__)
 
@@ -167,13 +166,13 @@ def _step2_search_authoritative(
     return rows_sorted, para_numbers
 
 
-def _step2_search_multi(
+def _step2_search_dense(
     conn: psycopg.Connection,
     query_emb: list[float],
     standard_ids: list[str],
     top_k: int = 10,
 ) -> tuple[list[tuple], list[str]]:
-    """Step 2 복수 기준서 통합 검색.
+    """Step 2 복수 기준서 Dense 통합 검색.
 
     여러 기준서의 chunks를 한 번에 벡터 검색하여 유사도 순으로 반환.
     각 기준서의 base_authority에 맞게 authority 필터를 동적 적용.
@@ -226,99 +225,14 @@ def _step2_search_multi(
     return rows_sorted, para_numbers
 
 
-def _step2_search_hybrid(
+def _step2_search_multi(
     conn: psycopg.Connection,
     query_emb: list[float],
-    query_text: str,
     standard_ids: list[str],
     top_k: int = 10,
-    rrf_k: int = 60,
-    pool_size: int = 0,
-    w_dense: float = 1.0,
-    w_bm25: float = 1.0,
 ) -> tuple[list[tuple], list[str]]:
-    """Step 2 BM25 + Dense Weighted RRF 하이브리드 검색.
-
-    Dense(벡터 유사도)와 BM25(키워드 매칭) 결과를
-    Weighted RRF(Reciprocal Rank Fusion)로 결합.
-    rrf_score = w_dense/(k + rank_dense) + w_bm25/(k + rank_bm25)
-    가중치로 Dense/BM25 기여도를 조절.
-
-    반환 튜플 형식: (chunk_id, para_number, component, section_title,
-                    content_markdown, rrf_score, standard_id)
-    """
-    if not standard_ids:
-        return [], []
-
-    rows_auth = conn.execute(
-        "SELECT standard_id, base_authority FROM standards WHERE standard_id = ANY(%s)",
-        (list(standard_ids),),
-    ).fetchall()
-    auth_pairs = [(r[0], r[1]) for r in rows_auth]
-
-    if not auth_pairs:
-        return [], []
-
-    sids = [p[0] for p in auth_pairs]
-    auths = [p[1] for p in auth_pairs]
-
-    # 단일 CTE 쿼리: dense + bm25 → FULL OUTER JOIN → 순수 RRF
-    all_rows = conn.execute(
-        """
-        WITH dense AS (
-            SELECT c.chunk_id, c.para_number, c.component, c.section_title,
-                   c.content_markdown, c.standard_id,
-                   ROW_NUMBER() OVER (ORDER BY c.embedding <=> %(emb)s::vector) AS rank_dense
-            FROM chunks c
-            JOIN UNNEST(%(sids)s::text[], %(auths)s::int[]) AS auth(sid, max_auth)
-              ON c.standard_id = auth.sid AND c.authority <= auth.max_auth
-            ORDER BY c.embedding <=> %(emb)s::vector
-            LIMIT %(pool)s
-        ),
-        bm25 AS (
-            SELECT c.chunk_id, c.para_number, c.component, c.section_title,
-                   c.content_markdown, c.standard_id,
-                   ROW_NUMBER() OVER (ORDER BY ts_rank(c.content_tsv, q) DESC) AS rank_bm25
-            FROM chunks c
-            JOIN UNNEST(%(sids)s::text[], %(auths)s::int[]) AS auth(sid, max_auth)
-              ON c.standard_id = auth.sid AND c.authority <= auth.max_auth,
-            plainto_tsquery('simple', %(query)s) q
-            WHERE c.content_tsv @@ q
-            ORDER BY ts_rank(c.content_tsv, q) DESC
-            LIMIT %(pool)s
-        )
-        SELECT COALESCE(d.chunk_id, b.chunk_id) AS chunk_id,
-               COALESCE(d.para_number, b.para_number) AS para_number,
-               COALESCE(d.component, b.component) AS component,
-               COALESCE(d.section_title, b.section_title) AS section_title,
-               COALESCE(d.content_markdown, b.content_markdown) AS content_markdown,
-               %(w_dense)s * 1.0/(%(rrf_k)s + COALESCE(d.rank_dense, 1000))
-                 + %(w_bm25)s * 1.0/(%(rrf_k)s + COALESCE(b.rank_bm25, 1000)) AS rrf_score,
-               COALESCE(d.standard_id, b.standard_id) AS standard_id
-        FROM dense d
-        FULL OUTER JOIN bm25 b ON d.chunk_id = b.chunk_id
-        ORDER BY rrf_score DESC
-        LIMIT %(top_k)s
-        """,
-        {
-            "emb": query_emb,
-            "sids": sids,
-            "auths": auths,
-            "query": tokenize_for_query(query_text),
-            "pool": pool_size if pool_size > 0 else top_k * 3,
-            "rrf_k": rrf_k,
-            "top_k": top_k,
-            "w_dense": w_dense,
-            "w_bm25": w_bm25,
-        },
-    ).fetchall()
-
-    # component 순서로 재정렬
-    rows_sorted = sorted(
-        all_rows, key=lambda r: (_COMPONENT_ORDER.get(r[2], 99), -r[5])
-    )
-    para_numbers = [r[1] for r in all_rows if r[1]]
-    return rows_sorted, para_numbers
+    """Backward-compatible alias for the dense multi-standard search."""
+    return _step2_search_dense(conn, query_emb, standard_ids, top_k=top_k)
 
 
 def _step2_search_multi_query(
@@ -457,7 +371,7 @@ def _expand_adjacent_paragraphs(
                 existing_ids.add(nr[0])
                 added.append(nr)
 
-    # 원본 순�� 유지 + 확장 문단 append (reranker가 최종 순서 결정)
+    # 원본 순서 유지 + 확장 문단 append (reranker가 최종 순서 결정)
     return list(rows) + added
 
 
@@ -609,11 +523,9 @@ def search_ifrs(query: str) -> str:
         # 임계값 이상인 기준서만 통합 검색 대상에 포함
         standard_ids = [s[0] for s in standards if s[2] >= _SIMILARITY_THRESHOLD]
 
-        # Step 2: 임계값 통과 기준서에서 BM25+Dense 하이브리드 검색 (순수 RRF)
+        # Step 2: 임계값 통과 기준서에서 Dense 검색
         # pool 확대(20)하여 reranker에 충분한 후보 제공
-        main_chunks, _ = _step2_search_hybrid(
-            conn, query_emb, query, standard_ids, top_k=20
-        )
+        main_chunks, _ = _step2_search_dense(conn, query_emb, standard_ids, top_k=20)
 
         # Step 2.5: Cohere Reranker로 재정렬 (graceful degradation)
         if main_chunks:

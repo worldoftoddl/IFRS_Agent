@@ -1,15 +1,14 @@
-"""RRF 파라미터 튜닝 테스트.
+"""Dense 검색 파라미터 튜닝 테스트.
 
-evaluate 모듈이 다양한 검색 설정(rrf_k, pool_size, dense-only, bm25-only)으로
+evaluate 모듈이 다양한 Dense 검색 설정(pool_size, reranker, multi-query)으로
 평가를 실행하고 결과를 비교할 수 있는지 검증.
 """
 
-import pytest
 from dotenv import load_dotenv
 
 load_dotenv()
 
-from eval.evaluate import run_evaluation, load_golden, SEARCH_CONFIGS
+from eval.evaluate import SEARCH_CONFIGS, load_golden, run_evaluation  # noqa: E402
 
 
 class TestSearchConfigs:
@@ -24,8 +23,8 @@ class TestSearchConfigs:
         assert "baseline" in SEARCH_CONFIGS
 
     def test_configs_have_required_keys(self):
-        """각 설정에 필수 키(rrf_k, pool_size, mode)가 있어야 한다."""
-        required = {"rrf_k", "pool_size", "mode"}
+        """각 설정에 필수 키(pool_size, mode)가 있어야 한다."""
+        required = {"pool_size", "mode"}
         for name, cfg in SEARCH_CONFIGS.items():
             missing = required - set(cfg.keys())
             assert not missing, f"{name}: 누락 키 {missing}"
@@ -33,12 +32,13 @@ class TestSearchConfigs:
     def test_dense_only_config_exists(self):
         """dense-only 설정이 존재해야 한다."""
         assert "dense_only" in SEARCH_CONFIGS
-        assert SEARCH_CONFIGS["dense_only"]["mode"] == "dense_only"
+        assert SEARCH_CONFIGS["dense_only"]["mode"] == "dense"
 
-    def test_bm25_only_config_exists(self):
-        """bm25-only 설정이 존재해야 한다."""
-        assert "bm25_only" in SEARCH_CONFIGS
-        assert SEARCH_CONFIGS["bm25_only"]["mode"] == "bm25_only"
+    def test_bm25_configs_removed(self):
+        """BM25 기반 설정은 더 이상 제공하지 않는다."""
+        assert "bm25_only" not in SEARCH_CONFIGS
+        assert "weighted_rrf" not in SEARCH_CONFIGS
+        assert all(cfg["mode"] != "hybrid" for cfg in SEARCH_CONFIGS.values())
 
 
 class TestConfiguredEvaluation:

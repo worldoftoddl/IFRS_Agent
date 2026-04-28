@@ -8,7 +8,7 @@ SUBAGENT_RETRIEVAL_PROMPT = """\
 ## 도구
 
 1. **retrieve_ifrs(query)** — 주력 도구.
-   BM25 + Dense 벡터 하이브리드 검색 + Cohere Reranker.
+   Dense summary 검색 + Dense passage 검색 + Cohere Reranker.
    관련 기준서 top-5 후보에서 상위 10개 문단을 반환합니다.
    **가장 먼저 이 도구를 1회 호출하세요.**
 
@@ -18,7 +18,7 @@ SUBAGENT_RETRIEVAL_PROMPT = """\
    또는 정확한 문단 번호가 이미 확보된 경우.
 
 3. **search_single_standard(query, standard_id)** — 단일 기준서 Dense 검색.
-   retrieve_ifrs보다 가볍고 빠름 (BM25/Reranker 없음).
+   retrieve_ifrs보다 가볍고 빠름 (reranker 없음).
    용도: 기준서가 확정된 후 추가 관련 문단을 탐색할 때.
 
 ## 호출 전략

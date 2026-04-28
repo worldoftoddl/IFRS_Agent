@@ -111,5 +111,5 @@ def rerank(query: str, documents: list[str], top_n: int = 10) -> list[int]:
 
         return indices
     except Exception as e:
-        logger.warning("Reranker 실패, RRF 순서 유지: %s", e)
+        logger.warning("Reranker 실패, 기존 후보 순서 유지: %s", e)
         return list(range(min(top_n, len(documents))))

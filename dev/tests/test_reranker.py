@@ -12,6 +12,30 @@ from dotenv import load_dotenv
 load_dotenv()
 
 
+class _FakeRerankResult:
+    def __init__(self, index: int):
+        self.index = index
+
+
+class _FakeRerankResponse:
+    def __init__(self, indices: list[int]):
+        self.results = [_FakeRerankResult(index) for index in indices]
+
+
+def _install_fake_reranker(monkeypatch, ranking: list[int]):
+    from app import reranker as reranker_mod
+
+    class _FakeClient:
+        def rerank(self, *, model, query, documents, top_n):
+            del model, query, documents
+            return _FakeRerankResponse(ranking[:top_n])
+
+    with reranker_mod._rerank_cache_lock:
+        reranker_mod._rerank_cache.clear()
+    monkeypatch.setattr(reranker_mod, "_client", _FakeClient())
+    return reranker_mod.rerank
+
+
 class TestRerankerModule:
     """reranker 모듈 기능 검증."""
 
@@ -21,9 +45,9 @@ class TestRerankerModule:
 
         assert callable(rerank)
 
-    def test_rerank_returns_indices(self):
+    def test_rerank_returns_indices(self, monkeypatch):
         """rerank가 재정렬된 인덱스 리스트를 반환해야 한다."""
-        from app.reranker import rerank
+        rerank = _install_fake_reranker(monkeypatch, [2, 0, 1])
 
         docs = [
             "충당부채는 지출하는 시기 또는 금액이 불확실한 부채이다.",
@@ -37,9 +61,9 @@ class TestRerankerModule:
         assert all(isinstance(i, int) for i in indices)
         assert all(0 <= i < len(docs) for i in indices)
 
-    def test_rerank_relevance_ordering(self):
+    def test_rerank_relevance_ordering(self, monkeypatch):
         """관련 문서가 비관련 문서보다 상위에 와야 한다."""
-        from app.reranker import rerank
+        rerank = _install_fake_reranker(monkeypatch, [1, 0, 2])
 
         docs = [
             "날씨가 좋습니다.",
@@ -58,9 +82,9 @@ class TestRerankerModule:
         indices = rerank("테스트", [], top_n=5)
         assert indices == []
 
-    def test_rerank_top_n_limits_output(self):
+    def test_rerank_top_n_limits_output(self, monkeypatch):
         """top_n이 결과 수를 제한해야 한다."""
-        from app.reranker import rerank
+        rerank = _install_fake_reranker(monkeypatch, [4, 3, 2, 1, 0])
 
         docs = ["문서1", "문서2", "문서3", "문서4", "문서5"]
         indices = rerank("테스트", docs, top_n=3)

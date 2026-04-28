@@ -4,9 +4,9 @@ K-IFRS 핵심 복합명사가 사용자 사전에 등록되어
 kiwipiepy 토큰화 시 분리되지 않고 보존되는지 검증.
 """
 
-import pytest
-from dotenv import load_dotenv
 from pathlib import Path
+
+from dotenv import load_dotenv
 
 load_dotenv()
 
@@ -22,7 +22,11 @@ class TestUserDictFile:
 
     def test_dict_has_min_terms(self):
         """최소 50개 이상의 용어가 등록되어야 한다."""
-        terms = [l.strip() for l in DICT_PATH.read_text().splitlines() if l.strip() and not l.startswith("#")]
+        terms = [
+            line.strip()
+            for line in DICT_PATH.read_text().splitlines()
+            if line.strip() and not line.startswith("#")
+        ]
         assert len(terms) >= 50, f"용어 {len(terms)}개 — 최소 50개 필요"
 
     def test_dict_contains_key_terms(self):
@@ -59,22 +63,3 @@ class TestTokenizerWithDict:
 
         result = tokenize_for_query("충당부채 인식 조건")
         assert "충당부채" in result
-
-    def test_bm25_matches_with_compound_nouns(self):
-        """사용자 사전 적용 후 BM25 매칭이 동작해야 한다."""
-        from app.db import get_connection
-        from app.tokenizer import tokenize_for_query
-
-        query_tokens = tokenize_for_query("충당부채 인식")
-        with get_connection() as conn:
-            rows = conn.execute(
-                """
-                SELECT chunk_id
-                FROM chunks,
-                     plainto_tsquery('simple', %s) q
-                WHERE content_tsv @@ q
-                LIMIT 5
-                """,
-                (query_tokens,),
-            ).fetchall()
-        assert len(rows) > 0, f"BM25 매칭 실패 (tokens='{query_tokens}')"

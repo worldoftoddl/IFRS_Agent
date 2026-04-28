@@ -1,7 +1,7 @@
 """K-IFRS 검색 파이프라인 평가 프레임워크.
 
 Golden dataset으로 Recall@K, MRR, Standard Accuracy를 산출한다.
-다양한 검색 설정(RRF 파라미터, dense-only, bm25-only)으로 비교 가능.
+Dense, Dense+Reranker, Multi-Query 설정으로 비교 가능.
 """
 
 import json
@@ -16,14 +16,11 @@ load_dotenv()
 
 from app.db import get_connection  # noqa: E402
 from app.embedder import embed_query  # noqa: E402
-from app.tokenizer import tokenize_for_query  # noqa: E402
 from app.tools import (  # noqa: E402
-    _COMPONENT_ORDER,
     _SIMILARITY_THRESHOLD,
     _expand_adjacent_paragraphs,
     _step1_identify_standard,
-    _step2_search_hybrid,
-    _step2_search_multi,
+    _step2_search_dense,
     _step2_search_multi_query,
 )
 
@@ -34,28 +31,23 @@ GOLDEN_PATH = Path(__file__).parent / "golden_dataset.json"
 # ---------------------------------------------------------------------------
 
 SEARCH_CONFIGS: dict[str, dict] = {
-    "baseline": {"rrf_k": 60, "pool_size": 30, "mode": "hybrid", "rerank": False},
-    "rrf_k20": {"rrf_k": 20, "pool_size": 30, "mode": "hybrid", "rerank": False},
-    "rrf_k100": {"rrf_k": 100, "pool_size": 30, "mode": "hybrid", "rerank": False},
-    "pool50": {"rrf_k": 60, "pool_size": 50, "mode": "hybrid", "rerank": False},
-    "dense_only": {"rrf_k": 60, "pool_size": 30, "mode": "dense_only", "rerank": False},
-    "bm25_only": {"rrf_k": 60, "pool_size": 30, "mode": "bm25_only", "rerank": False},
-    "reranker": {"rrf_k": 60, "pool_size": 30, "mode": "hybrid", "rerank": True},
-    "dense_reranker": {"rrf_k": 60, "pool_size": 30, "mode": "dense_only", "rerank": True},
-    "multi_query": {"rrf_k": 60, "pool_size": 30, "mode": "multi_query", "rerank": False},
-    "multi_query_reranker": {"rrf_k": 60, "pool_size": 30, "mode": "multi_query", "rerank": True},
-    # Phase 1 개선 설정
-    "weighted_rrf": {
-        "rrf_k": 60, "pool_size": 50, "mode": "hybrid", "rerank": False,
-        "w_dense": 0.7, "w_bm25": 0.3,
-    },
+    "baseline": {"pool_size": 20, "mode": "dense", "rerank": True},
+    "dense_only": {"pool_size": 20, "mode": "dense", "rerank": False},
+    "dense_pool50": {"pool_size": 50, "mode": "dense", "rerank": False},
+    "dense_reranker": {"pool_size": 20, "mode": "dense", "rerank": True},
+    "multi_query": {"pool_size": 30, "mode": "multi_query", "rerank": False},
+    "multi_query_reranker": {"pool_size": 30, "mode": "multi_query", "rerank": True},
     "expand_adjacent": {
-        "rrf_k": 60, "pool_size": 50, "mode": "hybrid", "rerank": False,
-        "w_dense": 0.7, "w_bm25": 0.3, "expand_adjacent": True,
+        "pool_size": 50,
+        "mode": "dense",
+        "rerank": False,
+        "expand_adjacent": True,
     },
     "phase1": {
-        "rrf_k": 60, "pool_size": 50, "mode": "hybrid", "rerank": True,
-        "w_dense": 0.7, "w_bm25": 0.3, "expand_adjacent": True,
+        "pool_size": 50,
+        "mode": "dense",
+        "rerank": True,
+        "expand_adjacent": True,
     },
 }
 
@@ -65,41 +57,6 @@ def load_golden() -> list[dict]:
     return json.loads(GOLDEN_PATH.read_text())
 
 
-def _search_bm25_only(
-    conn, query_text: str, standard_ids: list[str], top_k: int = 10
-) -> list[tuple]:
-    """BM25 전용 검색 (평가용)."""
-    rows_auth = conn.execute(
-        "SELECT standard_id, base_authority FROM standards WHERE standard_id = ANY(%s)",
-        (list(standard_ids),),
-    ).fetchall()
-    auth_pairs = [(r[0], r[1]) for r in rows_auth]
-    if not auth_pairs:
-        return []
-
-    rows = conn.execute(
-        """
-        SELECT c.chunk_id, c.para_number, c.component, c.section_title,
-               c.content_markdown,
-               ts_rank(c.content_tsv, plainto_tsquery('simple', %(query)s)) AS score,
-               c.standard_id
-        FROM chunks c
-        JOIN UNNEST(%(sids)s::text[], %(auths)s::int[]) AS auth(sid, max_auth)
-          ON c.standard_id = auth.sid AND c.authority <= auth.max_auth
-        WHERE c.content_tsv @@ plainto_tsquery('simple', %(query)s)
-        ORDER BY score DESC
-        LIMIT %(top_k)s
-        """,
-        {
-            "query": tokenize_for_query(query_text),
-            "sids": [p[0] for p in auth_pairs],
-            "auths": [p[1] for p in auth_pairs],
-            "top_k": top_k,
-        },
-    ).fetchall()
-    return sorted(rows, key=lambda r: (_COMPONENT_ORDER.get(r[2], 99), -r[5]))
-
-
 def run_evaluation(item: dict, config: dict | None = None, top_k: int = 10) -> dict:
     """단일 질문에 대해 검색 파이프라인을 실행하고 결과를 반환."""
     if config is None:
@@ -107,12 +64,9 @@ def run_evaluation(item: dict, config: dict | None = None, top_k: int = 10) -> d
 
     query = item["query"]
     expected_paras = set(item["expected_paragraphs"])
-    mode = config.get("mode", "hybrid")
-    rrf_k = config.get("rrf_k", 60)
-    pool_size = config.get("pool_size", 30)
+    mode = config.get("mode", "dense")
+    pool_size = config.get("pool_size", top_k)
     use_rerank = config.get("rerank", False)
-    w_dense = config.get("w_dense", 1.0)
-    w_bm25 = config.get("w_bm25", 1.0)
     expand_adjacent = config.get("expand_adjacent", False)
 
     query_emb = embed_query(query)
@@ -131,25 +85,17 @@ def run_evaluation(item: dict, config: dict | None = None, top_k: int = 10) -> d
 
         standard_ids = [s[0] for s in standards if s[2] >= _SIMILARITY_THRESHOLD]
 
-        # 검색 실행 — rerank 시 pool 확대(20)하여 reranker에 후보 제공
-        search_top_k = 20 if use_rerank else top_k
+        # 검색 실행 — rerank/인접 문단 확장 전에 후보 풀 확보
+        search_top_k = max(top_k, pool_size)
 
-        if mode == "hybrid":
-            rows, _ = _step2_search_hybrid(
-                conn, query_emb, query, standard_ids,
-                top_k=search_top_k, rrf_k=rrf_k, pool_size=pool_size,
-                w_dense=w_dense, w_bm25=w_bm25,
-            )
-        elif mode == "dense_only":
-            rows, _ = _step2_search_multi(
+        if mode == "dense":
+            rows, _ = _step2_search_dense(
                 conn, query_emb, standard_ids, top_k=search_top_k
             )
         elif mode == "multi_query":
             rows, _ = _step2_search_multi_query(
                 conn, query, standard_ids, top_k=search_top_k
             )
-        elif mode == "bm25_only":
-            rows = _search_bm25_only(conn, query, standard_ids, top_k=search_top_k)
         else:
             raise ValueError(f"Unknown mode: {mode}")
 

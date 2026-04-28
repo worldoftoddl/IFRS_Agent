@@ -2,7 +2,7 @@
 
 ## 현재 상태 (2026-04-08)
 
-핵심 기능 완성: 하이브리드 검색(BM25+Dense RRF) + Cohere Reranker + retrieval-distiller 서브에이전트 + 챗봇 UI
+핵심 기능 완성: Dense 검색 + Cohere Reranker + retrieval-distiller 서브에이전트 + 챗봇 UI
 - Std Accuracy: 100% (36/36)
 - Cited Recall: 74.2%
 - 메인: Claude Sonnet 4.6 / 서브: Claude Haiku 4.5

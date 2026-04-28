@@ -1,7 +1,7 @@
 """kiwipiepy 기반 한국어 토크나이저 + K-IFRS 사용자 사전.
 
-BM25 인덱싱/검색을 위해 한국어 텍스트를 형태소 분석하여
-공백 구분된 토큰 문자열로 변환한다.
+기존 tsvector 유산과 용어 추출 보조 작업을 위해 한국어 텍스트를
+형태소 분석하여 공백 구분된 토큰 문자열로 변환한다.
 K-IFRS 복합명사(충당부채, 사용권자산 등)는 사용자 사전에 등록하여 보존.
 """
 
@@ -52,7 +52,6 @@ def tokenize_for_index(text: str) -> str:
     """문서 인덱싱용 토큰화. content_text → 형태소 분리된 공백 문자열.
 
     K-IFRS 복합명사는 사용자 사전에 의해 보존됨.
-    to_tsvector('simple', result)로 인덱싱하면 형태소 단위 매칭 가능.
     """
     if not text or not text.strip():
         return ""
@@ -64,7 +63,8 @@ def tokenize_for_index(text: str) -> str:
 def tokenize_for_query(text: str) -> str:
     """검색 쿼리용 토큰화. 문서와 동일한 형태소 분석 적용.
 
-    plainto_tsquery('simple', result)로 검색하면 형태소 단위 매칭 가능.
+    현재 K-IFRS 런타임 검색은 pgvector Dense 검색을 사용하므로 이 함수는
+    legacy tsvector 유산과 보조 스크립트용으로만 남아 있다.
     """
     if not text or not text.strip():
         return ""

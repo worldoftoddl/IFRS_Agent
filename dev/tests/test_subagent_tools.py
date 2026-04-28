@@ -1,7 +1,7 @@
 """retrieval-distiller 서브에이전트용 도구 테스트.
 
 3개 도구 검증:
-- retrieve_ifrs: hybrid + reranker 무거운 파이프라인 (dict list 반환)
+- retrieve_ifrs: Dense + reranker 검색 파이프라인 (dict list 반환)
 - lookup_paragraph: (standard_id, para_number) 직접 조회
 - search_single_standard: 단일 기준서 Dense-only 검색
 """
@@ -29,7 +29,7 @@ _EXPECTED_KEYS = {
 
 
 class TestRetrieveIfrs:
-    """retrieve_ifrs: search_ifrs와 동등한 무거운 파이프라인."""
+    """retrieve_ifrs: search_ifrs와 동등한 Dense + Reranker 파이프라인."""
 
     def test_returns_list_of_dicts(self):
         """결과는 dict 리스트여야 한다."""

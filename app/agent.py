@@ -2,7 +2,7 @@
 
 구조:
 - 메인 Agent (Sonnet 4.6): 답변 생성, BC/IE·메타데이터 직접 조회
-- retrieval-distiller 서브에이전트 (Haiku 4.5): Level 1 하이브리드 검색 전담
+- retrieval-distiller 서브에이전트 (Haiku 4.5): K-IFRS Dense+Reranker 검색 전담
 - audit-retrieval-distiller 서브에이전트 (Haiku 4.5): 감사기준 Dense+Reranker 검색 전담
   → 원문 + 요약을 JSON으로 반환하여 메인 컨텍스트 절감
 
