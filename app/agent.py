@@ -32,6 +32,11 @@ from app.accounting_tools import (
     calculate_present_value,
     verify_arithmetic,
 )
+from app.audit_tools import (
+    search_audit_standards_k1,
+    search_audit_standards_k3,
+    search_audit_standards_k5,
+)
 from app.compact_middleware import MicroCompactMiddleware
 from app.middleware import EnhancedTodoMiddleware
 from app.prompts import SYSTEM_PROMPT
@@ -65,6 +70,9 @@ MAIN_TOOLS = [
     calculate_effective_interest_rate,
     build_amortization_schedule,
     verify_arithmetic,
+    search_audit_standards_k1,
+    search_audit_standards_k3,
+    search_audit_standards_k5,
 ]
 
 # ── 서브에이전트 설정 ─────────────────────────────────

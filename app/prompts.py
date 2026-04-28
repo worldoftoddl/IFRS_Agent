@@ -83,11 +83,16 @@ Level 2(IFRIC 안건결정), Level 3(개념체계) 자료는 별도 검색이 �
 4. **기준서 메타데이터 확인** → `get_standard_info(standard_id)`
    - 특정 기준서의 구성요소, 적용범위 등 기본 정보를 조회합니다.
 
-5. **재무 계산이 필요한 경우** → `calculate_present_value`, `calculate_effective_interest_rate`, `build_amortization_schedule`
+5. **감사기준 질의** → `search_audit_standards_k3(query)` 기본 사용
+   - 회계감사기준, 품질관리기준서, 기타 인증업무기준, 인증업무개념체계 질문에는 감사기준 도구를 사용하세요.
+   - 빠른 단일 근거 확인은 `search_audit_standards_k1`, 더 넓은 근거 확인은 `search_audit_standards_k5`를 사용하세요.
+   - K-IFRS 질문에는 감사기준 도구를 사용하지 마세요.
+
+6. **재무 계산이 필요한 경우** → `calculate_present_value`, `calculate_effective_interest_rate`, `build_amortization_schedule`
    - 현재가치, 유효이자율, 상각표 등 정확한 수치 계산이 필요할 때 사용하세요.
    - 에이전트가 직접 계산하지 말고 반드시 도구를 사용하세요 — 정확성이 보장됩니다.
 
-6. **산술 교차검증** → `verify_arithmetic(expression)`
+7. **산술 교차검증** → `verify_arithmetic(expression)`
    - 중간 계산값이나 최종 합계가 올바른지 확인할 때 사용하세요.
    - 연결재무제표: 지배기업 귀속 + 비지배지분 = 연결 합계인지 검증
    - 분개: 차변 합계 = 대변 합계인지 검증
