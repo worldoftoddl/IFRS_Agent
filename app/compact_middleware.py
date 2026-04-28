@@ -18,6 +18,7 @@ AnthropicPromptCachingMiddleware와의 충돌을 피하기 위해
 
 from __future__ import annotations
 
+import ast
 import json
 import logging
 import time
@@ -31,6 +32,18 @@ logger = logging.getLogger(__name__)
 
 PLACEHOLDER_TEMPLATE = "[Previous: used {tool_name}]"
 MIN_COMPACT_LENGTH = 100  # 짧은 content는 교체 이득 없음
+DEFAULT_MAX_DIGEST_CHARS = 2400
+
+RETRIEVAL_CONTEXT_TOOLS: set[str] = {
+    "retrieval-distiller",
+    "audit-retrieval-distiller",
+    "retrieve_ifrs",
+    "retrieve_audit_standards",
+    "search_single_standard",
+    "search_single_audit_standard",
+    "lookup_paragraph",
+    "lookup_audit_paragraph",
+}
 
 PRESERVE_TOOLS: set[str] = {
     # 회계 계산 — 재계산 비용 + 일관성 리스크
@@ -64,6 +77,144 @@ def estimate_tokens(messages: list[AnyMessage]) -> int:
     return total_chars // 4
 
 
+def _one_line(value: Any, limit: int = 500) -> str:
+    text = str(value or "")
+    text = " ".join(text.split())
+    if len(text) <= limit:
+        return text
+    if limit <= 3:
+        return text[:limit]
+    return text[: limit - 3].rstrip() + "..."
+
+
+def _truncate(value: str, limit: int) -> str:
+    if len(value) <= limit:
+        return value
+    if limit <= 3:
+        return value[:limit]
+    return value[: limit - 3].rstrip() + "..."
+
+
+def _load_structured_content(content: Any) -> Any | None:
+    """ToolMessage content에서 JSON/list/dict 구조를 best-effort로 복원."""
+    if isinstance(content, (dict, list)):
+        return content
+    if not isinstance(content, str):
+        return None
+
+    stripped = content.strip()
+    if not stripped or stripped[0] not in "[{":
+        return None
+
+    try:
+        return json.loads(stripped)
+    except json.JSONDecodeError:
+        pass
+
+    try:
+        return ast.literal_eval(stripped)
+    except (SyntaxError, ValueError):
+        return None
+
+
+def _chunk_ref(chunk: dict[str, Any]) -> str:
+    standard_id = chunk.get("standard_id") or chunk.get("standard") or "-"
+    para = chunk.get("para_number") or chunk.get("paragraph") or "N/A"
+    component = chunk.get("component") or "-"
+    section = chunk.get("section_title") or chunk.get("section") or "-"
+    return f"{standard_id} 문단 {para} ({component}, {section})"
+
+
+def _chunk_excerpt(chunk: dict[str, Any]) -> str:
+    for key in ("key_excerpt", "content_markdown", "original_text", "text"):
+        value = chunk.get(key)
+        if value:
+            return _one_line(value, limit=260)
+    return ""
+
+
+def _build_chunks_digest(chunks: list[Any], max_items: int = 5) -> list[str]:
+    lines: list[str] = []
+    for item in chunks[:max_items]:
+        if not isinstance(item, dict):
+            continue
+        ref = _chunk_ref(item)
+        excerpt = _chunk_excerpt(item)
+        reason = _one_line(item.get("why_relevant"), limit=160)
+        if excerpt and reason:
+            lines.append(f"- {ref}: {excerpt} / relevance: {reason}")
+        elif excerpt:
+            lines.append(f"- {ref}: {excerpt}")
+        else:
+            lines.append(f"- {ref}")
+    return lines
+
+
+def _build_retrieval_digest(
+    tool_name: str,
+    content: Any,
+    max_chars: int,
+) -> str | None:
+    """검색 결과 원문을 다음 턴용 citation digest로 축약."""
+    data = _load_structured_content(content)
+    if data is None:
+        return None
+
+    lines = [f"[Previous retrieval context: {tool_name}]"]
+
+    if isinstance(data, dict):
+        synthesis = data.get("synthesis")
+        if synthesis:
+            lines.append(f"synthesis: {_one_line(synthesis, limit=600)}")
+
+        chunks = data.get("chunks")
+        if isinstance(chunks, list) and chunks:
+            lines.append("chunks:")
+            lines.extend(_build_chunks_digest(chunks))
+
+        if "chunks" not in data:
+            lines.append("chunks:")
+            lines.extend(_build_chunks_digest([data], max_items=1))
+
+        notes = data.get("notes")
+        if notes:
+            lines.append(f"notes: {_one_line(notes, limit=300)}")
+
+    elif isinstance(data, list):
+        chunk_lines = _build_chunks_digest(data)
+        if not chunk_lines:
+            return None
+        lines.append("chunks:")
+        lines.extend(chunk_lines)
+
+    else:
+        return None
+
+    if len(lines) <= 1:
+        return None
+    return _truncate("\n".join(lines), max_chars)
+
+
+def _replacement_content(
+    tool_name: str,
+    content: Any,
+    max_digest_chars: int,
+) -> str | None:
+    if tool_name in RETRIEVAL_CONTEXT_TOOLS:
+        digest = _build_retrieval_digest(
+            tool_name=tool_name,
+            content=content,
+            max_chars=max_digest_chars,
+        )
+        if digest:
+            return digest
+
+    if isinstance(content, str) and len(content) >= MIN_COMPACT_LENGTH:
+        return PLACEHOLDER_TEMPLATE.format(tool_name=tool_name)
+
+    return None
+
+
 DEFAULT_ARCHIVE_DIR = Path("./.transcripts")
 
 
@@ -86,6 +237,7 @@ class MicroCompactMiddleware(AgentMiddleware):
     Args:
         trigger_tokens: 이 추정 토큰 수 미만이면 no-op (캐시 보호).
         keep_recent: 최근 N개의 tool_result는 보존.
+        max_digest_chars: 검색 결과를 digest로 치환할 때 남길 최대 문자 수.
         archive_dir: 치환 전 원본을 JSONL로 append 저장할 디렉터리.
             None이면 아카이브 비활성. 기본값: ``./.transcripts``.
     """
@@ -94,10 +246,12 @@ class MicroCompactMiddleware(AgentMiddleware):
         self,
         trigger_tokens: int = 50_000,
         keep_recent: int = 3,
+        max_digest_chars: int = DEFAULT_MAX_DIGEST_CHARS,
         archive_dir: Path | str | None = DEFAULT_ARCHIVE_DIR,
     ) -> None:
         self.trigger_tokens = trigger_tokens
         self.keep_recent = keep_recent
+        self.max_digest_chars = max_digest_chars
         self.archive_dir: Path | None = (
             Path(archive_dir) if archive_dir is not None else None
         )
@@ -122,17 +276,22 @@ class MicroCompactMiddleware(AgentMiddleware):
         updates: list[ToolMessage] = []
         originals: list[ToolMessage] = []
         for msg in old:
-            if not isinstance(msg.content, str):
-                continue  # list/dict content는 복잡해서 건드리지 않음
-            if len(msg.content) < MIN_COMPACT_LENGTH:
-                continue
             tool_name = msg.name or "unknown"
             if tool_name in PRESERVE_TOOLS:
                 continue
+
+            replacement_content = _replacement_content(
+                tool_name=tool_name,
+                content=msg.content,
+                max_digest_chars=self.max_digest_chars,
+            )
+            if replacement_content is None:
+                continue
+
             originals.append(msg)
             # 같은 id·tool_call_id로 교체 메시지 생성
             replacement = ToolMessage(
-                content=PLACEHOLDER_TEMPLATE.format(tool_name=tool_name),
+                content=replacement_content,
                 name=tool_name,
                 tool_call_id=msg.tool_call_id,
                 id=msg.id,

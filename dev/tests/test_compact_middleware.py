@@ -13,8 +13,10 @@ import pytest
 from langchain_core.messages import AIMessage, HumanMessage, ToolMessage
 
 from app.compact_middleware import (
+    DEFAULT_MAX_DIGEST_CHARS,
     PLACEHOLDER_TEMPLATE,
     PRESERVE_TOOLS,
+    RETRIEVAL_CONTEXT_TOOLS,
     MicroCompactMiddleware,
     estimate_tokens,
 )
@@ -54,6 +56,13 @@ class TestStructure:
     def test_configurable_keep_recent(self):
         mw = MicroCompactMiddleware(keep_recent=5)
         assert mw.keep_recent == 5
+
+    def test_configurable_max_digest_chars(self):
+        mw = MicroCompactMiddleware(max_digest_chars=1200)
+        assert mw.max_digest_chars == 1200
+
+    def test_default_digest_budget_exported(self):
+        assert DEFAULT_MAX_DIGEST_CHARS > 0
 
 
 class TestBelowThreshold:
@@ -195,6 +204,104 @@ class TestPreserveList:
         updates = {m.id: m for m in result["messages"]}
         # verify_arithmetic은 교체 대상에 없어야 함
         assert "tool_va" not in updates
+
+
+class TestRetrievalContextDigest:
+    """검색 결과는 원문 전체 대신 citation 중심 digest로 남긴다."""
+
+    def test_retrieval_tools_are_registered(self):
+        assert "retrieval-distiller" in RETRIEVAL_CONTEXT_TOOLS
+        assert "audit-retrieval-distiller" in RETRIEVAL_CONTEXT_TOOLS
+        assert "retrieve_ifrs" in RETRIEVAL_CONTEXT_TOOLS
+
+    def test_distiller_json_compacted_to_digest(self):
+        mw = MicroCompactMiddleware(
+            trigger_tokens=1,
+            keep_recent=0,
+            max_digest_chars=1200,
+            archive_dir=None,
+        )
+        full_original = "FULL_ORIGINAL_SHOULD_NOT_REMAIN " * 200
+        payload = {
+            "synthesis": "수익은 약속한 재화나 용역을 고객에게 이전할 때 인식한다.",
+            "chunks": [
+                {
+                    "standard_id": "K-IFRS 1115",
+                    "para_number": "31",
+                    "component": "main",
+                    "section_title": "수익의 인식",
+                    "original_text": full_original,
+                    "key_excerpt": "수행의무를 이행할 때 수익을 인식한다.",
+                    "why_relevant": "수익 인식 시점을 직접 설명한다.",
+                }
+            ],
+            "notes": "",
+        }
+        msgs = [
+            HumanMessage(content="q"),
+            AIMessage(
+                content="",
+                tool_calls=[
+                    {"name": "retrieval-distiller", "args": {}, "id": "c1"}
+                ],
+            ),
+            ToolMessage(
+                content=json.dumps(payload, ensure_ascii=False),
+                name="retrieval-distiller",
+                tool_call_id="c1",
+                id="t1",
+            ),
+        ]
+
+        result = mw.before_model({"messages": msgs}, None)
+        assert result is not None
+        digest = result["messages"][0].content
+        assert digest.startswith("[Previous retrieval context: retrieval-distiller]")
+        assert "K-IFRS 1115" in digest
+        assert "문단 31" in digest
+        assert "수행의무를 이행할 때" in digest
+        assert "FULL_ORIGINAL_SHOULD_NOT_REMAIN" not in digest
+
+    def test_raw_retrieval_list_compacted_to_digest(self):
+        mw = MicroCompactMiddleware(
+            trigger_tokens=1,
+            keep_recent=0,
+            max_digest_chars=1000,
+            archive_dir=None,
+        )
+        payload = [
+            {
+                "standard_id": "K-IFRS 1037",
+                "para_number": "14",
+                "component": "main",
+                "section_title": "충당부채",
+                "content_markdown": (
+                    "충당부채는 현재의무, 유출가능성, 신뢰성 있는 추정이 "
+                    "있을 때 인식한다."
+                ),
+            }
+        ]
+        msgs = [
+            HumanMessage(content="q"),
+            AIMessage(
+                content="",
+                tool_calls=[{"name": "retrieve_ifrs", "args": {}, "id": "c1"}],
+            ),
+            ToolMessage(
+                content=json.dumps(payload, ensure_ascii=False),
+                name="retrieve_ifrs",
+                tool_call_id="c1",
+                id="t1",
+            ),
+        ]
+
+        result = mw.before_model({"messages": msgs}, None)
+        assert result is not None
+        digest = result["messages"][0].content
+        assert digest.startswith("[Previous retrieval context: retrieve_ifrs]")
+        assert "K-IFRS 1037" in digest
+        assert "문단 14" in digest
+        assert "현재의무" in digest
 
 
 class TestEdgeCases:
