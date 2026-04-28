@@ -204,7 +204,8 @@ def _search_audit_standards(query: str, *, top_k: int) -> str:
 def search_audit_standards_k1(query: str) -> str:
     """감사기준 PostgreSQL DB에서 관련 문단 1개를 검색합니다.
 
-    가장 짧은 근거 확인이나 smoke test에 사용하세요.
+    명확한 단일 개념, 정의, 약어, 특정 문단을 확인할 때 우선 사용하세요.
+    예: "수행중요성 PM이란?", "계속기업 가정 평가는 무엇인가?"
 
     Args:
         query: 검색할 감사기준 질문
@@ -216,7 +217,8 @@ def search_audit_standards_k1(query: str) -> str:
 def search_audit_standards_k3(query: str) -> str:
     """감사기준 PostgreSQL DB에서 관련 문단 3개를 검색합니다.
 
-    일반적인 감사기준 질의응답에서 기본 검색 도구로 사용하세요.
+    일반적인 감사기준 질의응답의 기본 검색 도구입니다.
+    한 사용자 질문에는 감사기준 검색 도구를 한 번만 호출하세요.
 
     Args:
         query: 검색할 감사기준 질문
@@ -228,7 +230,8 @@ def search_audit_standards_k3(query: str) -> str:
 def search_audit_standards_k5(query: str) -> str:
     """감사기준 PostgreSQL DB에서 관련 문단 5개를 검색합니다.
 
-    근거 문단을 넓게 확인해야 하는 감사기준 질문에 사용하세요.
+    사용자가 넓은 근거, 여러 기준서 비교, 복수 쟁점 검토를 명시적으로 요구할 때만
+    사용하세요. 명확한 단일 개념 질문에는 k1을 쓰고, k5를 기본값으로 사용하지 마세요.
 
     Args:
         query: 검색할 감사기준 질문

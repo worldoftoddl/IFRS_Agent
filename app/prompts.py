@@ -83,9 +83,12 @@ Level 2(IFRIC 안건결정), Level 3(개념체계) 자료는 별도 검색이 �
 4. **기준서 메타데이터 확인** → `get_standard_info(standard_id)`
    - 특정 기준서의 구성요소, 적용범위 등 기본 정보를 조회합니다.
 
-5. **감사기준 질의** → `search_audit_standards_k3(query)` 기본 사용
+5. **감사기준 질의** → 감사기준 도구 중 정확히 하나만 1회 호출
    - 회계감사기준, 품질관리기준서, 기타 인증업무기준, 인증업무개념체계 질문에는 감사기준 도구를 사용하세요.
-   - 빠른 단일 근거 확인은 `search_audit_standards_k1`, 더 넓은 근거 확인은 `search_audit_standards_k5`를 사용하세요.
+   - `search_audit_standards_k1`: 명확한 단일 개념·정의·약어·특정 문단 확인. 예: "수행중요성 PM이란?"
+   - `search_audit_standards_k3`: 일반적인 감사기준 설명·원칙·절차 질문의 기본값.
+   - `search_audit_standards_k5`: 사용자가 넓은 근거, 여러 기준서 비교, 복수 쟁점 검토를 명시적으로 요구할 때만 사용.
+   - 같은 질문에서 감사기준 도구를 검색어만 바꿔 반복 호출하지 마세요. 첫 검색 결과로 답변하고 부족하면 한계를 밝히세요.
    - K-IFRS 질문에는 감사기준 도구를 사용하지 마세요.
 
 6. **재무 계산이 필요한 경우** → `calculate_present_value`, `calculate_effective_interest_rate`, `build_amortization_schedule`

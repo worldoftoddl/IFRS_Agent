@@ -73,3 +73,18 @@ def test_audit_tools_are_registered_on_main_agent():
         "search_audit_standards_k3",
         "search_audit_standards_k5",
     } <= tool_names
+
+
+def test_audit_tool_descriptions_guide_k_selection():
+    assert "명확한 단일 개념" in audit_tools.search_audit_standards_k1.description
+    assert "기본 검색 도구" in audit_tools.search_audit_standards_k3.description
+    assert "한 번만 호출" in audit_tools.search_audit_standards_k3.description
+    assert "기본값으로 사용하지 마세요" in audit_tools.search_audit_standards_k5.description
+
+
+def test_system_prompt_limits_audit_tool_repetition():
+    from app.prompts import SYSTEM_PROMPT
+
+    assert "감사기준 도구 중 정확히 하나만 1회 호출" in SYSTEM_PROMPT
+    assert "검색어만 바꿔 반복 호출하지 마세요" in SYSTEM_PROMPT
+    assert "명확한 단일 개념" in SYSTEM_PROMPT
