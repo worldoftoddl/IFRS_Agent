@@ -1,6 +1,15 @@
 "use client";
 
-export function SearchIndicator() {
+import { DOMAIN_UI } from "@/lib/domain";
+import type { DomainMode } from "@/types";
+
+interface SearchIndicatorProps {
+  domainMode: DomainMode;
+}
+
+export function SearchIndicator({ domainMode }: SearchIndicatorProps) {
+  const domain = DOMAIN_UI[domainMode];
+
   return (
     <div className="flex items-center gap-2 px-4 py-3">
       <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10">
@@ -24,7 +33,7 @@ export function SearchIndicator() {
           />
         </svg>
       </div>
-      <span className="text-sm text-gray-500">기준서 검색 중...</span>
+      <span className="text-sm text-gray-500">{domain.searchText}</span>
     </div>
   );
 }

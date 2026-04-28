@@ -1,16 +1,16 @@
 "use client";
 
+import { DOMAIN_UI } from "@/lib/domain";
+import type { DomainMode } from "@/types";
+
 interface EmptyStateProps {
   onExampleClick: (question: string) => void;
+  domainMode: DomainMode;
 }
 
-const EXAMPLES = [
-  "충당부채 인식 조건 3가지는?",
-  "리스 이용자의 최초 인식 회계처리는?",
-  "수익 인식의 5단계 모형을 설명해줘",
-];
+export function EmptyState({ onExampleClick, domainMode }: EmptyStateProps) {
+  const domain = DOMAIN_UI[domainMode];
 
-export function EmptyState({ onExampleClick }: EmptyStateProps) {
   return (
     <div className="flex flex-1 flex-col items-center justify-center px-4">
       <div className="mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10">
@@ -27,16 +27,16 @@ export function EmptyState({ onExampleClick }: EmptyStateProps) {
         </svg>
       </div>
       <h1 className="mb-2 text-xl font-bold text-gray-900">
-        K-IFRS 회계 자문 AI
+        {domain.title}
       </h1>
       <p className="mb-8 max-w-sm text-center text-sm text-gray-500">
-        한국채택국제회계기준에 대해 질문하세요.
+        {domain.subtitle}에 대해 질문하세요.
         <br />
-        기준서를 검색하고 근거 문단을 인용하여 답변합니다.
+        관련 기준서를 검색하고 근거 문단을 인용하여 답변합니다.
       </p>
 
       <div className="flex w-full max-w-md flex-col gap-2">
-        {EXAMPLES.map((q) => (
+        {domain.examples.map((q) => (
           <button
             key={q}
             onClick={() => onExampleClick(q)}

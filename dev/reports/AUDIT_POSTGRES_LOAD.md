@@ -84,7 +84,6 @@ audit.chunks = 10348
 audit.paragraph_links = 1788
 chunks with null embedding = 0
 summaries with null embedding = 0
-chunks with null content_tsv = 0
 ```
 
 Families loaded:

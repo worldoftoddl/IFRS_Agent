@@ -1,11 +1,17 @@
 import type { Message } from "@langchain/langgraph-sdk";
 
+const UI_MODE_PREFIX_RE = /^\[UI_MODE: (IFRS|AUDIT|AUTO)\]\n사용자 질문:\s*/;
+
+export function stripUiModePrefix(content: string): string {
+  return content.replace(UI_MODE_PREFIX_RE, "");
+}
+
 export function extractStringFromMessageContent(message: Message): string {
   if (typeof message.content === "string") {
-    return message.content;
+    return stripUiModePrefix(message.content);
   }
   if (Array.isArray(message.content)) {
-    return message.content
+    const content = message.content
       .filter(
         (c: unknown) =>
           (typeof c === "object" &&
@@ -19,9 +25,10 @@ export function extractStringFromMessageContent(message: Message): string {
           ? c
           : typeof c === "object" && c !== null && "text" in c
             ? (c as { text?: string }).text || ""
-            : "",
+          : "",
       )
       .join("");
+    return stripUiModePrefix(content);
   }
   return "";
 }

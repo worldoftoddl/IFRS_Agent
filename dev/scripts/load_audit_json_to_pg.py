@@ -296,8 +296,7 @@ def create_schema(conn: psycopg.Connection, schema: str, rebuild: bool) -> None:
                 char_count integer NOT NULL,
                 token_estimate integer NOT NULL,
                 metadata jsonb NOT NULL DEFAULT '{{}}'::jsonb,
-                created_at timestamptz DEFAULT now(),
-                content_tsv tsvector
+                created_at timestamptz DEFAULT now()
             )
             """
         ).format(q(schema, "chunks"), q(schema, "standards"))
@@ -340,7 +339,6 @@ def create_schema(conn: psycopg.Connection, schema: str, rebuild: bool) -> None:
         ("idx_chunks_standard", "chunks", "standard_id"),
         ("idx_chunks_component", "chunks", "component"),
         ("idx_chunks_authority", "chunks", "authority"),
-        ("idx_chunks_tsv", "chunks", "content_tsv", "GIN"),
         ("idx_links_source_component", "paragraph_links", "standard_id, source_component"),
         ("idx_links_target", "paragraph_links", "standard_id, target_para_start"),
     ]
@@ -583,13 +581,12 @@ def load_chunks(
         INSERT INTO {} (
             chunk_id, standard_id, para_number, component, section_title,
             authority, content_text, content_markdown, embedding, char_count,
-            token_estimate, metadata, content_tsv
+            token_estimate, metadata
         )
         VALUES (
             %(chunk_id)s, %(standard_id)s, %(para_number)s, %(component)s,
             %(section_title)s, %(authority)s, %(content_text)s, %(content_markdown)s,
-            %(embedding)s, %(char_count)s, %(token_estimate)s, %(metadata)s,
-            to_tsvector('simple', %(content_text)s)
+            %(embedding)s, %(char_count)s, %(token_estimate)s, %(metadata)s
         )
         ON CONFLICT (chunk_id) DO UPDATE SET
             standard_id = EXCLUDED.standard_id,
@@ -602,8 +599,7 @@ def load_chunks(
             embedding = EXCLUDED.embedding,
             char_count = EXCLUDED.char_count,
             token_estimate = EXCLUDED.token_estimate,
-            metadata = EXCLUDED.metadata,
-            content_tsv = EXCLUDED.content_tsv
+            metadata = EXCLUDED.metadata
         """
     ).format(q(schema, "chunks"))
     with conn.cursor() as cur:

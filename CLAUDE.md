@@ -103,7 +103,6 @@ LangGraph + DeepAgents 프레임워크로, 사용자 질문 → 관련 기준서
 - **LLM**: Claude Sonnet 4.6 (메인) + Haiku 4.5 (서브에이전트)
 - **임베딩**: Upstage Solar (`embedding-query`, 4096차원)
 - **Reranker**: Cohere `rerank-v3.5`
-- **토크나이저**: kiwipiepy + 158개 K-IFRS 사용자 사전
 
 ## 빌드 & 실행
 
@@ -113,13 +112,11 @@ python3 -m venv .venv && source .venv/bin/activate
 pip install -e .              # 프로덕션 의존성
 pip install -e ".[dev]"       # + ruff, pytest, langgraph-cli
 
-# DB 마이그레이션 (DB 재적재 후 반드시 실행)
-python app/extract_terms.py                        # K-IFRS 용어 사전 생성
-python app/migrations/002_rebuild_tsvector_kiwi.py  # kiwipiepy tsvector 재빌드
+# DB cleanup (기존 DB에 레거시 키워드 인덱스가 남아 있을 때만 실행)
+psql "$DATABASE_URL" -f app/migrations/003_drop_legacy_keyword_index.sql
 
 # 테스트
 python -m pytest dev/tests/ -v                     # 전체 테스트
-python -m pytest dev/tests/test_tokenizer.py -v    # 단일 파일 실행
 python -m pytest dev/tests/ -k "test_name" -v      # 특정 테스트만 실행
 
 # 린트
@@ -226,22 +223,15 @@ langgraph dev --no-browser       # http://localhost:2024
 
 - **Dense 검색**: Step 1은 `standard_summaries`, Step 2는 `chunks.embedding`을 pgvector로 검색.
 - **Cohere Reranker**: Dense 후보 20 → rerank-v3.5 → top-10. 실패 시 기존 후보 순서 유지 (graceful degradation).
-- **kiwipiepy 사용자 사전**: 158개 K-IFRS 복합명사 (`app/kiwi_user_dict.txt`). 레거시 토큰/용어 추출 도구에서 사용.
 - **복수 기준서 통합 검색**: UNNEST JOIN으로 top-5 후보를 단일 쿼리 처리 (N+1 방지).
 - **authority 동적 필터**: `authority <= base_authority`. 개념체계(3), 실무서(4) 자동 조절.
 - **유사도 임계값 0.2**: 회계 무관 질문 조기 차단.
 - **Step 2 캐시**: 동일 (query, standard_id) 60초 TTL 캐시로 중복 임베딩 호출 방지.
 - **인접 문단 확장**: `_expand_adjacent_paragraphs()` — 검색된 문단 ±1 자동 포함, reranker가 최종 순서 결정.
 
-### 레거시 토큰화 (`app/tokenizer.py`)
-
-- kiwipiepy 형태소 분석 + 158개 사용자 사전
-- `tokenize_for_index()` / `tokenize_for_query()` — 레거시 보조 스크립트와 용어 추출용
-- 현재 K-IFRS 검색 런타임은 `embedding` 기반 Dense 검색 + reranker를 사용
-
 ### 싱글턴 패턴
 
-`db`, `embedder`, `tokenizer`, `reranker` 모두 **double-checked locking** thread-safe 싱글턴.
+`db`, `embedder`, `reranker` 모두 **double-checked locking** thread-safe 싱글턴.
 `langgraph.json`의 `"env": ".env"`가 환경변수를 로딩하므로 `agent.py`에서 `load_dotenv()` 미호출.
 
 ### 미들웨어 구조 (`app/middleware.py`, `app/task_middleware.py`, `app/agent.py`)

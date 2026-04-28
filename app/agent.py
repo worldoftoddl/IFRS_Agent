@@ -106,7 +106,7 @@ SUBAGENT_CONFIGS = [
         "description": (
             "감사기준 검색 및 선별 전담 서브에이전트. "
             "회계감사기준, 품질관리기준서, 기타 인증업무기준, 인증업무개념체계 질문에서 "
-            "BM25 없이 Dense 검색과 reranker로 관련 문단을 찾고, 핵심 근거만 JSON으로 반환. "
+            "Dense 검색과 reranker로 관련 문단을 찾고, 핵심 근거만 JSON으로 반환. "
             "감사기준 질문에는 반드시 이 서브에이전트를 호출하라."
         ),
         "system_prompt": AUDIT_SUBAGENT_RETRIEVAL_PROMPT,

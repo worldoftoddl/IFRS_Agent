@@ -8,6 +8,8 @@ export interface AppConfig {
   assistantId: string;
 }
 
+export type DomainMode = "ifrs" | "audit" | "auto";
+
 export type StateType = {
   messages: Message[];
 };

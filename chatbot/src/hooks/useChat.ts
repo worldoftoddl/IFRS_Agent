@@ -1,32 +1,57 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useStream } from "@langchain/langgraph-sdk/react";
 import type { Message } from "@langchain/langgraph-sdk";
 import { v4 as uuidv4 } from "uuid";
 import { getClient } from "@/lib/client";
-import type { AppConfig, StateType } from "@/types";
+import type { AppConfig, DomainMode, StateType } from "@/types";
 
-const THREAD_ID_KEY = "kifrs-thread-id";
+const THREAD_ID_KEY_PREFIX = "standard-chat-thread-id";
 
-function getStoredThreadId(): string | null {
+const MODE_HINT: Record<DomainMode, string> = {
+  ifrs: "IFRS",
+  audit: "AUDIT",
+  auto: "AUTO",
+};
+
+function threadIdKey(mode: DomainMode): string {
+  return `${THREAD_ID_KEY_PREFIX}:${mode}`;
+}
+
+function getStoredThreadId(mode: DomainMode): string | null {
   if (typeof window === "undefined") return null;
-  return sessionStorage.getItem(THREAD_ID_KEY);
+  return sessionStorage.getItem(threadIdKey(mode));
 }
 
-function storeThreadId(id: string): void {
+function storeThreadId(mode: DomainMode, id: string): void {
   if (typeof window === "undefined") return;
-  sessionStorage.setItem(THREAD_ID_KEY, id);
+  sessionStorage.setItem(threadIdKey(mode), id);
 }
 
-export function useChat(config: AppConfig) {
+function clearStoredThreadId(mode: DomainMode): void {
+  if (typeof window === "undefined") return;
+  sessionStorage.removeItem(threadIdKey(mode));
+}
+
+function withModeHint(content: string, mode: DomainMode): string {
+  return `[UI_MODE: ${MODE_HINT[mode]}]\n사용자 질문: ${content}`;
+}
+
+export function useChat(config: AppConfig, domainMode: DomainMode) {
   const client = useMemo(() => getClient(config), [config]);
-  const [threadId, setThreadId] = useState<string | null>(getStoredThreadId);
+  const [threadId, setThreadId] = useState<string | null>(() =>
+    getStoredThreadId(domainMode),
+  );
+
+  useEffect(() => {
+    setThreadId(getStoredThreadId(domainMode));
+  }, [domainMode]);
 
   const handleThreadId = useCallback((id: string) => {
     setThreadId(id);
-    storeThreadId(id);
-  }, []);
+    storeThreadId(domainMode, id);
+  }, [domainMode]);
 
   const stream = useStream<StateType>({
     assistantId: config.assistantId,
@@ -38,18 +63,24 @@ export function useChat(config: AppConfig) {
 
   const sendMessage = useCallback(
     (content: string) => {
-      const newMessage: Message = { id: uuidv4(), type: "human", content };
+      const id = uuidv4();
+      const submittedMessage: Message = {
+        id,
+        type: "human",
+        content: withModeHint(content, domainMode),
+      };
+      const optimisticMessage: Message = { id, type: "human", content };
       stream.submit(
-        { messages: [newMessage] },
+        { messages: [submittedMessage] },
         {
           optimisticValues: (prev) => ({
-            messages: [...(prev.messages ?? []), newMessage],
+            messages: [...(prev.messages ?? []), optimisticMessage],
           }),
           config: { recursion_limit: 100 },
         },
       );
     },
-    [stream],
+    [domainMode, stream],
   );
 
   const stopStream = useCallback(() => {
@@ -58,8 +89,8 @@ export function useChat(config: AppConfig) {
 
   const startNewChat = useCallback(() => {
     setThreadId(null);
-    sessionStorage.removeItem(THREAD_ID_KEY);
-  }, []);
+    clearStoredThreadId(domainMode);
+  }, [domainMode]);
 
   return {
     messages: stream.messages,

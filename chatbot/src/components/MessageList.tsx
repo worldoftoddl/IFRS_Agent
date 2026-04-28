@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import type { Message } from "@/types";
+import type { DomainMode, Message } from "@/types";
 import { MessageBubble } from "./MessageBubble";
 import { SearchIndicator } from "./SearchIndicator";
 import { isSearching } from "@/lib/utils";
@@ -9,9 +9,14 @@ import { isSearching } from "@/lib/utils";
 interface MessageListProps {
   messages: Message[];
   isLoading: boolean;
+  domainMode: DomainMode;
 }
 
-export function MessageList({ messages, isLoading }: MessageListProps) {
+export function MessageList({
+  messages,
+  isLoading,
+  domainMode,
+}: MessageListProps) {
   const bottomRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -29,9 +34,9 @@ export function MessageList({ messages, isLoading }: MessageListProps) {
     <div className="flex-1 overflow-y-auto">
       <div className="mx-auto max-w-3xl py-4">
         {visibleMessages.map((msg) => (
-          <MessageBubble key={msg.id} message={msg} />
+          <MessageBubble key={msg.id} message={msg} domainMode={domainMode} />
         ))}
-        {showSearching && <SearchIndicator />}
+        {showSearching && <SearchIndicator domainMode={domainMode} />}
         {isLoading && !showSearching && (
           <div className="px-4 py-2">
             <div className="mx-auto max-w-3xl pl-8">

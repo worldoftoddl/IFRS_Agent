@@ -29,17 +29,14 @@ class TestSubagentPrompt:
         assert "lookup_paragraph" in SUBAGENT_RETRIEVAL_PROMPT
         assert "search_single_standard" in SUBAGENT_RETRIEVAL_PROMPT
 
-    def test_kifrs_prompt_mentions_dense_reranker_without_bm25(self):
+    def test_kifrs_prompt_mentions_dense_reranker(self):
         from app.subagent_prompts import SUBAGENT_RETRIEVAL_PROMPT
 
         assert "Dense summary 검색" in SUBAGENT_RETRIEVAL_PROMPT
         assert "Dense passage 검색" in SUBAGENT_RETRIEVAL_PROMPT
         assert "Cohere Reranker" in SUBAGENT_RETRIEVAL_PROMPT
-        assert "BM25" not in SUBAGENT_RETRIEVAL_PROMPT
-        assert "RRF" not in SUBAGENT_RETRIEVAL_PROMPT
-        assert "하이브리드" not in SUBAGENT_RETRIEVAL_PROMPT
 
-    def test_audit_prompt_mentions_dense_reranker_without_bm25(self):
+    def test_audit_prompt_mentions_dense_reranker(self):
         from app.subagent_prompts import AUDIT_SUBAGENT_RETRIEVAL_PROMPT
 
         assert "retrieve_audit_standards" in AUDIT_SUBAGENT_RETRIEVAL_PROMPT
@@ -47,7 +44,6 @@ class TestSubagentPrompt:
         assert "search_single_audit_standard" in AUDIT_SUBAGENT_RETRIEVAL_PROMPT
         assert "Dense" in AUDIT_SUBAGENT_RETRIEVAL_PROMPT
         assert "Reranker" in AUDIT_SUBAGENT_RETRIEVAL_PROMPT
-        assert "BM25는 사용하지 않습니다" in AUDIT_SUBAGENT_RETRIEVAL_PROMPT
 
     def test_prompt_specifies_return_format(self):
         """반환 형식(synthesis + chunks + why_relevant)이 프롬프트에 포함되어야 한다."""

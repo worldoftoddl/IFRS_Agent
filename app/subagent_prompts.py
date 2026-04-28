@@ -75,7 +75,6 @@ AUDIT_SUBAGENT_RETRIEVAL_PROMPT = """\
 
 1. **retrieve_audit_standards(query)** — 주력 도구.
    Dense summary 검색 + Dense passage 검색 + Cohere Reranker.
-   **BM25는 사용하지 않습니다.**
    관련 기준서 top-5 후보에서 reranker 상위 10개 문단을 반환합니다.
    **가장 먼저 이 도구를 정확히 1회 호출하세요.**
 
@@ -85,7 +84,7 @@ AUDIT_SUBAGENT_RETRIEVAL_PROMPT = """\
 
 3. **search_single_audit_standard(query, standard_id)** — 단일 감사기준 Dense 검색.
    기준서가 확정된 후 보강 문단을 찾을 때만 사용합니다.
-   BM25와 reranker는 사용하지 않습니다.
+   reranker는 사용하지 않습니다.
 
 ## 호출 전략
 

@@ -34,11 +34,13 @@ class TestSearchConfigs:
         assert "dense_only" in SEARCH_CONFIGS
         assert SEARCH_CONFIGS["dense_only"]["mode"] == "dense"
 
-    def test_bm25_configs_removed(self):
-        """BM25 기반 설정은 더 이상 제공하지 않는다."""
-        assert "bm25_only" not in SEARCH_CONFIGS
-        assert "weighted_rrf" not in SEARCH_CONFIGS
-        assert all(cfg["mode"] != "hybrid" for cfg in SEARCH_CONFIGS.values())
+    def test_configs_use_current_dense_modes(self):
+        """현재 평가 설정은 dense 계열 모드만 제공한다."""
+        allowed_modes = {"dense", "multi_query"}
+        allowed_keys = {"pool_size", "mode", "rerank", "expand_adjacent"}
+        for cfg in SEARCH_CONFIGS.values():
+            assert cfg["mode"] in allowed_modes
+            assert set(cfg) <= allowed_keys
 
 
 class TestConfiguredEvaluation:

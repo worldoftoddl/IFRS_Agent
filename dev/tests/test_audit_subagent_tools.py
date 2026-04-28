@@ -1,16 +1,16 @@
 """감사기준 서브에이전트용 검색 도구 테스트."""
 
-import inspect
-
 from app import audit_subagent_tools
 
 
-def test_audit_subagent_retrieval_does_not_use_bm25():
-    source = inspect.getsource(audit_subagent_tools)
+def test_audit_subagent_retrieval_uses_dense_similarity():
+    dense_code = audit_subagent_tools._search_audit_dense.__code__
 
-    assert "plainto_tsquery" not in source
-    assert "ts_rank" not in source
-    assert "content_tsv" not in source
+    assert any(
+        "embedding <=>" in const
+        for const in dense_code.co_consts
+        if isinstance(const, str)
+    )
 
 
 def test_audit_standard_id_validation():
@@ -58,5 +58,4 @@ def test_retrieve_audit_standards_description_mentions_dense_reranker():
     description = audit_subagent_tools.retrieve_audit_standards.description
 
     assert "Dense 검색 + Reranker" in description
-    assert "BM25는 사용하지 않습니다" in description
     assert "1회만" in description

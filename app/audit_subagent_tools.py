@@ -1,9 +1,7 @@
 """Audit-standard retrieval tools for the audit-retrieval-distiller subagent.
 
-The audit pipeline intentionally excludes BM25. It uses:
-1. dense summary search to identify candidate standards,
-2. dense passage search to build a candidate pool,
-3. Cohere reranker to sort the final evidence set.
+The audit pipeline uses dense summary search, dense passage search, and
+Cohere reranker to sort the final evidence set.
 """
 
 import os
@@ -163,8 +161,7 @@ def _lookup_audit_rows(standard_id: str, para_number: str) -> list[_AuditRow]:
 def retrieve_audit_standards(query: str) -> list[dict]:
     """감사기준에서 관련 문단을 Dense 검색 + Reranker로 검색합니다.
 
-    BM25는 사용하지 않습니다. 감사기준 질문에서는 이 도구를 가장 먼저 1회만
-    호출하세요.
+    감사기준 질문에서는 이 도구를 가장 먼저 1회만 호출하세요.
 
     Args:
         query: 검색할 감사기준 질문
@@ -203,8 +200,7 @@ def lookup_audit_paragraph(standard_id: str, para_number: str) -> list[dict]:
 def search_single_audit_standard(query: str, standard_id: str) -> list[dict]:
     """단일 감사기준 내에서 Dense 벡터 검색만 수행합니다.
 
-    이미 기준서가 확정된 뒤 보강 문단을 찾을 때 사용합니다. BM25와 reranker는
-    사용하지 않습니다.
+    이미 기준서가 확정된 뒤 보강 문단을 찾을 때 사용합니다. reranker는 사용하지 않습니다.
 
     Args:
         query: 검색 질문

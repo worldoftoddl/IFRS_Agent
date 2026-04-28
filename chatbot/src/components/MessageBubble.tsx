@@ -1,18 +1,21 @@
 "use client";
 
-import type { Message } from "@/types";
+import { DOMAIN_UI } from "@/lib/domain";
+import type { DomainMode, Message } from "@/types";
 import { extractStringFromMessageContent } from "@/lib/utils";
 import { MarkdownRenderer } from "./MarkdownRenderer";
 
 interface MessageBubbleProps {
   message: Message;
+  domainMode: DomainMode;
 }
 
-export function MessageBubble({ message }: MessageBubbleProps) {
+export function MessageBubble({ message, domainMode }: MessageBubbleProps) {
   const content = extractStringFromMessageContent(message);
   if (!content) return null;
 
   const isHuman = message.type === "human";
+  const domain = DOMAIN_UI[domainMode];
 
   if (isHuman) {
     return (
@@ -31,7 +34,7 @@ export function MessageBubble({ message }: MessageBubbleProps) {
           <div className="flex h-6 w-6 items-center justify-center rounded-full bg-primary/10 text-xs font-bold text-primary">
             AI
           </div>
-          <span className="text-xs text-gray-400">K-IFRS 자문</span>
+          <span className="text-xs text-gray-400">{domain.assistantLabel}</span>
         </div>
         <div className="pl-8">
           <MarkdownRenderer content={content} />

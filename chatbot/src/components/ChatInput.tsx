@@ -1,11 +1,14 @@
 "use client";
 
 import { useState, useRef, useCallback } from "react";
+import { DOMAIN_UI } from "@/lib/domain";
+import type { DomainMode } from "@/types";
 
 interface ChatInputProps {
   onSend: (message: string) => void;
   onStop: () => void;
   isLoading: boolean;
+  domainMode: DomainMode;
   disabled?: boolean;
 }
 
@@ -13,10 +16,12 @@ export function ChatInput({
   onSend,
   onStop,
   isLoading,
+  domainMode,
   disabled,
 }: ChatInputProps) {
   const [input, setInput] = useState("");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const domain = DOMAIN_UI[domainMode];
 
   const handleSubmit = useCallback(() => {
     const trimmed = input.trim();
@@ -52,7 +57,7 @@ export function ChatInput({
           value={input}
           onChange={handleInput}
           onKeyDown={handleKeyDown}
-          placeholder="K-IFRS에 대해 질문하세요..."
+          placeholder={domain.inputPlaceholder}
           rows={1}
           disabled={disabled}
           className="max-h-[200px] min-h-[44px] flex-1 resize-none rounded-xl border border-gray-200 px-4 py-3 text-sm placeholder:text-gray-400 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary disabled:bg-gray-50"
@@ -89,7 +94,7 @@ export function ChatInput({
         )}
       </div>
       <p className="mx-auto mt-2 max-w-3xl text-center text-xs text-gray-400">
-        AI가 생성한 답변은 참고용이며, 정확한 회계 처리는 전문가 확인이
+        AI가 생성한 답변은 참고용이며, 최종 판단은 원문 기준서와 전문가 검토가
         필요합니다.
       </p>
     </div>

@@ -1,7 +1,5 @@
 """감사기준 PostgreSQL 검색 도구 테스트."""
 
-import inspect
-
 import pytest
 
 from app import audit_tools
@@ -66,12 +64,14 @@ def test_invalid_audit_schema_env_is_rejected(monkeypatch):
         audit_tools._audit_schema()
 
 
-def test_direct_audit_tools_do_not_use_bm25():
-    source = inspect.getsource(audit_tools)
+def test_direct_audit_tools_use_dense_similarity():
+    chunks_code = audit_tools._search_audit_chunks.__code__
 
-    assert "plainto_tsquery" not in source
-    assert "ts_rank" not in source
-    assert "content_tsv" not in source
+    assert any(
+        "embedding <=>" in const
+        for const in chunks_code.co_consts
+        if isinstance(const, str)
+    )
 
 
 def test_direct_audit_tools_are_not_registered_on_main_agent():
