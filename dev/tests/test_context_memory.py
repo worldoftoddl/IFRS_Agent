@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 import json
 from pathlib import Path
 
@@ -216,3 +217,40 @@ class TestContextMemoryMiddleware:
         memories = store.search(thread_id="thread-1", query="충당부채")
         assert len(memories) == 1
         assert memories[0]["source_tool"] == "retrieval-distiller"
+
+    def test_awrap_tool_call_saves_retrieval_result(self, store: RetrievalMemoryStore):
+        mw = ContextMemoryMiddleware(store=store)
+        request = _FakeToolRequest(
+            {
+                "name": "task",
+                "args": {
+                    "subagent_type": "audit-retrieval-distiller",
+                    "description": "수행중요성",
+                },
+                "id": "call-1",
+            }
+        )
+
+        async def handler(_request):
+            payload = {
+                "chunks": [
+                    {
+                        "standard_id": "ISA-320",
+                        "para_number": "9.",
+                        "content_markdown": "감사인은 수행중요성을 결정한다.",
+                    }
+                ]
+            }
+            return ToolMessage(
+                content=json.dumps(payload, ensure_ascii=False),
+                name="task",
+                tool_call_id="call-1",
+                id="tool-1",
+            )
+
+        result = asyncio.run(mw.awrap_tool_call(request, handler))
+        assert isinstance(result, ToolMessage)
+        memories = store.search(thread_id="thread-1", query="수행중요성")
+        assert len(memories) == 1
+        assert memories[0]["source_tool"] == "audit-retrieval-distiller"
+        assert memories[0]["domain"] == "audit"

@@ -160,6 +160,12 @@ class ContextMemoryMiddleware(AgentMiddleware):
             self._save_tool_result(request, result)
         return result
 
+    async def awrap_tool_call(self, request: Any, handler: Any) -> Any:
+        result = await handler(request)
+        if isinstance(result, ToolMessage):
+            self._save_tool_result(request, result)
+        return result
+
     def _save_tool_result(self, request: Any, result: ToolMessage) -> None:
         tool_call = getattr(request, "tool_call", {}) or {}
         if not isinstance(tool_call, dict):
