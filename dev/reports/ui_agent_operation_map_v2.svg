@@ -1,0 +1,333 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1900" height="1520" viewBox="0 0 1900 1520" role="img" aria-labelledby="title desc">
+  <title id="title">IFRS Agent UI Operation Map v2</title>
+  <desc id="desc">Current chatbot, main agent routing, context memory, K-IFRS retrieval, audit-standard retrieval, and compaction flow.</desc>
+  <defs>
+    <marker id="arrow" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto" markerUnits="strokeWidth">
+      <path d="M2,2 L10,6 L2,10 Z" fill="#475569"/>
+    </marker>
+    <marker id="arrow-blue" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto" markerUnits="strokeWidth">
+      <path d="M2,2 L10,6 L2,10 Z" fill="#2563eb"/>
+    </marker>
+    <marker id="arrow-green" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto" markerUnits="strokeWidth">
+      <path d="M2,2 L10,6 L2,10 Z" fill="#059669"/>
+    </marker>
+    <marker id="arrow-red" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto" markerUnits="strokeWidth">
+      <path d="M2,2 L10,6 L2,10 Z" fill="#dc2626"/>
+    </marker>
+    <style>
+      .bg { fill: #f8fafc; }
+      .title { font: 800 34px system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #0f172a; }
+      .subtitle { font: 500 15px system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #475569; }
+      .panel { fill: #ffffff; stroke: #cbd5e1; stroke-width: 2; }
+      .panel-title { font: 800 23px system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #0f172a; }
+      .label { font: 750 16px system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #0f172a; }
+      .small { font: 500 13px system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #475569; }
+      .tiny { font: 500 11px system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #64748b; }
+      .box { fill: #f8fafc; stroke: #94a3b8; stroke-width: 1.5; }
+      .ui { fill: #eff6ff; stroke: #60a5fa; }
+      .agent { fill: #f5f3ff; stroke: #a78bfa; }
+      .context { fill: #fffbeb; stroke: #f59e0b; }
+      .ifrs { fill: #ecfdf5; stroke: #34d399; }
+      .audit { fill: #fef2f2; stroke: #f87171; }
+      .db { fill: #eef2ff; stroke: #818cf8; }
+      .rerank { fill: #faf5ff; stroke: #c084fc; }
+      .answer { fill: #f0f9ff; stroke: #38bdf8; }
+      .muted { fill: #f1f5f9; stroke: #cbd5e1; }
+      .arrow { fill: none; stroke: #475569; stroke-width: 2.3; marker-end: url(#arrow); }
+      .arrow-blue { fill: none; stroke: #2563eb; stroke-width: 2.5; marker-end: url(#arrow-blue); }
+      .arrow-green { fill: none; stroke: #059669; stroke-width: 2.5; marker-end: url(#arrow-green); }
+      .arrow-red { fill: none; stroke: #dc2626; stroke-width: 2.5; marker-end: url(#arrow-red); }
+      .dash { fill: none; stroke: #64748b; stroke-width: 2.2; stroke-dasharray: 8 8; marker-end: url(#arrow); }
+      .fine { fill: none; stroke: #94a3b8; stroke-width: 1.6; marker-end: url(#arrow); }
+      .chip-text { font: 700 12px system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #334155; }
+    </style>
+  </defs>
+
+  <rect class="bg" width="1900" height="1520"/>
+  <text x="50" y="62" class="title">IFRS_Agent UI 작동 Map v2</text>
+  <text x="50" y="92" class="subtitle">코드 기준: UI 모드 힌트, context_search 재사용 분기, K-IFRS/감사기준 Dense+Reranker 파이프라인, context 보존/압축 흐름</text>
+
+  <rect x="1370" y="36" width="120" height="30" rx="15" class="ui"/>
+  <text x="1405" y="56" class="chip-text">UI</text>
+  <rect x="1500" y="36" width="120" height="30" rx="15" class="agent"/>
+  <text x="1530" y="56" class="chip-text">Agent</text>
+  <rect x="1630" y="36" width="120" height="30" rx="15" class="ifrs"/>
+  <text x="1662" y="56" class="chip-text">K-IFRS</text>
+  <rect x="1760" y="36" width="95" height="30" rx="15" class="audit"/>
+  <text x="1784" y="56" class="chip-text">Audit</text>
+
+  <!-- UI panel -->
+  <rect x="50" y="125" width="405" height="355" rx="16" class="panel"/>
+  <text x="80" y="165" class="panel-title">1. Chatbot UI</text>
+
+  <rect x="82" y="200" width="148" height="68" rx="10" class="box ui"/>
+  <text x="109" y="228" class="label">모드 선택</text>
+  <text x="105" y="250" class="small">K-IFRS / 감사 / 자동</text>
+
+  <rect x="275" y="200" width="148" height="68" rx="10" class="box ui"/>
+  <text x="307" y="228" class="label">사용자 입력</text>
+  <text x="312" y="250" class="small">ChatInput</text>
+
+  <rect x="82" y="305" width="148" height="68" rx="10" class="box context"/>
+  <text x="104" y="333" class="label">localStorage</text>
+  <text x="103" y="355" class="tiny">kifrs-domain-mode</text>
+
+  <rect x="275" y="305" width="148" height="68" rx="10" class="box context"/>
+  <text x="294" y="333" class="label">sessionStorage</text>
+  <text x="298" y="355" class="tiny">thread-id:{mode}</text>
+
+  <rect x="82" y="405" width="341" height="45" rx="10" class="box ui"/>
+  <text x="105" y="433" class="label">useStream.submit + 숨은 [UI_MODE] prefix</text>
+
+  <line x1="230" y1="234" x2="275" y2="234" class="fine"/>
+  <line x1="156" y1="268" x2="156" y2="305" class="fine"/>
+  <line x1="349" y1="268" x2="349" y2="305" class="fine"/>
+  <line x1="252" y1="373" x2="252" y2="405" class="arrow-blue"/>
+
+  <!-- Agent routing panel -->
+  <rect x="500" y="125" width="700" height="355" rx="16" class="panel"/>
+  <text x="530" y="165" class="panel-title">2. Main Agent 라우팅</text>
+
+  <rect x="535" y="200" width="180" height="68" rx="10" class="box agent"/>
+  <text x="568" y="228" class="label">System Prompt</text>
+  <text x="560" y="250" class="small">UI_MODE 내부 라우팅</text>
+
+  <rect x="760" y="200" width="180" height="68" rx="10" class="box agent"/>
+  <text x="785" y="228" class="label">후속 질문?</text>
+  <text x="786" y="250" class="small">방금 / 위 문단 / 같은 기준</text>
+
+  <rect x="985" y="200" width="180" height="68" rx="10" class="box context"/>
+  <text x="1013" y="228" class="label">context_search</text>
+  <text x="1018" y="250" class="small">thread-scoped memory</text>
+
+  <rect x="760" y="315" width="180" height="72" rx="10" class="box context"/>
+  <text x="798" y="344" class="label">충분한가?</text>
+  <text x="785" y="367" class="small">충분 / 일부 / 부족</text>
+
+  <rect x="535" y="405" width="180" height="45" rx="10" class="box answer"/>
+  <text x="557" y="434" class="label">재사용 답변</text>
+
+  <rect x="760" y="405" width="180" height="45" rx="10" class="box context"/>
+  <text x="782" y="434" class="label">context_get / lookup</text>
+
+  <rect x="985" y="405" width="180" height="45" rx="10" class="box agent"/>
+  <text x="1002" y="434" class="label">새 검색 라우팅</text>
+
+  <line x1="455" y1="428" x2="535" y2="234" class="arrow-blue"/>
+  <line x1="715" y1="234" x2="760" y2="234" class="arrow"/>
+  <line x1="940" y1="234" x2="985" y2="234" class="arrow-green"/>
+  <line x1="1075" y1="268" x2="850" y2="315" class="arrow-green"/>
+  <path d="M850 387 C790 398, 720 405, 715 427" class="arrow-green"/>
+  <line x1="850" y1="387" x2="850" y2="405" class="arrow-green"/>
+  <path d="M940 351 C1000 358, 1045 382, 1075 405" class="arrow"/>
+  <text x="700" y="395" class="tiny">충분</text>
+  <text x="868" y="399" class="tiny">일부</text>
+  <text x="1047" y="386" class="tiny">부족/새 주제</text>
+
+  <!-- Persistence panel -->
+  <rect x="1245" y="125" width="605" height="355" rx="16" class="panel"/>
+  <text x="1275" y="165" class="panel-title">3. Context 보존과 압축</text>
+
+  <rect x="1280" y="205" width="170" height="80" rx="10" class="box context"/>
+  <text x="1305" y="235" class="label">.context/*.json</text>
+  <text x="1307" y="258" class="small">검색 memory</text>
+  <text x="1307" y="277" class="tiny">max 20 entries</text>
+
+  <rect x="1490" y="205" width="150" height="80" rx="10" class="box muted"/>
+  <text x="1515" y="235" class="label">ToolMessage</text>
+  <text x="1518" y="258" class="small">최근 3개 유지</text>
+  <text x="1518" y="277" class="tiny">50K token trigger</text>
+
+  <rect x="1680" y="205" width="135" height="80" rx="10" class="box context"/>
+  <text x="1700" y="235" class="label">.transcripts</text>
+  <text x="1705" y="258" class="small">raw archive</text>
+  <text x="1705" y="277" class="tiny">7일/10MB cleanup</text>
+
+  <rect x="1280" y="330" width="535" height="92" rx="10" class="box context"/>
+  <text x="1305" y="360" class="label">ContextMemoryMiddleware.wrap_tool_call</text>
+  <text x="1305" y="384" class="small">retrieval-distiller, audit-retrieval-distiller, lookup/search 결과를 즉시 저장</text>
+  <text x="1305" y="405" class="small">MicroCompactMiddleware는 오래된 결과를 citation digest 또는 placeholder로 교체</text>
+
+  <line x1="1450" y1="245" x2="1490" y2="245" class="dash"/>
+  <line x1="1640" y1="245" x2="1680" y2="245" class="dash"/>
+
+  <!-- K-IFRS pipeline -->
+  <rect x="50" y="545" width="865" height="625" rx="16" class="panel"/>
+  <text x="80" y="585" class="panel-title">4. K-IFRS Retrieval Pipeline</text>
+  <text x="80" y="612" class="subtitle">retrieval-distiller (Haiku 4.5) → retrieve_ifrs / lookup_paragraph / search_single_standard</text>
+
+  <rect x="85" y="650" width="155" height="64" rx="10" class="box ifrs"/>
+  <text x="120" y="678" class="label">원본 질문</text>
+  <text x="112" y="699" class="small">description 그대로</text>
+
+  <rect x="275" y="650" width="145" height="64" rx="10" class="box ifrs"/>
+  <text x="300" y="678" class="label">embed_query</text>
+  <text x="305" y="699" class="small">embedding-query</text>
+
+  <rect x="455" y="650" width="170" height="64" rx="10" class="box db"/>
+  <text x="475" y="678" class="label">standard_summaries</text>
+  <text x="496" y="699" class="small">pgvector top-5</text>
+
+  <rect x="660" y="650" width="170" height="64" rx="10" class="box ifrs"/>
+  <text x="686" y="678" class="label">threshold 0.2</text>
+  <text x="683" y="699" class="small">standard_ids 확정</text>
+
+  <rect x="85" y="765" width="180" height="78" rx="10" class="box db"/>
+  <text x="111" y="793" class="label">chunks dense</text>
+  <text x="110" y="816" class="small">top-20 후보 pool</text>
+  <text x="110" y="835" class="tiny">dynamic authority filter</text>
+
+  <rect x="315" y="765" width="180" height="78" rx="10" class="box rerank"/>
+  <text x="352" y="793" class="label">Cohere Rerank</text>
+  <text x="358" y="816" class="small">rerank-v3.5</text>
+  <text x="360" y="835" class="tiny">top-10 evidence</text>
+
+  <rect x="545" y="765" width="160" height="78" rx="10" class="box ifrs"/>
+  <text x="572" y="793" class="label">Haiku 선별</text>
+  <text x="568" y="816" class="small">3-5 chunks 중심</text>
+  <text x="570" y="835" class="tiny">근거 관련성 설명</text>
+
+  <rect x="750" y="765" width="130" height="78" rx="10" class="box answer"/>
+  <text x="775" y="793" class="label">JSON 반환</text>
+  <text x="770" y="816" class="small">synthesis</text>
+  <text x="770" y="835" class="tiny">chunks / notes</text>
+
+  <rect x="85" y="905" width="230" height="74" rx="10" class="box muted"/>
+  <text x="110" y="934" class="label">lookup_paragraph</text>
+  <text x="110" y="957" class="small">standard_id + para_number 직접 SQL</text>
+
+  <rect x="360" y="905" width="230" height="74" rx="10" class="box muted"/>
+  <text x="385" y="934" class="label">search_single_standard</text>
+  <text x="385" y="957" class="small">단일 기준서 Dense-only, no reranker</text>
+
+  <rect x="635" y="905" width="245" height="74" rx="10" class="box muted"/>
+  <text x="660" y="934" class="label">직접 보조 도구</text>
+  <text x="660" y="957" class="small">IE / BC / get_standard_info</text>
+
+  <rect x="85" y="1035" width="795" height="82" rx="10" class="box ifrs"/>
+  <text x="110" y="1065" class="label">K-IFRS DB 경계</text>
+  <text x="110" y="1089" class="small">PostgreSQL + pgvector: standard_summaries, chunks, standards</text>
+  <text x="110" y="1110" class="small">Level 1 본문/적용지침/정의 우선, IE/BC는 보조 참고로 분리</text>
+
+  <line x1="240" y1="682" x2="275" y2="682" class="arrow-green"/>
+  <line x1="420" y1="682" x2="455" y2="682" class="arrow-green"/>
+  <line x1="625" y1="682" x2="660" y2="682" class="arrow-green"/>
+  <path d="M745 714 C745 748, 175 738, 175 765" class="arrow-green"/>
+  <line x1="265" y1="804" x2="315" y2="804" class="arrow-green"/>
+  <line x1="495" y1="804" x2="545" y2="804" class="arrow-green"/>
+  <line x1="705" y1="804" x2="750" y2="804" class="arrow-green"/>
+  <path d="M1030 450 C980 545, 830 585, 815 650" class="arrow-green"/>
+
+  <!-- Audit pipeline -->
+  <rect x="985" y="545" width="865" height="625" rx="16" class="panel"/>
+  <text x="1015" y="585" class="panel-title">5. Audit Standards Retrieval Pipeline</text>
+  <text x="1015" y="612" class="subtitle">audit-retrieval-distiller (Haiku 4.5) → retrieve_audit_standards / lookup_audit_paragraph / search_single_audit_standard</text>
+
+  <rect x="1020" y="650" width="155" height="64" rx="10" class="box audit"/>
+  <text x="1055" y="678" class="label">원본 질문</text>
+  <text x="1047" y="699" class="small">description 그대로</text>
+
+  <rect x="1210" y="650" width="145" height="64" rx="10" class="box audit"/>
+  <text x="1235" y="678" class="label">embed_query</text>
+  <text x="1240" y="699" class="small">embedding-query</text>
+
+  <rect x="1390" y="650" width="170" height="64" rx="10" class="box db"/>
+  <text x="1410" y="678" class="label">audit.summaries</text>
+  <text x="1425" y="699" class="small">pgvector top-5</text>
+
+  <rect x="1595" y="650" width="170" height="64" rx="10" class="box audit"/>
+  <text x="1621" y="678" class="label">threshold 0.2</text>
+  <text x="1620" y="699" class="small">audit ids 확정</text>
+
+  <rect x="1020" y="765" width="180" height="78" rx="10" class="box db"/>
+  <text x="1046" y="793" class="label">audit.chunks</text>
+  <text x="1045" y="816" class="small">top-20 후보 pool</text>
+  <text x="1045" y="835" class="tiny">schema: AUDIT_SCHEMA=audit</text>
+
+  <rect x="1250" y="765" width="180" height="78" rx="10" class="box rerank"/>
+  <text x="1287" y="793" class="label">Cohere Rerank</text>
+  <text x="1293" y="816" class="small">rerank-v3.5</text>
+  <text x="1295" y="835" class="tiny">top-10 evidence</text>
+
+  <rect x="1480" y="765" width="160" height="78" rx="10" class="box audit"/>
+  <text x="1507" y="793" class="label">Haiku 선별</text>
+  <text x="1503" y="816" class="small">감사 근거 정리</text>
+  <text x="1505" y="835" class="tiny">ISA/ISQM/ASSR/FRMK</text>
+
+  <rect x="1685" y="765" width="130" height="78" rx="10" class="box answer"/>
+  <text x="1710" y="793" class="label">JSON 반환</text>
+  <text x="1705" y="816" class="small">synthesis</text>
+  <text x="1705" y="835" class="tiny">chunks / notes</text>
+
+  <rect x="1020" y="905" width="230" height="74" rx="10" class="box muted"/>
+  <text x="1045" y="934" class="label">lookup_audit_paragraph</text>
+  <text x="1045" y="957" class="small">문단 후보: 9, 9., A13. 지원</text>
+
+  <rect x="1295" y="905" width="230" height="74" rx="10" class="box muted"/>
+  <text x="1320" y="934" class="label">search_single_audit</text>
+  <text x="1320" y="957" class="small">단일 기준서 Dense-only, no reranker</text>
+
+  <rect x="1570" y="905" width="245" height="74" rx="10" class="box muted"/>
+  <text x="1595" y="934" class="label">감사 DB ID 체계</text>
+  <text x="1595" y="957" class="small">ISA-*, ISQM-*, ASSR-*, FRMK-*</text>
+
+  <rect x="1020" y="1035" width="795" height="82" rx="10" class="box audit"/>
+  <text x="1045" y="1065" class="label">Audit DB 경계</text>
+  <text x="1045" y="1089" class="small">PostgreSQL + pgvector: audit.standard_summaries, audit.chunks, audit.standards</text>
+  <text x="1045" y="1110" class="small">K-IFRS와 같은 검색 복잡도지만 별도 schema와 별도 subagent prompt 사용</text>
+
+  <line x1="1175" y1="682" x2="1210" y2="682" class="arrow-red"/>
+  <line x1="1355" y1="682" x2="1390" y2="682" class="arrow-red"/>
+  <line x1="1560" y1="682" x2="1595" y2="682" class="arrow-red"/>
+  <path d="M1680 714 C1680 748, 1110 738, 1110 765" class="arrow-red"/>
+  <line x1="1200" y1="804" x2="1250" y2="804" class="arrow-red"/>
+  <line x1="1430" y1="804" x2="1480" y2="804" class="arrow-red"/>
+  <line x1="1640" y1="804" x2="1685" y2="804" class="arrow-red"/>
+  <path d="M1100 450 C1185 545, 1510 585, 1750 650" class="arrow-red"/>
+
+  <!-- Output and memory lifecycle -->
+  <rect x="50" y="1225" width="1800" height="235" rx="16" class="panel"/>
+  <text x="80" y="1265" class="panel-title">6. 결과 반환과 메모리 Lifecycle</text>
+
+  <rect x="85" y="1305" width="240" height="78" rx="10" class="box answer"/>
+  <text x="110" y="1335" class="label">Subagent JSON</text>
+  <text x="110" y="1358" class="small">synthesis + chunks + notes</text>
+  <text x="110" y="1377" class="tiny">main answer의 근거 재료</text>
+
+  <rect x="380" y="1305" width="260" height="78" rx="10" class="box context"/>
+  <text x="405" y="1335" class="label">.context 저장</text>
+  <text x="405" y="1358" class="small">excerpt + original_text 일부 + ref</text>
+  <text x="405" y="1377" class="tiny">다음 턴 context_search 대상</text>
+
+  <rect x="695" y="1305" width="260" height="78" rx="10" class="box muted"/>
+  <text x="720" y="1335" class="label">50K 이후 MicroCompact</text>
+  <text x="720" y="1358" class="small">최근 tool 3개 제외</text>
+  <text x="720" y="1377" class="tiny">digest 또는 placeholder로 교체</text>
+
+  <rect x="1010" y="1305" width="260" height="78" rx="10" class="box context"/>
+  <text x="1035" y="1335" class="label">.transcripts archive</text>
+  <text x="1035" y="1358" class="small">치환 전 원문 JSONL 보관</text>
+  <text x="1035" y="1377" class="tiny">recall 대상 아님</text>
+
+  <rect x="1325" y="1305" width="240" height="78" rx="10" class="box agent"/>
+  <text x="1350" y="1335" class="label">후속 질문</text>
+  <text x="1350" y="1358" class="small">memory 충분하면 재검색 생략</text>
+  <text x="1350" y="1377" class="tiny">부족하면 새 검색으로 복귀</text>
+
+  <rect x="1620" y="1305" width="195" height="78" rx="10" class="box answer"/>
+  <text x="1648" y="1335" class="label">UI Stream</text>
+  <text x="1648" y="1358" class="small">최종 한국어 답변</text>
+  <text x="1648" y="1377" class="tiny">근거 문단 인용</text>
+
+  <line x1="325" y1="1344" x2="380" y2="1344" class="arrow-green"/>
+  <line x1="640" y1="1344" x2="695" y2="1344" class="dash"/>
+  <line x1="955" y1="1344" x2="1010" y2="1344" class="dash"/>
+  <line x1="1270" y1="1344" x2="1325" y2="1344" class="arrow"/>
+  <line x1="1565" y1="1344" x2="1620" y2="1344" class="arrow-blue"/>
+
+  <path d="M1750 1225 C1765 1160, 1790 1060, 1750 843" class="arrow-red"/>
+  <path d="M205 1225 C190 1160, 160 1060, 175 843" class="arrow-green"/>
+  <path d="M1445 1305 C1375 1040, 1280 620, 1365 285" class="dash"/>
+
+  <text x="85" y="1420" class="small">핵심 읽는 법: context_search는 재사용 시작점일 뿐이며, 결과가 부족하면 lookup 보강 또는 새 K-IFRS/감사기준 검색으로 돌아갈 수 있다.</text>
+</svg>
